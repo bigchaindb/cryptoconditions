@@ -1,10 +1,7 @@
-import base64
 import hashlib
 from math import ceil
 
 import binascii
-
-from six import string_types
 
 MSB = 0x80
 REST = 0x7F
@@ -414,7 +411,7 @@ def base64_add_padding(data):
 
     """
 
-    if isinstance(data, string_types):
+    if isinstance(data, str):
         data = data.encode('utf-8')
     missing_padding = 4 - len(data) % 4
     if missing_padding:
@@ -432,6 +429,6 @@ def base64_remove_padding(data):
         base64: Unpadded base64 bytes
 
     """
-    if isinstance(data, string_types):
+    if isinstance(data, str):
         data = data.encode('utf-8')
     return data.rstrip(b'=')

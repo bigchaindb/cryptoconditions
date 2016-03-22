@@ -2,9 +2,6 @@ import base64
 import re
 from abc import ABCMeta
 
-import binascii
-from six import string_types
-
 from cryptoconditions.buffer import base64_add_padding, base64_remove_padding, Writer, Reader
 
 CONDITION_REGEX = r'^cc:1:[1-9a-f][0-9a-f]{0,2}:[a-zA-Z0-9_-]{43}:[1-9][0-9]{0,50}$'
@@ -28,7 +25,7 @@ class Condition(metaclass=ABCMeta):
         Returns:
             Condition: Resulting object
         """
-        if not isinstance(serialized_condition, string_types):
+        if not isinstance(serialized_condition, str):
             raise TypeError('Serialized condition must be a string')
 
         pieces = serialized_condition.split(':')

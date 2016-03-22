@@ -2,8 +2,6 @@ import base64
 import re
 from abc import ABCMeta, abstractmethod
 
-from six import string_types
-
 from cryptoconditions.condition import Condition
 from cryptoconditions.buffer import Writer, base64_remove_padding, Reader, base64_add_padding, Predictor
 
@@ -26,7 +24,7 @@ class Fulfillment(metaclass=ABCMeta):
         Return:
             Fulfillment: Resulting object
         """
-        if not isinstance(serialized_fulfillment, string_types):
+        if not isinstance(serialized_fulfillment, str):
             raise TypeError('Serialized fulfillment must be a string')
 
         pieces = serialized_fulfillment.split(':')
