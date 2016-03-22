@@ -104,15 +104,3 @@ class VerifyingKey(metaclass=ABCMeta):
             public_base58 (base58):
         """
 
-
-def hash_data(data):
-    """Hash the provided data using SHA3-256"""
-
-    return sha3.sha3_256(data.encode()).hexdigest()
-
-
-from cryptoconditions.ecdsa import EcdsaSigningKey, EcdsaVerifyingKey, ecdsa_generate_key_pair
-
-SigningKey = EcdsaSigningKey
-VerifyingKey = EcdsaVerifyingKey
-generate_key_pair = ecdsa_generate_key_pair
