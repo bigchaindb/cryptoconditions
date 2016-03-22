@@ -1,7 +1,7 @@
 import base64
 
-from bigchaindb.crypto.ecdsa import EcdsaSigningKey, EcdsaVerifyingKey, ecdsa_generate_key_pair
-from bigchaindb.crypto.ed25519 import Ed25519SigningKey, Ed25519VerifyingKey, ed25519_generate_key_pair
+from cryptoconditions.ecdsa import EcdsaSigningKey, EcdsaVerifyingKey, ecdsa_generate_key_pair
+from cryptoconditions.ed25519 import Ed25519SigningKey, Ed25519VerifyingKey, ed25519_generate_key_pair
 
 
 class TestBigchainCryptoED25519(object):

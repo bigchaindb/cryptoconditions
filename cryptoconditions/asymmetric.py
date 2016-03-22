@@ -111,7 +111,7 @@ def hash_data(data):
     return sha3.sha3_256(data.encode()).hexdigest()
 
 
-from bigchaindb.crypto.ecdsa import EcdsaSigningKey, EcdsaVerifyingKey, ecdsa_generate_key_pair
+from cryptoconditions.ecdsa import EcdsaSigningKey, EcdsaVerifyingKey, ecdsa_generate_key_pair
 
 SigningKey = EcdsaSigningKey
 VerifyingKey = EcdsaVerifyingKey

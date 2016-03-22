@@ -1,4 +1,4 @@
-from bigchaindb.crypto.buffer import MAX_SAFE_INTEGER_JS
+from cryptoconditions.buffer import MAX_SAFE_INTEGER_JS
 
 
 class BitmaskRegistry:
@@ -51,9 +51,9 @@ class BitmaskRegistry:
             })
 
 
-from bigchaindb.crypto.fulfillments.sha256 import Sha256Fulfillment
-from bigchaindb.crypto.fulfillments.threshold_sha256 import ThresholdSha256Fulfillment
-from bigchaindb.crypto.fulfillments.ed25519_sha256 import Ed25519Sha256Fulfillment
+from cryptoconditions.fulfillments.sha256 import Sha256Fulfillment
+from cryptoconditions.fulfillments.threshold_sha256 import ThresholdSha256Fulfillment
+from cryptoconditions.fulfillments.ed25519_sha256 import Ed25519Sha256Fulfillment
 
 BitmaskRegistry.register_type(Sha256Fulfillment)
 BitmaskRegistry.register_type(ThresholdSha256Fulfillment)

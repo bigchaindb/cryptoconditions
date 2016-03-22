@@ -1,5 +1,5 @@
-from bigchaindb.crypto.fulfillments.base_sha256 import BaseSha256Fulfillment
-from bigchaindb.crypto.buffer import Hasher, Reader, Writer, Predictor
+from cryptoconditions.fulfillments.base_sha256 import BaseSha256Fulfillment
+from cryptoconditions.buffer import Hasher, Reader, Writer, Predictor
 
 
 class Sha256Fulfillment(BaseSha256Fulfillment):

@@ -1,8 +1,8 @@
 import base58
 
-from bigchaindb.crypto.ed25519 import Ed25519VerifyingKey
-from bigchaindb.crypto.fulfillments.base_sha256 import BaseSha256Fulfillment
-from bigchaindb.crypto.buffer import Predictor
+from cryptoconditions.ed25519 import Ed25519VerifyingKey
+from cryptoconditions.fulfillments.base_sha256 import BaseSha256Fulfillment
+from cryptoconditions.buffer import Predictor
 
 
 class Ed25519Sha256Fulfillment(BaseSha256Fulfillment):

@@ -79,9 +79,9 @@ Crypto-conditions are a simple multi-algorithm, multi-message, multi-level, mult
 
 ```python
 import binascii
-from bigchaindb.crypto.condition import Condition
-from bigchaindb.crypto.fulfillment import Fulfillment
-from bigchaindb.crypto.fulfillments.sha256 import Sha256Fulfillment
+from cryptoconditions.condition import Condition
+from cryptoconditions.fulfillment import Fulfillment
+from cryptoconditions.fulfillments.sha256 import Sha256Fulfillment
 
 # Parse a condition from a URI
 example_condition_uri = 'cc:1:1:47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU:1'
@@ -207,8 +207,8 @@ FULFILLMENT_PAYLOAD =
 
 ```python
 import binascii, hashlib
-from bigchaindb.crypto.condition import Condition
-from bigchaindb.crypto.fulfillments.sha256 import Sha256Fulfillment
+from cryptoconditions.condition import Condition
+from cryptoconditions.fulfillments.sha256 import Sha256Fulfillment
 
 secret = ''
 puzzle = binascii.hexlify(hashlib.sha256(secret.encode()).digest())
@@ -289,8 +289,8 @@ The `MESSAGE_ID`, `FIXED_PREFIX`, `DYNAMIC_MESSAGE_LENGTH` and `DYNAMIC_MESSAGE`
 ### Usage
 
 ```python
-from bigchaindb.crypto.ed25519 import Ed25519SigningKey, Ed25519VerifyingKey
-from bigchaindb.crypto.fulfillments.ed25519_sha256 import Ed25519Sha256Fulfillment
+from cryptoconditions.ed25519 import Ed25519SigningKey, Ed25519VerifyingKey
+from cryptoconditions.fulfillments.ed25519_sha256 import Ed25519Sha256Fulfillment
 
 # We use base58 key encoding
 sk = Ed25519SigningKey(b'9qLvREC54mhKYivr88VpckyVWdAFmifJpGjbvV5AiTRs')
@@ -371,9 +371,9 @@ FULFILLMENT_PAYLOAD =
 ### Usage
 
 ```python
-from bigchaindb.crypto.fulfillments.sha256 import Sha256Fulfillment
-from bigchaindb.crypto.fulfillments.ed25519_sha256 import Ed25519Sha256Fulfillment
-from bigchaindb.crypto.fulfillments.threshold_sha256 import ThresholdSha256Fulfillment
+from cryptoconditions.fulfillments.sha256 import Sha256Fulfillment
+from cryptoconditions.fulfillments.ed25519_sha256 import Ed25519Sha256Fulfillment
+from cryptoconditions.fulfillments.threshold_sha256 import ThresholdSha256Fulfillment
 
 # Parse some fulfillments
 sha256_fulfillment = Sha256Fulfillment.from_uri('cf:1:1:AA')

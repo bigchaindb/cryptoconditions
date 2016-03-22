@@ -4,8 +4,8 @@ from abc import ABCMeta, abstractmethod
 
 from six import string_types
 
-from bigchaindb.crypto.condition import Condition
-from bigchaindb.crypto.buffer import Writer, base64_remove_padding, Reader, base64_add_padding, Predictor
+from cryptoconditions.condition import Condition
+from cryptoconditions.buffer import Writer, base64_remove_padding, Reader, base64_add_padding, Predictor
 
 FULFILLMENT_REGEX = r'^cf:1:[1-9a-f][0-9a-f]{0,2}:[a-zA-Z0-9_-]+$'
 
@@ -41,7 +41,7 @@ class Fulfillment(metaclass=ABCMeta):
 
         bitmask = int(pieces[2])
 
-        from bigchaindb.crypto.bitmark_registry import BitmaskRegistry
+        from cryptoconditions.bitmark_registry import BitmaskRegistry
 
         cls = BitmaskRegistry.get_class_from_typebit(bitmask)
         fulfillment = cls()
@@ -69,7 +69,7 @@ class Fulfillment(metaclass=ABCMeta):
         """
         reader = Reader.from_source(reader)
 
-        from bigchaindb.crypto.bitmark_registry import BitmaskRegistry
+        from cryptoconditions.bitmark_registry import BitmaskRegistry
 
         cls_type = reader.read_var_uint()
         cls = BitmaskRegistry.get_class_from_typebit(cls_type)

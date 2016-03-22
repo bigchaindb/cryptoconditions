@@ -5,7 +5,7 @@ import base64
 import base58
 import ed25519
 
-from bigchaindb.crypto.asymmetric import SigningKey, VerifyingKey
+from cryptoconditions.asymmetric import SigningKey, VerifyingKey
 
 
 class Ed25519SigningKey(ed25519.SigningKey, SigningKey):

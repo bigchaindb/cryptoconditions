@@ -4,12 +4,12 @@ from math import ceil
 
 import pytest
 
-from bigchaindb.crypto.condition import Condition
-from bigchaindb.crypto.ed25519 import Ed25519SigningKey, Ed25519VerifyingKey
-from bigchaindb.crypto.fulfillment import Fulfillment
-from bigchaindb.crypto.fulfillments.ed25519_sha256 import Ed25519Sha256Fulfillment
-from bigchaindb.crypto.fulfillments.sha256 import Sha256Fulfillment
-from bigchaindb.crypto.fulfillments.threshold_sha256 import ThresholdSha256Fulfillment
+from cryptoconditions.condition import Condition
+from cryptoconditions.ed25519 import Ed25519SigningKey, Ed25519VerifyingKey
+from cryptoconditions.fulfillment import Fulfillment
+from cryptoconditions.fulfillments.ed25519_sha256 import Ed25519Sha256Fulfillment
+from cryptoconditions.fulfillments.sha256 import Sha256Fulfillment
+from cryptoconditions.fulfillments.threshold_sha256 import ThresholdSha256Fulfillment
 
 
 class TestBigchainILPSha256Condition:
