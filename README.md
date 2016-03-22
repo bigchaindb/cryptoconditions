@@ -1,3 +1,14 @@
+# How to install and run tests
+
+First clone this repository (optional: and a virtual env).
+Note that we support **Python>=3.4**.
+
+```
+$ pip install -e .[dev]
+$ py.test -v
+```
+
+
 # Crypto Conditions
 
 This spec is from the [**Interledger Protocol (ILP)**]
