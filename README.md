@@ -16,9 +16,13 @@ This spec is from the [**Interledger Protocol (ILP)**]
 
 ## Motivation
 
-We would like a way to describe a signed message such that multiple actors in a distributed system can all verify the same signed message and agree on whether it matches the description.
+We would like a way to describe a signed message such that multiple actors in a
+distributed system can all verify the same signed message and agree on whether
+it matches the description.
 
-This provides a useful primitive for distributed, event-based systems since we can describe events (represented by signed messages) and therefore define generic authenticated event handlers.
+This provides a useful primitive for distributed, event-based systems since we
+can describe events (represented by signed messages) and therefore define
+generic authenticated event handlers.
 
 ## Terminology
 
@@ -26,12 +30,17 @@ This provides a useful primitive for distributed, event-based systems since we c
   A condition is the hash of a description of a signed message.
 
 * ##### Fulfillment
-  A fulfillment consists of a description of a signed message and a signed message that matches the description.
+  A fulfillment consists of a description of a signed message and a signed
+  message that matches the description.
 
-  The description can be hashed and compared to a condition. If the message matches the description and the hash of the description matches the condition, we say that the fulfillment **fulfills** the condition.
+  The description can be hashed and compared to a condition. If the message
+  matches the description and the hash of the description matches the
+  condition, we say that the fulfillment **fulfills** the condition.
 
 * ##### Hashlock
-  A tuple consisting of a bytestring and its hash where the hash is published first and the publication of the corresponding bytestring acts as a one-bit, one-time signature.
+  A tuple consisting of a bytestring and its hash where the hash is published
+  first and the publication of the corresponding bytestring acts as a one-bit,
+  one-time signature.
 
 # Basic Format
 
@@ -52,47 +61,71 @@ The following bits are assigned:
 |      100|2<sup>2</sup>|   4|THRESHOLD-SHA-256|
 |     1000|2<sup>3</sup>|   8|ED25519-SHA-256  |
 
-Conditions contain a bitmask of types they require the implementation to support. Implementations provide a bitmask of types they support.
+Conditions contain a bitmask of types they require the implementation to
+support. Implementations provide a bitmask of types they support.
 
 ### ILP Features
 
-Crypto-conditions are a simple multi-algorithm, multi-message, multi-level, multi-signature standard.
+Crypto-conditions are a simple multi-algorithm, multi-message, multi-level,
+multi-signature standard.
 
 * **Multi-algorithm**
 
-  Crypto-conditions can support several different signature and hash algorithms and support for new ones can be added in the future.
+  Crypto-conditions can support several different signature and hash algorithms
+  and support for new ones can be added in the future.
 
-  Implementations can state their supported algorithms simply by providing a bitmask. It is easy to verify that a given implementation will be able to verify the fulfillment to a given condition, by verifying that the condition's bitmask `condition` and its own bitmask of supported algorithms `supported` satisfies `condition & ~supported == 0` where `&` is the bitwise AND operator and `~` is the bitwise NOT operator.
+  Implementations can state their supported algorithms simply by providing a
+  bitmask. It is easy to verify that a given implementation will be able to
+  verify the fulfillment to a given condition, by verifying that the
+  condition's bitmask `condition` and its own bitmask of supported algorithms
+  `supported` satisfies `condition & ~supported == 0` where `&` is the bitwise
+  AND operator and `~` is the bitwise NOT operator.
 
-  Any new high bit can redefine the meaning of any existing lower bits as long as it is set. This can be used to remove obsolete algorithms.
+  Any new high bit can redefine the meaning of any existing lower bits as long
+  as it is set. This can be used to remove obsolete algorithms.
 
   The bitmask is encoded as a varint to minimize space usage.
 
 * **Multi-signature**
 
-  Crypto-conditions can abstract away many of the details of multi-sign. When a party provides a condition, other parties can treat it opaquely and do not need to know about its internal structure. That allows parties to define arbitrary multi-signature setups without breaking compatibility.
+  Crypto-conditions can abstract away many of the details of multi-sign. When a
+  party provides a condition, other parties can treat it opaquely and do not
+  need to know about its internal structure. That allows parties to define
+  arbitrary multi-signature setups without breaking compatibility.
 
-  Protocol designers can use crypto-conditions as a drop-in replacement for public key signature algorithms and add multi-signature support to their protocols without adding any additional complexity.
+  Protocol designers can use crypto-conditions as a drop-in replacement for
+  public key signature algorithms and add multi-signature support to their
+  protocols without adding any additional complexity.
 
 * **Multi-level**
 
-  Basic multi-sign is single-level and does not support more complex trust relationships such as "I trust Alice and Bob, but only when Candice also agrees". In single level 2-of-3 Alice and Bob could sign on their own, without Candice's approval.
+  Basic multi-sign is single-level and does not support more complex trust
+  relationships such as "I trust Alice and Bob, but only when Candice also
+  agrees". In single level 2-of-3 Alice and Bob could sign on their own,
+  without Candice's approval.
 
-  Crypto-conditions add that flexibility elegantly, by applying thresholds not just to signatures, but to conditions which can be signatures or further conditions. That allows the creation of an arbitrary threshold boolean circuit of signatures.
+  Crypto-conditions add that flexibility elegantly, by applying thresholds not
+  just to signatures, but to conditions which can be signatures or further
+  conditions. That allows the creation of an arbitrary threshold boolean
+  circuit of signatures.
 
 * **Multi-message**
 
-  Crypto-conditions can sign not just one, but multiple messages at the same time and by different people. These messages can then be used as inputs for other algorithms.
+  Crypto-conditions can sign not just one, but multiple messages at the same
+  time and by different people. These messages can then be used as inputs for
+  other algorithms.
 
-  This allows resource-controlling systems to perform their functions without knowing the details of the higher-level protocols that these functions are a part of.
+  This allows resource-controlling systems to perform their functions without
+  knowing the details of the higher-level protocols that these functions are a
+  part of.
 
 ## Usage
 
 ```python
 import binascii
-from bigchaindb.crypto.condition import Condition
-from bigchaindb.crypto.fulfillment import Fulfillment
-from bigchaindb.crypto.fulfillments.sha256 import Sha256Fulfillment
+from cryptoconditions.condition import Condition
+from cryptoconditions.fulfillment import Fulfillment
+from cryptoconditions.fulfillments.sha256 import Sha256Fulfillment
 
 # Parse a condition from a URI
 example_condition_uri = 'cc:1:1:47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU:1'
@@ -128,7 +161,12 @@ parsed_fulfillment.validate()
 
 * **VARUINT**
 
-  Unsigned variable-length integer. Implementation matches [Base128 Varints](https://developers.google.com/protocol-buffers/docs/encoding#varints) in Protocol Buffers. Implementations MAY define different maximum lengths for their varints, as long as that length is long enough to cover their bitmask and their maximum supported fulfillment length. (This is safe, because no larger varuint can appear in a valid crypto-condition.)
+  Unsigned variable-length integer. Implementation matches [Base128
+  Varints](https://developers.google.com/protocol-buffers/docs/encoding#varints)
+  in Protocol Buffers. Implementations MAY define different maximum lengths for
+  their varints, as long as that length is long enough to cover their bitmask
+  and their maximum supported fulfillment length. (This is safe, because no
+  larger varuint can appear in a valid crypto-condition.)
 
 * **VARBYTES**
 
@@ -136,21 +174,27 @@ parsed_fulfillment.validate()
 
 * **VARARRAY**
 
-  Consists of a `VARUINT` length fields followed by that many bytes filled with elements of the array.
+  Consists of a `VARUINT` length fields followed by that many bytes filled with
+  elements of the array.
 
 ### String types
 
 * **BASE10**
 
-  Variable-length integer encoded as a base-10 (decimal) number. Implementations MUST reject encodings that are too large for them to parse. Implementations MUST be tested for overflows.
+  Variable-length integer encoded as a base-10 (decimal) number.
+  Implementations MUST reject encodings that are too large for them to parse.
+  Implementations MUST be tested for overflows.
 
 * **BASE16**
 
-  Variable-length integer encoded as a base-16 (hexadecimal) number. Implementations MUST reject encodings that are too large for them to parse. Implementations MUST be tested for overflows. No leading zeros.
+  Variable-length integer encoded as a base-16 (hexadecimal) number.
+  Implementations MUST reject encodings that are too large for them to parse.
+  Implementations MUST be tested for overflows. No leading zeros.
 
 * **BASE64URL**
 
-  Base64-URL encoding. See [RFC4648 Section 5](https://tools.ietf.org/html/rfc4648#section-5).
+  Base64-URL encoding. See [RFC4648 Section
+  5](https://tools.ietf.org/html/rfc4648#section-5).
 
 ### Condition
 
@@ -169,7 +213,8 @@ CONDITION =
   VARUINT MAX_FULFILLMENT_LENGTH
 ```
 
-The `TYPE_BITMASK` is the boolean OR of the `TYPE_BIT`s of the condition type and all subcondition types, recursively.
+The `TYPE_BITMASK` is the boolean OR of the `TYPE_BIT`s of the condition type
+and all subcondition types, recursively.
 
 ### Fulfillment
 
@@ -197,7 +242,8 @@ SHA-256 is assigned the type bit 2<sup>0</sup> = 0x01.
 
 ### Notes
 
-This type of condition is also called a hashlock. We can use revealing the preimage as a type of one bit signature.
+This type of condition is also called a hashlock. We can use revealing the
+preimage as a type of one bit signature.
 
 Bitcoin supports this type of condition via the `OP_HASH256` operator
 
@@ -218,8 +264,8 @@ FULFILLMENT_PAYLOAD =
 
 ```python
 import binascii, hashlib
-from bigchaindb.crypto.condition import Condition
-from bigchaindb.crypto.fulfillments.sha256 import Sha256Fulfillment
+from cryptoconditions.condition import Condition
+from cryptoconditions.fulfillments.sha256 import Sha256Fulfillment
 
 secret = ''
 puzzle = binascii.hexlify(hashlib.sha256(secret.encode()).digest())
@@ -259,7 +305,8 @@ print(sha256fulfillment.validate() and \
 
 RSA-SHA-256 is assigned the type bit 2<sup>1</sup> = 0x02.
 
-**Warning:** not (yet) implemented in BigchainDB, for info see the [**ILP specification**](https://interledger.org/five-bells-condition/spec.html)
+**Warning:** not (yet) implemented in `cryptoconditions`, for info see the
+[**ILP specification**](https://interledger.org/five-bells-condition/spec.html)
 
 
 ## ED25519-SHA-256
@@ -289,19 +336,27 @@ FULFILLMENT_PAYLOAD =
   VARBYTES SIGNATURE
 ```
 
-The `DYNAMIC_MESSAGE_LENGTH` is included to provide a maximum length for `DYNAMIC_MESSAGE` even if the actual message suffix length is different. This value is used to calculate the `MAX_FULFILLMENT_LENGTH` in the condition.
+The `DYNAMIC_MESSAGE_LENGTH` is included to provide a maximum length for
+`DYNAMIC_MESSAGE` even if the actual message suffix length is different. This
+value is used to calculate the `MAX_FULFILLMENT_LENGTH` in the condition.
 
-The `MESSAGE_ID` represents an identifier for the message. All messages in a cryptocondition that have a common identifier must match, otherwise the condition is invalid. Implementations may return messages as a map of `MESSAGE_ID` => `MESSAGE` pairs.
+The `MESSAGE_ID` represents an identifier for the message. All messages in a
+cryptocondition that have a common identifier must match, otherwise the
+condition is invalid. Implementations may return messages as a map of
+`MESSAGE_ID` => `MESSAGE` pairs.
 
-The message to be signed is the concatenation of the `FIXED_PREFIX` and `DYNAMIC_MESSAGE`.
+The message to be signed is the concatenation of the `FIXED_PREFIX` and
+`DYNAMIC_MESSAGE`.
 
-The `MESSAGE_ID`, `FIXED_PREFIX`, `DYNAMIC_MESSAGE_LENGTH` and `DYNAMIC_MESSAGE` fields have the same meaning as in the [**RSA-SHA-256 condition type**](https://interledger.org/five-bells-condition/spec.html).
+The `MESSAGE_ID`, `FIXED_PREFIX`, `DYNAMIC_MESSAGE_LENGTH` and
+`DYNAMIC_MESSAGE` fields have the same meaning as in the [**RSA-SHA-256
+condition type**](https://interledger.org/five-bells-condition/spec.html).
 
 ### Usage
 
 ```python
-from bigchaindb.crypto.ed25519 import Ed25519SigningKey, Ed25519VerifyingKey
-from bigchaindb.crypto.fulfillments.ed25519_sha256 import Ed25519Sha256Fulfillment
+from cryptoconditions.ed25519 import Ed25519SigningKey, Ed25519VerifyingKey
+from cryptoconditions.fulfillments.ed25519_sha256 import Ed25519Sha256Fulfillment
 
 # We use base58 key encoding
 sk = Ed25519SigningKey(b'9qLvREC54mhKYivr88VpckyVWdAFmifJpGjbvV5AiTRs')
@@ -327,7 +382,7 @@ print(ed25519_fulfillment.validate())
 # prints True
 
 print(ed25519_fulfillment.serialize_uri())
-# prints 
+# prints
 #  'cf:1:8:IOwXK5OtXlY79JMscOEkUDTDVGfvLv1NZOv4GWg0Z-K_DEhlbGxvIHdvcmxkI
 #   SAVIENvbmRpdGlvbnMgYXJlIGhlcmUhQENbql531PbCJlRUvKjP56k0XKJMOrIGo2F66u
 #   euTtRnYrJB2t2ZttdfXM4gzD_87eH1nZTpu4rTkAx81hSdpwI'
@@ -335,7 +390,7 @@ print (ed25519_fulfillment.condition.serialize_uri())
 
 # Parse a fulfillment URI
 parsed_ed25519_fulfillment = Ed25519Sha256Fulfillment.from_uri('cf:1:8:IOwXK5OtXlY79JMscOEkUDTDVGfvLv1NZOv4GWg0Z-K_DEhlbGxvIHdvcmxkISAVIENvbmRpdGlvbnMgYXJlIGhlcmUhQENbql531PbCJlRUvKjP56k0XKJMOrIGo2F66ueuTtRnYrJB2t2ZttdfXM4gzD_87eH1nZTpu4rTkAx81hSdpwI')
-        
+
 print(parsed_ed25519_fulfillment.validate())
 # prints True
 print(parsed_ed25519_fulfillment.condition.serialize_uri())
@@ -344,7 +399,9 @@ print(parsed_ed25519_fulfillment.condition.serialize_uri())
 
 ### Implementation
 
-The exact algorithm and encodings used for `PUBLIC_KEY` and `SIGNATURE` are Ed25519 as defined in [draft-irtf-cfrg-eddsa-04](https://datatracker.ietf.org/doc/draft-irtf-cfrg-eddsa/).
+The exact algorithm and encodings used for `PUBLIC_KEY` and `SIGNATURE` are
+Ed25519 as defined in
+[draft-irtf-cfrg-eddsa-04](https://datatracker.ietf.org/doc/draft-irtf-cfrg-eddsa/).
 
 ## THRESHOLD-SHA-256
 
@@ -362,9 +419,15 @@ HASH = SHA256(
 )
 ```
 
-The `TYPE_BIT` is `0x04`. The reason we need this is because threshold conditions are a structural condition. Structural conditions can have subconditions, meaning their TYPE_BITMASK can have multiple bits set, including other structural conditions. This `TYPE_BIT` prevents the possibility that two different structural fulfillments could ever generate the exact same condition.
+The `TYPE_BIT` is `0x04`. The reason we need this is because threshold
+conditions are a structural condition. Structural conditions can have
+subconditions, meaning their TYPE_BITMASK can have multiple bits set, including
+other structural conditions. This `TYPE_BIT` prevents the possibility that two
+different structural fulfillments could ever generate the exact same condition.
 
-The `VARARRAY` of conditions is sorted first based on length, shortest first. Elements of the same length are sorted in lexicographic (big-endian) order, smallest first.
+The `VARARRAY` of conditions is sorted first based on length, shortest first.
+Elements of the same length are sorted in lexicographic (big-endian) order,
+smallest first.
 
 ### Fulfillment
 
@@ -382,9 +445,9 @@ FULFILLMENT_PAYLOAD =
 ### Usage
 
 ```python
-from bigchaindb.crypto.fulfillments.sha256 import Sha256Fulfillment
-from bigchaindb.crypto.fulfillments.ed25519_sha256 import Ed25519Sha256Fulfillment
-from bigchaindb.crypto.fulfillments.threshold_sha256 import ThresholdSha256Fulfillment
+from cryptoconditions.fulfillments.sha256 import Sha256Fulfillment
+from cryptoconditions.fulfillments.ed25519_sha256 import Ed25519Sha256Fulfillment
+from cryptoconditions.fulfillments.threshold_sha256 import ThresholdSha256Fulfillment
 
 # Parse some fulfillments
 sha256_fulfillment = Sha256Fulfillment.from_uri('cf:1:1:AA')
@@ -394,7 +457,7 @@ ed25519_fulfillment = Ed25519Sha256Fulfillment.from_uri('cf:1:8:IOwXK5OtXlY79JMs
 threshold_fulfillment = ThresholdSha256Fulfillment()
 threshold_fulfillment.add_subfulfillment(sha256_fulfillment)
 threshold_fulfillment.add_subfulfillment(ed25519_fulfillment)
-threshold_fulfillment.threshold = 1  # OR gate 
+threshold_fulfillment.threshold = 1  # OR gate
 print(threshold_fulfillment.condition.serialize_uri())
 # prints 'cc:1:d:9DdkQtOl2m9yjqZzCg6ck5b2zM3tAPLlJMaHsKkszIA:114'
 
@@ -421,15 +484,15 @@ print(threshold_fulfillment.validate())
 # prints False
 
 # Create a nested threshold condition
-# VALID = SHA and DSA and (DSA or DSA) 
+# VALID = SHA and DSA and (DSA or DSA)
 nested_fulfillment = ThresholdSha256Fulfillment()
 nested_fulfillment.add_subfulfillment(ed25519_fulfillment)
 nested_fulfillment.add_subfulfillment(ed25519_fulfillment)
-nested_fulfillment.threshold = 1  # OR gate 
+nested_fulfillment.threshold = 1  # OR gate
 
 threshold_fulfillment.add_subfulfillment(nested_fulfillment)
 print(threshold_fulfillment.serialize_uri())
-# prints 
+# prints
 #  'cf:1:4:AwMBAQABCCDsFyuTrV5WO_STLHDhJFA0w1Rn7y79TWTr-BloNGfivwxIZWxsby
 #   B3b3JsZCEgFSBDb25kaXRpb25zIGFyZSBoZXJlIUBDW6ped9T2wiZUVLyoz-epNFyiTDq
 #   yBqNheurnrk7UZ2KyQdrdmbbXX1zOIMw__O3h9Z2U6buK05AMfNYUnacCAQQBAQEIIOwX
