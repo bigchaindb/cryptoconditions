@@ -363,7 +363,7 @@ sk = Ed25519SigningKey(b'9qLvREC54mhKYivr88VpckyVWdAFmifJpGjbvV5AiTRs')
 vk = sk.get_verifying_key()
 
 # Create an ED25519-SHA256 condition
-ed25519_fulfill`nt = Ed25519Sha256Fulfillment()
+ed25519_fulfillment = Ed25519Sha256Fulfillment()
 ed25519_fulfillment.public_key = vk
 ed25519_fulfillment.message_prefix = 'Hello world!'
 ed25519_fulfillment.max_dynamic_message_length = 32  # defaults to 0
