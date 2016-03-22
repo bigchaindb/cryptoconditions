@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/bigchaindb/cryptoconditions.svg?branch=master)](https://travis-ci.org/bigchaindb/cryptoconditions)
+[![codecov.io](https://codecov.io/github/bigchaindb/cryptoconditions/coverage.svg?branch=master)](https://codecov.io/github/bigchaindb/cryptoconditions?branch=master)
+
+
 # How to install and run tests
 
 First clone this repository (optional: and a virtual env).
