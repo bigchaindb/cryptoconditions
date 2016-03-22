@@ -7,8 +7,6 @@ install:
   - pip install -e .[test]
   - pip install codecov
 
-before_script: rethinkdb --daemon
-
 script: py.test -v --cov=cryptoconditions
 
 after_success: codecov
