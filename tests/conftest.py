@@ -1,15 +1,31 @@
 
 import pytest
 
-
+# ED25519
 VK_HEX_ILP = b'ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf'
 VK_B64_ILP = b'7Bcrk61eVjv0kyxw4SRQNMNUZ+8u/U1k6/gZaDRn4r8'
 VK_B58_ILP = b'Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU'
+VK_BYT_ILP = b'\xec\x17+\x93\xad^V;\xf4\x93,p\xe1$P4\xc3Tg\xef.\xfdMd\xeb\xf8\x19h4g\xe2\xbf'
+
+VK_B64_ILP_2 = b'Lvf3YtnHLMER+VHT0aaeEJF+7WQcvp4iKZAdvMVto7c'
 
 SK_HEX_ILP = b'833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42'
 SK_B64_ILP = b'gz/mJAkje51i7HdYdSCRHpp1nOwdGXVbfakBuW3KPUI'
 SK_B58_ILP = b'9qLvREC54mhKYivr88VpckyVWdAFmifJpGjbvV5AiTRs'
+SK_BYT_ILP = b'\x83?\xe6$\t#{\x9db\xecwXu \x91\x1e\x9au\x9c\xec\x1d\x19u[}\xa9\x01\xb9m\xca=B'
 
+MSG_SHA_ILP = 'claZQU7qkFz7smkAVtQp9ekUCc5LgoeN9W3RItIzykNEDbGSvzeHvOk9v/vrPpm+XWx5VFjd/sVbM2SLnCpxLw=='
+SIG_B64_ILP = 'sd0RahwuJJgeNfg8HvWHtYf4uqNgCOqIbseERacqs8G0kXNQQnhfV6gWAnMb+0RIlY3e0mqbrQiUwbRYJvRBAw=='
+
+# ECDSA
+SK_VALUE_ECDSA = 64328150571824492670917070117568709277186368319388887463636481841106388379832
+SK_B58_ECDSA = 'AaAp4xBavbe6VGeQF2mWdSKNM1r6HfR2Z1tAY6aUkwdq'
+
+VK_VALUE_X_ECDSA = 48388170575736684074633245566225141536152842355597159440179742847497614196929
+VK_VALUE_Y_ECDSA = 65233479152484407841598798165960909560839872511163322973341535484598825150846
+VK_B58_ECDSA = 'ifEi3UuTDT4CqUUKiS5omgeDodhu2aRFHVp6LoahbEVe'
+
+# ILP CRYPTOCONDITIONS
 CONDITION_SHA256_URI = 'cc:1:1:47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU:1'
 CONDITION_SHA256_HASH = b'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
 FULFILLMENT_SHA256_URI = 'cf:1:1:AA'
@@ -38,7 +54,11 @@ def vk_ilp():
     return {
         'hex': VK_HEX_ILP,
         'b64': VK_B64_ILP,
-        'b58': VK_B58_ILP
+        'b58': VK_B58_ILP,
+        'byt': VK_BYT_ILP,
+        2: {
+           'b64': VK_B64_ILP_2
+        }
     }
 
 
@@ -47,7 +67,33 @@ def sk_ilp():
     return {
         'hex': SK_HEX_ILP,
         'b64': SK_B64_ILP,
-        'b58': SK_B58_ILP
+        'b58': SK_B58_ILP,
+        'byt': SK_BYT_ILP
+    }
+
+
+@pytest.fixture(scope='module')
+def signature():
+    return {
+        'msg': MSG_SHA_ILP,
+        'sig': SIG_B64_ILP
+    }
+
+
+@pytest.fixture(scope='module')
+def vk_ecdsa():
+    return {
+        'b58': VK_B58_ECDSA,
+        'value_x': VK_VALUE_X_ECDSA,
+        'value_y': VK_VALUE_Y_ECDSA,
+    }
+
+
+@pytest.fixture(scope='module')
+def sk_ecdsa():
+    return {
+        'b58': SK_B58_ECDSA,
+        'value': SK_VALUE_ECDSA
     }
 
 
