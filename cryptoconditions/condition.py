@@ -1,3 +1,7 @@
+import json
+
+import base58
+
 import base64
 import re
 from abc import ABCMeta
@@ -217,3 +221,12 @@ class Condition(metaclass=ABCMeta):
         # TODO: Ensure bitmask is supported?
         self.hash = reader.read_var_bytes()
         self.max_fulfillment_length = reader.read_var_uint()
+
+    def serialize_json(self):
+        return json.dumps(
+            {
+                'type': 'condition',
+                'bitmask': self.bitmask,
+                'hash': base58.b58encode(self.hash)
+            }
+        )

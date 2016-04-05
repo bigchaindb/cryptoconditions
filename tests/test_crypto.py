@@ -1,7 +1,5 @@
 import binascii
-
 import base58
-
 import base64
 
 from cryptoconditions.buffer import base64_add_padding

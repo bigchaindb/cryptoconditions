@@ -1,3 +1,5 @@
+import json
+
 import copy
 
 from cryptoconditions.condition import Condition
@@ -149,7 +151,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         in the largest total fulfillment size.
 
         Return:
-             int Maximum length of the fulfillment payload
+             int: Maximum length of the fulfillment payload
 
         """
         total_condition_len = 0
@@ -163,7 +165,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
                 'size': fulfillment_len - condition_len
             })
 
-        subconditions.sort(key=lambda c: c['weight'])
+        subconditions.sort(key=lambda x: x['weight'])
 
         worst_case_fulfillments_length = total_condition_len + \
             ThresholdSha256Fulfillment.calculate_worst_case_length(self.threshold, subconditions)
@@ -173,10 +175,10 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
 
         # Calculate resulting total maximum fulfillment size
         predictor = Predictor()
-        predictor.write_var_uint(self.threshold)  # THRESHOLD
+        predictor.write_var_uint(self.threshold)   # THRESHOLD
         predictor.write_var_uint(len(self.subconditions))
         for c in self.subconditions:
-            predictor.write_uint8()  # IS_FULFILLMENT
+            predictor.write_uint8()                # IS_FULFILLMENT
             predictor.write_var_uint(c['weight'])  # WEIGHT
 
         # Represents the sum of CONDITION/FULFILLMENT values
@@ -192,8 +194,8 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
 
         predictor = Predictor()
         predictor.write_var_uint(cond['weight'])  # WEIGHT
-        predictor.write_var_bytes('')  # FULFILLMENT
-        predictor.write_var_uint(condition_len)  # CONDITION
+        predictor.write_var_bytes('')             # FULFILLMENT
+        predictor.write_var_uint(condition_len)   # CONDITION
         predictor.skip(condition_len)
 
         return predictor.size
@@ -205,45 +207,42 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             else cond['body'].max_fulfillment_length
 
         predictor = Predictor()
-        predictor.write_var_uint(cond['weight'])  # WEIGHT
+        predictor.write_var_uint(cond['weight'])   # WEIGHT
         predictor.write_var_uint(fulfillment_len)  # FULFILLMENT
         predictor.skip(fulfillment_len)
-        predictor.write_var_bytes('')  # CONDITION
+        predictor.write_var_bytes('')              # CONDITION
 
         return predictor.size
 
     @staticmethod
     def calculate_worst_case_length(threshold, subconditions, index=0):
         """
-        * Calculate the worst case length of a set of conditions.
-        *
-        * This implements a recursive algorithm to determine the longest possible
-        * length for a valid, minimal (no fulfillment can be removed) set of
-        * subconditions.
-        *
-        * Note that the input array of subconditions must be sorted by weight
-        * descending.
-        *
-        * The algorithm works by recursively adding and not adding each subcondition.
-        * Finally, it determines the maximum of all valid solutions.
-        *
-        * @author Evan Schwartz <evan@ripple.com>
-        *
-        * @param {Number} threshold Threshold that the remaining subconditions have
-        *   to meet.
-        * @param {Object[]} subconditions Set of subconditions.
-        * @param {Number} subconditions[].weight Weight of the subcondition
-        * @param {Number} subconditions[].size Maximum number of bytes added to the
-        *   size if the fulfillment is included.
-        * @param {Number} subconditions[].omitSize Maximum number of bytes added to
-        *   the size if the fulfillment is omitted (and the condition is added
-        *   instead.)
-        * @param {Number} [size=0] Size the fulfillment already has (used by the
-        *   recursive calls.)
-        * @param {Number} [index=0] Current index in the subconditions array (used by
-        *   the recursive calls.)
-        * @return {Number} Maximum size of a valid, minimal set of fulfillments or
-        *   -1 if there is no valid set.
+        Calculate the worst case length of a set of conditions.
+
+        This implements a recursive algorithm to determine the longest possible
+        length for a valid, minimal (no fulfillment can be removed) set of subconditions.
+
+        Note that the input array of subconditions must be sorted by weight descending.
+
+        The algorithm works by recursively adding and not adding each subcondition.
+        Finally, it determines the maximum of all valid solutions.
+
+        Author:
+            Evan Schwartz <evan@ripple.com>
+
+        Args:
+            threshold (int): Threshold that the remaining subconditions have to meet.
+            subconditions ([Condition]): Set of subconditions.
+                                         subconditions[].weight Weight of the subcondition
+                                         subconditions[].size Maximum number of bytes added to the
+                                                              size if the fulfillment is included.
+                                         subconditions[].omitSize Maximum number of bytes added to
+                                                                  the size if the fulfillment is omitted
+                                                                  (and the condition is added instead.)
+            index (int): Current index in the subconditions array (used by the recursive calls.)
+
+        Returns:
+            (int): Maximum size of a valid, minimal set of fulfillments or -1 if there is no valid set.
         """
         if threshold <= 0:
             return 0
@@ -347,7 +346,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         sorted_subconditions = ThresholdSha256Fulfillment.sort_buffers(serialized_subconditions)
 
         writer.write_var_uint(self.threshold)
-        writer.write_var_uint(len(serialized_subconditions))
+        writer.write_var_uint(len(sorted_subconditions))
         for c in sorted_subconditions:
             writer.write(c)
 
@@ -356,18 +355,20 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
     @staticmethod
     def calculate_smallest_valid_fulfillment_set(threshold, fulfillments, state=None):
         """
-        * Select the smallest valid set of fulfillments.
-        *
-        * From a set of fulfillments, selects the smallest combination of
-        * fulfillments which meets the given threshold.
-        *
-        * @param {Number} threshold (Remaining) threshold that must be met.
-        * @param {Object[]} fulfillments Set of fulfillments
-        * @param {Object} [state] Used for recursion
-        * @param {Number} state.index Current index being processed.
-        * @param {Number} state.size Size of the binary so far
-        * @param {Object[]} state.set Set of fulfillments that were included.
-        * @return {Object} Result with size and set properties.
+        Select the smallest valid set of fulfillments.
+
+        From a set of fulfillments, selects the smallest combination of
+        fulfillments which meets the given threshold.
+
+        Args:
+            threshold (int): (Remaining) threshold that must be met.
+            fulfillments ([{}]): Set of fulfillments
+            state (dict): Used for recursion
+                          state.index (int): Current index being processed.
+                          state.size (int): Size of the binary so far
+                          state.set ([{}]): Set of fulfillments that were included.
+        Returns:
+            (dict): Result with size and set properties.
         """
         if not state:
             state = {'index': 0, 'size': 0, 'set': []}
@@ -402,17 +403,40 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
     @staticmethod
     def sort_buffers(buffers):
         """
-        * Sort buffers according to spec.
-        *
-        * Buffers must be sorted first by length. Buffers with the same length are
-        * sorted lexicographically.
-        *
-        * @param {Buffer[]} buffers Set of octet strings to sort.
-        * @return {Buffer[]} Sorted buffers.
+        Sort buffers according to spec.
+
+        Buffers must be sorted first by length. Buffers with the same length are sorted lexicographically.
+
+        Args:
+            buffers ([]): Set of octet strings to sort.
+
+        Returns:
+            Sorted buffers.
         """
         buffers_copy = copy.deepcopy(buffers)
         buffers_copy.sort(key=lambda item: (len(item), item))
         return buffers_copy
+
+    def serialize_json(self):
+        """
+        Generate a JSON object of the fulfillment
+
+        Returns:
+        """
+        subfulfillments_json = []
+        for c in self.subconditions:
+            subcondition = json.loads(c['body'].serialize_json())
+            subcondition.update({'weight': c['weight']})
+            subfulfillments_json.append(subcondition)
+
+        return json.dumps(
+            {
+                'type': 'fulfillment',
+                'bitmask': ThresholdSha256Fulfillment.FEATURE_BITMASK,
+                'threshold': self.threshold,
+                'subfulfillments': subfulfillments_json
+            }
+        )
 
     def validate(self, message=None):
         """

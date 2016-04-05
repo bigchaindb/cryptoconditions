@@ -97,9 +97,7 @@ class Fulfillment(metaclass=ABCMeta):
 
         Returns:
             int: Bitmask corresponding to this fulfillment.
-
         """
-
         return self.FEATURE_BITMASK
 
     @property
@@ -115,7 +113,6 @@ class Fulfillment(metaclass=ABCMeta):
 
         Return:
             Condition: Condition corresponding to this fulfillment.
-
         """
         condition = Condition()
         condition.bitmask = self.bitmask
@@ -202,12 +199,35 @@ class Fulfillment(metaclass=ABCMeta):
 
     @abstractmethod
     def write_payload(self, writer):
-        raise NotImplementedError
+        """
+        Generate the fulfillment payload.
+
+        Args:
+            writer (Writer, Predictor): Subject for writing the fulfillment payload.
+        """
 
     @abstractmethod
     def parse_payload(self, reader):
-        raise NotImplementedError
+        """
+        Parse the payload of the fulfillment.
+
+        Args:
+            reader (Reader): Source to read the fulfillment payload from.
+        """
 
     @abstractmethod
-    def validate(self):
-        raise NotImplementedError
+    def serialize_json(self):
+        """
+        Generate a JSON object of the fulfillment
+
+        Returns:
+        """
+
+    @abstractmethod
+    def validate(self, *args, **kwargs):
+        """
+        Validate this fulfillment
+
+        Returns:
+            boolean: Validation result
+        """

@@ -1,4 +1,6 @@
 import binascii
+import json
+import pprint
 
 from math import ceil
 
@@ -37,6 +39,10 @@ class TestBigchainILPSha256Fulfillment:
         assert fulfillment.serialize_uri() == fulfillment_sha256['fulfillment_uri']
         assert fulfillment.condition.serialize_uri() == fulfillment_sha256['condition_uri']
         assert fulfillment.validate()
+
+    def test_json(self, fulfillment_sha256):
+        fulfillment = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
+        assert json.loads(fulfillment.serialize_json()) == {"bitmask": 3, "preimage": ""}
 
     def test_deserialize_condition_and_validate_fulfillment(self, fulfillment_sha256):
         condition = Condition.from_uri(fulfillment_sha256['condition_uri'])
@@ -96,6 +102,13 @@ class TestBigchainILPEd25519Sha256Fulfillment:
 
         assert deserialized_condition.serialize_uri() == fulfillment_ed25519['condition_uri']
         assert binascii.hexlify(deserialized_condition.hash) == fulfillment_ed25519['condition_hash']
+
+    def test_json(self, fulfillment_ed25519):
+        fulfillment = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
+        assert json.loads(fulfillment.serialize_json()) == \
+            {"bitmask": 32,
+             "public_key": "Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU",
+             "signature": "4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj"}
 
     def test_serialize_deserialize_condition(self, vk_ilp):
         vk = Ed25519VerifyingKey(vk_ilp['b58'])
@@ -197,6 +210,10 @@ class TestBigchainILPThresholdSha256Fulfillment:
         assert fulfillment.serialize_uri() == fulfillment_threshold['fulfillment_uri']
         assert len(fulfillment.subconditions) == num_fulfillments
         assert fulfillment.validate(MESSAGE)
+
+    def test_json(self, fulfillment_threshold):
+        fulfillment = Fulfillment.from_uri(fulfillment_threshold['fulfillment_uri'])
+        print(fulfillment.serialize_json())
 
     def test_serialize_deserialize_fulfillment(self,
                                                fulfillment_ed25519):

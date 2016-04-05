@@ -1,3 +1,5 @@
+import json
+
 import base58
 
 from cryptoconditions.ed25519 import Ed25519VerifyingKey
@@ -88,6 +90,21 @@ class Ed25519Fulfillment(Fulfillment):
 
     def calculate_max_fulfillment_length(self):
         return self.FULFILLMENT_LENGTH
+
+    def serialize_json(self):
+        """
+        Generate a JSON object of the fulfillment
+
+        Returns:
+        """
+        return json.dumps(
+            {
+                'type': 'fulfillment',
+                'bitmask': Ed25519Fulfillment.FEATURE_BITMASK,
+                'public_key': self.public_key.to_ascii(encoding='base58').decode(),
+                'signature': base58.b58encode(self.signature)
+            }
+        )
 
     def validate(self, message=None):
         """
