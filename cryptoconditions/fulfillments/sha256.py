@@ -2,19 +2,12 @@ from cryptoconditions.fulfillments.base_sha256 import BaseSha256Fulfillment
 from cryptoconditions.buffer import Hasher, Reader, Writer, Predictor
 
 
-class Sha256Fulfillment(BaseSha256Fulfillment):
+class PreimageSha256Fulfillment(BaseSha256Fulfillment):
 
-    _bitmask = 0x01
+    TYPE_ID = 0
+    FEATURE_BITMASK = 0x03
 
-    def __init__(self):
-        self._preimage = None
-
-    @property
-    def preimage(self):
-        return self._preimage
-
-    @preimage.setter
-    def preimage(self, value):
+    def __init__(self, preimage=None):
         """
         Provide a preimage.
 
@@ -26,10 +19,14 @@ class Sha256Fulfillment(BaseSha256Fulfillment):
         used to avoid having to store each individual preimage.
 
         Args:
-             value: Secret data that will be hashed to form the condition.
+             preimage: Secret data that will be hashed to form the condition.
         """
         # TODO: Verify preimage
-        self._preimage = value
+        self.preimage = preimage
+
+    @property
+    def bitmask(self):
+        return self.FEATURE_BITMASK
 
     def write_hash_payload(self, hasher):
         """
@@ -81,7 +78,7 @@ class Sha256Fulfillment(BaseSha256Fulfillment):
         writer.write_var_bytes(self.preimage)
         return writer
 
-    def validate(self):
+    def validate(self, message=None):
         """
         Validate this fulfillment.
 

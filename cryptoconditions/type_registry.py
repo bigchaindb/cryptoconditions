@@ -1,31 +1,31 @@
 from cryptoconditions.buffer import MAX_SAFE_INTEGER_JS
 
 
-class BitmaskRegistry:
+class TypeRegistry:
     registered_types = []
 
     @staticmethod
-    def get_class_from_typebit(bitmask):
+    def get_class_from_type_id(type_id):
         """
         Determine fulfillment implementation class from a bitmask.
 
-        Returns the class implementing a fulfillment type that matches a certain bitmask.
+        Returns the class implementing a fulfillment type that matches a certain type ID.
 
         Args:
-           bitmask (int): fulfillment bitmask
+            type_id (int): fulfillment type ID
 
         Return:
             Class implementing the given fulfillment type.
         """
         # Determine type of condition
-        if bitmask > MAX_SAFE_INTEGER_JS:
-            raise ValueError('Bitmask {} is not supported'.format(bitmask))
+        if type_id > MAX_SAFE_INTEGER_JS:
+            raise ValueError('Type {} is not supported'.format(type_id))
 
-        for registered_type in BitmaskRegistry.registered_types:
-            if bitmask == registered_type['bitmask']:
+        for registered_type in TypeRegistry.registered_types:
+            if type_id == registered_type['type_id']:
                 return registered_type['class']
 
-        raise ValueError('Bitmask {} is not supported'.format(bitmask))
+        raise ValueError('Type {} is not supported'.format(type_id))
 
     @staticmethod
     def register_type(cls):
@@ -44,17 +44,11 @@ class BitmaskRegistry:
         """
         # TODO Do some sanity checks on Class
 
-        BitmaskRegistry.registered_types.append(
+        TypeRegistry.registered_types.append(
             {
-                'bitmask': cls().bitmask,
+                'type_id': cls.TYPE_ID,
                 'class': cls
             })
 
 
-from cryptoconditions.fulfillments.sha256 import Sha256Fulfillment
-from cryptoconditions.fulfillments.threshold_sha256 import ThresholdSha256Fulfillment
-from cryptoconditions.fulfillments.ed25519_sha256 import Ed25519Sha256Fulfillment
 
-BitmaskRegistry.register_type(Sha256Fulfillment)
-BitmaskRegistry.register_type(ThresholdSha256Fulfillment)
-BitmaskRegistry.register_type(Ed25519Sha256Fulfillment)

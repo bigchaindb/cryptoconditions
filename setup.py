@@ -32,7 +32,7 @@ docs_require = [
 
 setup(
     name='cryptoconditions',
-    version='0.1.1',
+    version='0.1.2',
     description='cryptoconditions provide a mechanism to describe a signed '
                 'message such that multiple actors in a distributed system '
                 'can all verify the same signed message and agree on whether '

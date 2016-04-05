@@ -149,6 +149,12 @@ class Predictor:
     def __init__(self):
         self.size = 0
 
+    def write_uint8(self):
+        """
+        Add one byte to the predicted size.
+        """
+        self.size += 1
+
     def write_var_uint(self, val):
         """
         Calculate the size of a VARUINT.
@@ -245,7 +251,7 @@ class Reader:
         """
         if len(self.buffer) < self.cursor + num_bytes:
             raise OverflowError('Tried to read {} bytes, but only {} bytes available'
-                                .format(num_bytes, len(self.buffer.length) - self.cursor))
+                                .format(num_bytes, len(self.buffer) - self.cursor))
 
     def read_uint8(self):
         """

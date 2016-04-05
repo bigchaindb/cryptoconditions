@@ -7,9 +7,12 @@ import pytest
 from cryptoconditions.condition import Condition
 from cryptoconditions.ed25519 import Ed25519SigningKey, Ed25519VerifyingKey
 from cryptoconditions.fulfillment import Fulfillment
-from cryptoconditions.fulfillments.ed25519_sha256 import Ed25519Sha256Fulfillment
-from cryptoconditions.fulfillments.sha256 import Sha256Fulfillment
+from cryptoconditions.fulfillments.ed25519 import Ed25519Fulfillment
+from cryptoconditions.fulfillments.sha256 import PreimageSha256Fulfillment
 from cryptoconditions.fulfillments.threshold_sha256 import ThresholdSha256Fulfillment
+
+
+MESSAGE = 'Hello World! Conditions are here!'
 
 
 class TestBigchainILPSha256Condition:
@@ -21,7 +24,7 @@ class TestBigchainILPSha256Condition:
 
     def test_create_condition(self, fulfillment_sha256):
         sha256condition = Condition()
-        sha256condition.bitmask = Sha256Fulfillment._bitmask
+        sha256condition._bitmask = PreimageSha256Fulfillment.FEATURE_BITMASK
         sha256condition.hash = binascii.unhexlify(fulfillment_sha256['condition_hash'])
         sha256condition.max_fulfillment_length = 1
         assert sha256condition.serialize_uri() == fulfillment_sha256['condition_uri']
@@ -37,7 +40,7 @@ class TestBigchainILPSha256Fulfillment:
 
     def test_deserialize_condition_and_validate_fulfillment(self, fulfillment_sha256):
         condition = Condition.from_uri(fulfillment_sha256['condition_uri'])
-        fulfillment = Sha256Fulfillment()
+        fulfillment = PreimageSha256Fulfillment()
         fulfillment.preimage = ''
         assert fulfillment.serialize_uri() == fulfillment_sha256['fulfillment_uri']
         assert fulfillment.condition.serialize_uri() == condition.serialize_uri()
@@ -46,14 +49,14 @@ class TestBigchainILPSha256Fulfillment:
             and fulfillment.condition.serialize_uri() == condition.serialize_uri()
 
     def test_condition_from_fulfillment(self):
-        fulfillment = Sha256Fulfillment()
+        fulfillment = PreimageSha256Fulfillment()
         with pytest.raises(ValueError):
             fulfillment.condition
 
         fulfillment.preimage = 'Hello World!'
         condition = fulfillment.condition
 
-        verify_fulfillment = Sha256Fulfillment()
+        verify_fulfillment = PreimageSha256Fulfillment()
         verify_fulfillment.preimage = 'Hello World!'
         assert verify_fulfillment.condition.serialize_uri() == condition.serialize_uri()
         assert verify_fulfillment.validate()
@@ -74,24 +77,19 @@ class TestBigchainILPEd25519Sha256Fulfillment:
         sk = Ed25519SigningKey(sk_ilp['b58'])
         vk = Ed25519VerifyingKey(vk_ilp['b58'])
 
-        fulfillment = Ed25519Sha256Fulfillment()
-        fulfillment.public_key = vk
-        fulfillment.message_prefix = 'Hello world!'
-        fulfillment.max_dynamic_message_length = 32  # defaults to 0
+        fulfillment = Ed25519Fulfillment(public_key=vk)
 
         assert fulfillment.condition.serialize_uri() == fulfillment_ed25519['condition_uri']
         assert binascii.hexlify(fulfillment.condition.hash) == fulfillment_ed25519['condition_hash']
-
-        fulfillment.message = ' Conditions are here!'
 
         # ED25519-SHA256 condition not fulfilled
         assert fulfillment.validate() == False
 
         # Fulfill an ED25519-SHA256 condition
-        fulfillment.sign(sk)
+        fulfillment.sign(MESSAGE, sk)
 
         assert fulfillment.serialize_uri() == fulfillment_ed25519['fulfillment_uri']
-        assert fulfillment.validate()
+        assert fulfillment.validate(MESSAGE)
 
     def test_deserialize_condition(self, fulfillment_ed25519):
         deserialized_condition = Condition.from_uri(fulfillment_ed25519['condition_uri'])
@@ -102,10 +100,7 @@ class TestBigchainILPEd25519Sha256Fulfillment:
     def test_serialize_deserialize_condition(self, vk_ilp):
         vk = Ed25519VerifyingKey(vk_ilp['b58'])
 
-        fulfillment = Ed25519Sha256Fulfillment()
-        fulfillment.public_key = vk
-        fulfillment.message_prefix = 'Hello world!'
-        fulfillment.max_dynamic_message_length = 32
+        fulfillment = Ed25519Fulfillment(public_key=vk)
 
         condition = fulfillment.condition
         deserialized_condition = Condition.from_uri(condition.serialize_uri())
@@ -118,32 +113,38 @@ class TestBigchainILPEd25519Sha256Fulfillment:
     def test_deserialize_fulfillment(self, vk_ilp, fulfillment_ed25519):
         fulfillment = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
 
-        assert isinstance(fulfillment, Ed25519Sha256Fulfillment)
+        assert isinstance(fulfillment, Ed25519Fulfillment)
         assert fulfillment.serialize_uri() == fulfillment_ed25519['fulfillment_uri']
         assert fulfillment.condition.serialize_uri() == fulfillment_ed25519['condition_uri']
         assert binascii.hexlify(fulfillment.condition.hash) == fulfillment_ed25519['condition_hash']
         assert fulfillment.public_key.to_ascii(encoding='hex') == vk_ilp['hex']
-        assert fulfillment.validate()
+        assert fulfillment.validate(MESSAGE)
+
+    def test_deserialize_fulfillment_2(self, vk_ilp, fulfillment_ed25519_2):
+        fulfillment = Fulfillment.from_uri(fulfillment_ed25519_2['fulfillment_uri'])
+
+        assert isinstance(fulfillment, Ed25519Fulfillment)
+        assert fulfillment.serialize_uri() == fulfillment_ed25519_2['fulfillment_uri']
+        assert fulfillment.condition.serialize_uri() == fulfillment_ed25519_2['condition_uri']
+        assert binascii.hexlify(fulfillment.condition.hash) == fulfillment_ed25519_2['condition_hash']
+        assert fulfillment.public_key.to_ascii(encoding='hex') == vk_ilp[2]['hex']
+        assert fulfillment.validate(MESSAGE)
 
     def test_serialize_deserialize_fulfillment(self, sk_ilp, vk_ilp):
         sk = Ed25519SigningKey(sk_ilp['b58'])
         vk = Ed25519VerifyingKey(vk_ilp['b58'])
 
-        fulfillment = Ed25519Sha256Fulfillment()
-        fulfillment.public_key = vk
-        fulfillment.message_prefix = 'Hello world!'
-        fulfillment.max_dynamic_message_length = 32  # defaults to 0
-        fulfillment.message = ' Conditions are here!'
-        fulfillment.sign(sk)
+        fulfillment = Ed25519Fulfillment(public_key=vk)
+        fulfillment.sign(MESSAGE, sk)
 
-        assert fulfillment.validate()
+        assert fulfillment.validate(MESSAGE)
 
         deserialized_fulfillment = Fulfillment.from_uri(fulfillment.serialize_uri())
-        assert isinstance(deserialized_fulfillment, Ed25519Sha256Fulfillment)
+        assert isinstance(deserialized_fulfillment, Ed25519Fulfillment)
         assert deserialized_fulfillment.serialize_uri() == fulfillment.serialize_uri()
         assert deserialized_fulfillment.condition.serialize_uri() == fulfillment.condition.serialize_uri()
         assert deserialized_fulfillment.public_key.to_bytes() == fulfillment.public_key.to_bytes()
-        assert deserialized_fulfillment.validate()
+        assert deserialized_fulfillment.validate(MESSAGE)
 
 
 class TestBigchainILPThresholdSha256Fulfillment:
@@ -152,12 +153,8 @@ class TestBigchainILPThresholdSha256Fulfillment:
         sk = Ed25519SigningKey(sk_ilp['b58'])
         vk = Ed25519VerifyingKey(vk_ilp['b58'])
 
-        fulfillment = Ed25519Sha256Fulfillment()
-        fulfillment.public_key = vk
-        fulfillment.message_prefix = 'Hello world!'
-        fulfillment.max_dynamic_message_length = 32  # defaults to 0
-        fulfillment.message = ' Conditions are here!'
-        fulfillment.sign(sk)
+        fulfillment = Ed25519Fulfillment(public_key=vk)
+        fulfillment.sign(MESSAGE, sk)
         return fulfillment
 
     def test_serialize_condition_and_validate_fulfillment(self,
@@ -165,12 +162,13 @@ class TestBigchainILPThresholdSha256Fulfillment:
                                                           fulfillment_ed25519,
                                                           fulfillment_ed25519_2,
                                                           fulfillment_threshold):
+
         ilp_fulfillment = Fulfillment.from_uri(fulfillment_ed25519_2['fulfillment_uri'])
         ilp_fulfillment_2 = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
         ilp_fulfillment_3 = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
 
-        assert ilp_fulfillment.validate() == True
-        assert ilp_fulfillment_2.validate() == True
+        assert ilp_fulfillment.validate(MESSAGE) == True
+        assert ilp_fulfillment_2.validate(MESSAGE) == True
 
         threshold = 2
 
@@ -186,31 +184,24 @@ class TestBigchainILPThresholdSha256Fulfillment:
         # fulfillments will be chosen over longer ones.
         # thresholdFulfillmentUri.length === 65
         assert fulfillment.serialize_uri() == fulfillment_threshold['fulfillment_uri']
-        assert fulfillment.validate()
+        assert fulfillment.validate(MESSAGE)
 
-    def test_deserialize_fulfillment(self,
-                                     fulfillment_sha256,
-                                     fulfillment_ed25519,
-                                     fulfillment_threshold):
+    def test_deserialize_fulfillment(self, fulfillment_threshold):
         num_fulfillments = 3
         threshold = 2
 
         fulfillment = Fulfillment.from_uri(fulfillment_threshold['fulfillment_uri'])
         assert isinstance(fulfillment, ThresholdSha256Fulfillment)
         assert fulfillment.threshold == threshold
-        assert len(fulfillment.subfulfillments) == threshold
-        assert len(fulfillment.get_all_subconditions()) == num_fulfillments
+        assert len([f for f in fulfillment.subconditions if f['type'] == 'fulfillment']) == threshold
         assert fulfillment.serialize_uri() == fulfillment_threshold['fulfillment_uri']
-        assert fulfillment.validate()
-        assert isinstance(fulfillment.subfulfillments[0], Sha256Fulfillment)
-        assert isinstance(fulfillment.subfulfillments[1], Ed25519Sha256Fulfillment)
-        assert fulfillment.subfulfillments[0].condition.serialize_uri() == fulfillment_sha256['condition_uri']
-        assert fulfillment.subfulfillments[1].condition.serialize_uri() == fulfillment_ed25519['condition_uri']
+        assert len(fulfillment.subconditions) == num_fulfillments
+        assert fulfillment.validate(MESSAGE)
 
     def test_serialize_deserialize_fulfillment(self,
                                                fulfillment_ed25519):
         ilp_fulfillment = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
-        num_fulfillments = 100
+        num_fulfillments = 20
         threshold = ceil(num_fulfillments * 2 / 3)
 
         # Create a threshold condition
@@ -221,15 +212,15 @@ class TestBigchainILPThresholdSha256Fulfillment:
 
         fulfillment_uri = fulfillment.serialize_uri()
 
-        assert fulfillment.validate()
+        assert fulfillment.validate(MESSAGE)
         deserialized_fulfillment = Fulfillment.from_uri(fulfillment_uri)
 
         assert isinstance(deserialized_fulfillment, ThresholdSha256Fulfillment)
         assert deserialized_fulfillment.threshold == threshold
-        assert len(deserialized_fulfillment.subfulfillments) == threshold
-        assert len(deserialized_fulfillment.get_all_subconditions()) == num_fulfillments
+        assert len([f for f in deserialized_fulfillment.subconditions if f['type'] == 'fulfillment']) == threshold
+        assert len(deserialized_fulfillment.subconditions) == num_fulfillments
         assert deserialized_fulfillment.serialize_uri() == fulfillment_uri
-        assert deserialized_fulfillment.validate()
+        assert deserialized_fulfillment.validate(MESSAGE)
 
     def test_fulfillment_didnt_reach_threshold(self, fulfillment_ed25519):
         ilp_fulfillment = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
@@ -242,24 +233,24 @@ class TestBigchainILPThresholdSha256Fulfillment:
         for i in range(threshold - 1):
             fulfillment.add_subfulfillment(ilp_fulfillment)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(KeyError):
             fulfillment.serialize_uri()
 
-        assert fulfillment.validate() is False
+        assert fulfillment.validate(MESSAGE) is False
 
         fulfillment.add_subfulfillment(ilp_fulfillment)
 
         fulfillment_uri = fulfillment.serialize_uri()
-        assert fulfillment.validate()
+        assert fulfillment.validate(MESSAGE)
 
         deserialized_fulfillment = Fulfillment.from_uri(fulfillment_uri)
 
         assert isinstance(deserialized_fulfillment, ThresholdSha256Fulfillment)
         assert deserialized_fulfillment.threshold == threshold
-        assert len(deserialized_fulfillment.subfulfillments) == threshold
-        assert len(deserialized_fulfillment.get_all_subconditions()) == threshold
+        assert len([f for f in deserialized_fulfillment.subconditions if f['type'] == 'fulfillment']) == threshold
+        assert len(deserialized_fulfillment.subconditions) == threshold
         assert deserialized_fulfillment.serialize_uri() == fulfillment_uri
-        assert deserialized_fulfillment.validate()
+        assert deserialized_fulfillment.validate(MESSAGE)
 
     def test_fulfillment_nested_and_or(self,
                                        fulfillment_sha256,
@@ -274,20 +265,21 @@ class TestBigchainILPThresholdSha256Fulfillment:
         fulfillment.threshold = 2
         fulfillment.add_subfulfillment(ilp_fulfillment_sha)
 
-        assert fulfillment.validate() is False
+        assert fulfillment.validate(MESSAGE) is False
 
         # 1-of-2 (OR with 2 inputs)
         nested_fulfillment = ThresholdSha256Fulfillment()
         nested_fulfillment.threshold = 1
         nested_fulfillment.add_subfulfillment(ilp_fulfillment_ed1)
-        assert nested_fulfillment.validate() is True
+        assert nested_fulfillment.validate(MESSAGE) is True
         nested_fulfillment.add_subfulfillment(ilp_fulfillment_ed2)
-        assert nested_fulfillment.validate() is True
+        assert nested_fulfillment.validate(MESSAGE) is True
 
         fulfillment.add_subfulfillment(nested_fulfillment)
-        assert fulfillment.validate() is True
+        assert fulfillment.validate(MESSAGE) is True
 
         fulfillment_uri = fulfillment.serialize_uri()
+        print(fulfillment_uri)
         deserialized_fulfillment = Fulfillment.from_uri(fulfillment_uri)
 
         condition_uri = fulfillment.condition.serialize_uri()
@@ -295,11 +287,10 @@ class TestBigchainILPThresholdSha256Fulfillment:
 
         assert isinstance(deserialized_fulfillment, ThresholdSha256Fulfillment)
         assert deserialized_fulfillment.threshold == 2
-        assert len(deserialized_fulfillment.subfulfillments) == 2
-        assert len(deserialized_fulfillment.subfulfillments[1].subfulfillments) == 1
-        assert len(deserialized_fulfillment.get_all_subconditions()) == 2
+        assert len(deserialized_fulfillment.subconditions) == 2
+        assert len(deserialized_fulfillment.subconditions[1]['body'].subconditions) == 2
         assert deserialized_fulfillment.serialize_uri() == fulfillment_uri
-        assert deserialized_fulfillment.validate()
+        assert deserialized_fulfillment.validate(MESSAGE)
         assert deserialized_condition.serialize_uri() == condition_uri
 
     def test_fulfillment_nested(self,
@@ -328,10 +319,10 @@ class TestBigchainILPThresholdSha256Fulfillment:
 
         fulfillment = add_nested_fulfillment(fulfillment)
 
-        assert fulfillment.validate() is True
-        assert len(fulfillment.subfulfillments) == 2
-        assert isinstance(fulfillment.subfulfillments[1], ThresholdSha256Fulfillment)
-        assert isinstance(fulfillment.subfulfillments[1].subfulfillments[0], ThresholdSha256Fulfillment)
+        assert fulfillment.validate(MESSAGE) is True
+        assert len(fulfillment.subconditions) == 2
+        assert isinstance(fulfillment.subconditions[1]['body'], ThresholdSha256Fulfillment)
+        assert isinstance(fulfillment.subconditions[1]['body'].subconditions[0]['body'], ThresholdSha256Fulfillment)
 
         fulfillment_uri = fulfillment.serialize_uri()
         deserialized_fulfillment = Fulfillment.from_uri(fulfillment_uri)
@@ -340,5 +331,5 @@ class TestBigchainILPThresholdSha256Fulfillment:
         deserialized_condition = Condition.from_uri(condition_uri)
 
         assert deserialized_fulfillment.serialize_uri() == fulfillment_uri
-        assert deserialized_fulfillment.validate() is True
+        assert deserialized_fulfillment.validate(MESSAGE) is True
         assert deserialized_condition.serialize_uri() == condition_uri

@@ -1,15 +1,18 @@
 import base64
 import re
 from abc import ABCMeta, abstractmethod
+from cryptoconditions import TypeRegistry
 
 from cryptoconditions.condition import Condition
 from cryptoconditions.buffer import Writer, base64_remove_padding, Reader, base64_add_padding, Predictor
 
-FULFILLMENT_REGEX = r'^cf:1:[1-9a-f][0-9a-f]{0,2}:[a-zA-Z0-9_-]+$'
+FULFILLMENT_REGEX = r'^cf:1:([1-9a-f][0-9a-f]{0,2}|0):[a-zA-Z0-9_-]+$'
 
 
 class Fulfillment(metaclass=ABCMeta):
-    _bitmask = None
+
+    TYPE_ID = None
+    FEATURE_BITMASK = None
 
     @staticmethod
     def from_uri(serialized_fulfillment):
@@ -39,9 +42,7 @@ class Fulfillment(metaclass=ABCMeta):
 
         bitmask = int(pieces[2])
 
-        from cryptoconditions.bitmark_registry import BitmaskRegistry
-
-        cls = BitmaskRegistry.get_class_from_typebit(bitmask)
+        cls = TypeRegistry.get_class_from_type_id(bitmask)
         fulfillment = cls()
 
         payload = Reader.from_source(
@@ -67,15 +68,23 @@ class Fulfillment(metaclass=ABCMeta):
         """
         reader = Reader.from_source(reader)
 
-        from cryptoconditions.bitmark_registry import BitmaskRegistry
-
         cls_type = reader.read_var_uint()
-        cls = BitmaskRegistry.get_class_from_typebit(cls_type)
+        cls = TypeRegistry.get_class_from_type_id(cls_type)
 
         fulfillment = cls()
         fulfillment.parse_payload(reader)
 
         return fulfillment
+
+    @property
+    def type_id(self):
+        """
+        Return the type ID of this fulfillment.
+
+        Returns:
+            (int): Type ID as an integer.
+        """
+        return self.TYPE_ID
 
     @property
     def bitmask(self):
@@ -91,7 +100,7 @@ class Fulfillment(metaclass=ABCMeta):
 
         """
 
-        return self._bitmask
+        return self.FEATURE_BITMASK
 
     @property
     def condition(self):
@@ -114,6 +123,30 @@ class Fulfillment(metaclass=ABCMeta):
         condition.max_fulfillment_length = self.calculate_max_fulfillment_length()
         return condition
 
+    @abstractmethod
+    def generate_hash(self):
+        """
+        Generate the hash of the fulfillment.
+
+        This method is a stub and will be overridden by subclasses.
+        """
+        raise NotImplementedError
+
+    def calculate_max_fulfillment_length(self):
+        """
+        Calculate the maximum length of the fulfillment payload.
+
+        This implementation works by measuring the length of the fulfillment.
+        Condition types that do not have a constant length will override this
+        method with one that calculates the maximum possible length.
+
+        Return:
+            {Number} Maximum fulfillment length
+        """
+        predictor = Predictor()
+        self.write_payload(predictor)
+        return predictor.size
+
     def serialize_uri(self):
         """
         Generate the URI form encoding of this fulfillment.
@@ -127,7 +160,7 @@ class Fulfillment(metaclass=ABCMeta):
         Return:
              string: Fulfillment as a URI
         """
-        return 'cf:1:{:x}:{}'.format(self._bitmask,
+        return 'cf:1:{:x}:{}'.format(self.type_id,
                                      base64_remove_padding(
                                          base64.urlsafe_b64encode(
                                              b''.join(self.serialize_payload().components)
@@ -150,7 +183,7 @@ class Fulfillment(metaclass=ABCMeta):
             Serialized fulfillment
         """
         writer = Writer()
-        writer.write_var_uint(self._bitmask)
+        writer.write_var_uint(self.type_id)
         self.write_payload(writer)
         return b''.join(writer.components)
 
@@ -167,36 +200,12 @@ class Fulfillment(metaclass=ABCMeta):
         """
         return self.write_payload(Writer())
 
-    def calculate_max_fulfillment_length(self):
-        """
-        Calculate the maximum length of the fulfillment payload.
-
-        This implementation works by measuring the length of the fulfillment.
-        Condition types that do not have a constant length will override this
-        method with one that calculates the maximum possible length.
-
-        Return:
-            {Number} Maximum fulfillment length
-        """
-        predictor = Predictor()
-        self.write_payload(predictor)
-        return predictor.size
-
     @abstractmethod
     def write_payload(self, writer):
         raise NotImplementedError
 
     @abstractmethod
     def parse_payload(self, reader):
-        raise NotImplementedError
-
-    @abstractmethod
-    def generate_hash(self):
-        """
-        Generate the hash of the fulfillment.
-
-        This method is a stub and will be overridden by subclasses.
-        """
         raise NotImplementedError
 
     @abstractmethod
