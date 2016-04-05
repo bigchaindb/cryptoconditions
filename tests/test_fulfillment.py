@@ -42,7 +42,7 @@ class TestBigchainILPSha256Fulfillment:
 
     def test_json(self, fulfillment_sha256):
         fulfillment = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
-        assert json.loads(fulfillment.serialize_json()) == {"bitmask": 3, "preimage": ""}
+        assert json.loads(fulfillment.serialize_json()) == {"bitmask": 3, "preimage": "", "type": "fulfillment"}
 
     def test_deserialize_condition_and_validate_fulfillment(self, fulfillment_sha256):
         condition = Condition.from_uri(fulfillment_sha256['condition_uri'])
@@ -108,7 +108,8 @@ class TestBigchainILPEd25519Sha256Fulfillment:
         assert json.loads(fulfillment.serialize_json()) == \
             {"bitmask": 32,
              "public_key": "Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU",
-             "signature": "4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj"}
+             "signature": "4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj",
+             "type": "fulfillment"}
 
     def test_serialize_deserialize_condition(self, vk_ilp):
         vk = Ed25519VerifyingKey(vk_ilp['b58'])
