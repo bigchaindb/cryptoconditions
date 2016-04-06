@@ -63,7 +63,7 @@ setup(
 
     install_requires=[
         'pysha3==0.3',
-        'cryptography==1.2.1',
+        'cryptography==1.2.3',
         'base58==0.2.2',
         'bitcoin==1.1.42',
         'ed25519',
