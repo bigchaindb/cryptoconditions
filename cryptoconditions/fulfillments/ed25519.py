@@ -21,6 +21,8 @@ class Ed25519Fulfillment(Fulfillment):
         Args:
             public_key (Ed25519VerifyingKey): Ed25519 publicKey
         """
+        if public_key and isinstance(public_key, (str, bytes)):
+            public_key = Ed25519VerifyingKey(public_key)
         if public_key and not isinstance(public_key, Ed25519VerifyingKey):
             raise TypeError
         self.public_key = public_key
@@ -34,6 +36,7 @@ class Ed25519Fulfillment(Fulfillment):
         prefix and suffix and create a signature using the provided Ed25519 private key.
 
         Args:
+            message (string): message to be signed
             private_key (string) Ed25519 private key
         """
         sk = private_key

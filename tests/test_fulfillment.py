@@ -79,6 +79,11 @@ class TestBigchainILPEd25519Sha256Fulfillment:
         assert vk.to_ascii(encoding='base64') == vk_ilp['b64']
         assert binascii.hexlify(vk.to_bytes()) == vk_ilp['hex']
 
+    def test_create(self, vk_ilp):
+        fulfillment1 = Ed25519Fulfillment(public_key=vk_ilp['b58'])
+        fulfillment2 = Ed25519Fulfillment(Ed25519VerifyingKey(vk_ilp['b58']))
+        assert fulfillment1.condition.serialize_uri() == fulfillment2.condition.serialize_uri()
+
     def test_serialize_condition_and_validate_fulfillment(self, sk_ilp, vk_ilp, fulfillment_ed25519):
         sk = Ed25519SigningKey(sk_ilp['b58'])
         vk = Ed25519VerifyingKey(vk_ilp['b58'])
