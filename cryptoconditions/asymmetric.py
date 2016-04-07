@@ -1,8 +1,6 @@
 # Separate all crypto code so that we can easily test several implementations
 from abc import ABCMeta, abstractmethod
 
-import sha3
-
 
 class SigningKey(metaclass=ABCMeta):
     """
