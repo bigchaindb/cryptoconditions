@@ -8,7 +8,7 @@ import ed25519
 from cryptoconditions.asymmetric import SigningKey, VerifyingKey
 
 
-class Ed25519SigningKey(ed25519.SigningKey, SigningKey):
+class SigningKey(ed25519.SigningKey, SigningKey):
     """
     PrivateKey instance
     """
@@ -28,10 +28,10 @@ class Ed25519SigningKey(ed25519.SigningKey, SigningKey):
         Get the corresponding VerifyingKey
 
         Returns:
-            Ed25519VerifyingKey
+            VerifyingKey
         """
         vk = super().get_verifying_key()
-        return Ed25519VerifyingKey(base58.b58encode(vk.to_bytes()))
+        return VerifyingKey(base58.b58encode(vk.to_bytes()))
 
     def to_ascii(self, prefix="", encoding='base58'):
         """
@@ -49,7 +49,7 @@ class Ed25519SigningKey(ed25519.SigningKey, SigningKey):
         else:
             return super().to_ascii(prefix=prefix, encoding=encoding)
 
-    def sign(self, data, prefix="", encoding="base64"):
+    def sign(self, data, prefix="", encoding="base58"):
         """
         Sign data with private key
 
@@ -60,7 +60,11 @@ class Ed25519SigningKey(ed25519.SigningKey, SigningKey):
         """
         if not isinstance(data, bytes):
             data = data.encode('ascii')
-        return super().sign(data, prefix="", encoding=encoding)
+        if encoding == 'base58':
+            signature = super().sign(data, prefix="", encoding='base64')
+            return base58.b58encode(base64.b64decode(base64_add_padding(signature)))
+        else:
+            return super().sign(data, prefix="", encoding=encoding)
 
     @staticmethod
     def encode(private_base64):
@@ -83,7 +87,7 @@ class Ed25519SigningKey(ed25519.SigningKey, SigningKey):
         return base64.b64encode(base58.b58decode(key))
 
 
-class Ed25519VerifyingKey(ed25519.VerifyingKey, VerifyingKey):
+class VerifyingKey(ed25519.VerifyingKey, VerifyingKey):
 
     def __init__(self, key):
         """
@@ -92,7 +96,7 @@ class Ed25519VerifyingKey(ed25519.VerifyingKey, VerifyingKey):
         public_base64 = self.decode(key)
         super().__init__(public_base64, encoding='base64')
 
-    def verify(self, data, signature, prefix="", encoding='base64'):
+    def verify(self, data, signature, prefix="", encoding='base58'):
         """
         Verify if the signature signs the data with this verifying key
 
@@ -105,7 +109,10 @@ class Ed25519VerifyingKey(ed25519.VerifyingKey, VerifyingKey):
         try:
             if not isinstance(data, bytes):
                 data = data.encode('ascii')
-            super().verify(signature, data, prefix=prefix, encoding=encoding)
+            if encoding == 'base58':
+                super().verify(base58.b58decode(signature), data, prefix=prefix)
+            else:
+                super().verify(signature, data, prefix=prefix, encoding=encoding)
         except ed25519.BadSignatureError:
             return False
 
@@ -135,7 +142,7 @@ class Ed25519VerifyingKey(ed25519.VerifyingKey, VerifyingKey):
         Args:
             public_base64
         """
-        return Ed25519SigningKey.encode(public_base64)
+        return SigningKey.encode(public_base64)
 
     @staticmethod
     def decode(public_base58):
@@ -145,7 +152,7 @@ class Ed25519VerifyingKey(ed25519.VerifyingKey, VerifyingKey):
         Args:
             public_base58
         """
-        return Ed25519SigningKey.decode(public_base58)
+        return SigningKey.decode(public_base58)
 
 
 def ed25519_generate_key_pair():
@@ -154,9 +161,43 @@ def ed25519_generate_key_pair():
     """
     sk, vk = ed25519.create_keypair()
     # Private key
-    private_value_base58 = Ed25519SigningKey(base58.b58encode(sk.to_bytes())).to_ascii()
+    private_value_base58 = SigningKey(base58.b58encode(sk.to_bytes())).to_ascii()
 
     # Public key
-    public_value_compressed_base58 = Ed25519VerifyingKey(base58.b58encode(vk.to_bytes())).to_ascii()
+    public_value_compressed_base58 = VerifyingKey(base58.b58encode(vk.to_bytes())).to_ascii()
 
     return private_value_base58, public_value_compressed_base58
+
+
+def base64_add_padding(data):
+    """
+    Add enough padding for base64 encoding such that length is a multiple of 4
+
+    Args:
+        data: unpadded string or bytes
+    Return:
+        bytes: The padded bytes
+
+    """
+
+    if isinstance(data, str):
+        data = data.encode('utf-8')
+    missing_padding = 4 - len(data) % 4
+    if missing_padding:
+        data += b'=' * missing_padding
+    return data
+
+
+def base64_remove_padding(data):
+    """
+    Remove padding from base64 encoding
+
+    Args:
+        data: fully padded base64 data
+    Return:
+        base64: Unpadded base64 bytes
+
+    """
+    if isinstance(data, str):
+        data = data.encode('utf-8')
+    return data.rstrip(b'=')

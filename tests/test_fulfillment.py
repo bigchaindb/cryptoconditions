@@ -6,7 +6,7 @@ from math import ceil
 import pytest
 
 from cryptoconditions.condition import Condition
-from cryptoconditions.ed25519 import Ed25519SigningKey, Ed25519VerifyingKey
+from cryptoconditions.ed25519 import SigningKey, VerifyingKey
 from cryptoconditions.fulfillment import Fulfillment
 from cryptoconditions.fulfillments.ed25519 import Ed25519Fulfillment
 from cryptoconditions.fulfillments.sha256 import PreimageSha256Fulfillment
@@ -78,22 +78,22 @@ class TestBigchainILPSha256Fulfillment:
 
 class TestBigchainILPEd25519Sha256Fulfillment:
     def test_ilp_keys(self, sk_ilp, vk_ilp):
-        sk = Ed25519SigningKey(sk_ilp['b58'])
+        sk = SigningKey(sk_ilp['b58'])
         assert sk.to_ascii(encoding='base64') == sk_ilp['b64']
         assert binascii.hexlify(sk.to_bytes()[:32]) == sk_ilp['hex']
 
-        vk = Ed25519VerifyingKey(vk_ilp['b58'])
+        vk = VerifyingKey(vk_ilp['b58'])
         assert vk.to_ascii(encoding='base64') == vk_ilp['b64']
         assert binascii.hexlify(vk.to_bytes()) == vk_ilp['hex']
 
     def test_create(self, vk_ilp):
         fulfillment1 = Ed25519Fulfillment(public_key=vk_ilp['b58'])
-        fulfillment2 = Ed25519Fulfillment(Ed25519VerifyingKey(vk_ilp['b58']))
+        fulfillment2 = Ed25519Fulfillment(VerifyingKey(vk_ilp['b58']))
         assert fulfillment1.condition.serialize_uri() == fulfillment2.condition.serialize_uri()
 
     def test_serialize_condition_and_validate_fulfillment(self, sk_ilp, vk_ilp, fulfillment_ed25519):
-        sk = Ed25519SigningKey(sk_ilp['b58'])
-        vk = Ed25519VerifyingKey(vk_ilp['b58'])
+        sk = SigningKey(sk_ilp['b58'])
+        vk = VerifyingKey(vk_ilp['b58'])
 
         fulfillment = Ed25519Fulfillment(public_key=vk)
 
@@ -157,7 +157,7 @@ class TestBigchainILPEd25519Sha256Fulfillment:
         assert parsed_fulfillment.serialize_json() == fulfillment.serialize_json()
 
     def test_serialize_deserialize_condition(self, vk_ilp):
-        vk = Ed25519VerifyingKey(vk_ilp['b58'])
+        vk = VerifyingKey(vk_ilp['b58'])
 
         fulfillment = Ed25519Fulfillment(public_key=vk)
 
@@ -190,8 +190,8 @@ class TestBigchainILPEd25519Sha256Fulfillment:
         assert fulfillment.validate(MESSAGE)
 
     def test_serialize_deserialize_fulfillment(self, sk_ilp, vk_ilp):
-        sk = Ed25519SigningKey(sk_ilp['b58'])
-        vk = Ed25519VerifyingKey(vk_ilp['b58'])
+        sk = SigningKey(sk_ilp['b58'])
+        vk = VerifyingKey(vk_ilp['b58'])
 
         fulfillment = Ed25519Fulfillment(public_key=vk)
         fulfillment.sign(MESSAGE, sk)
@@ -209,8 +209,8 @@ class TestBigchainILPEd25519Sha256Fulfillment:
 class TestBigchainILPThresholdSha256Fulfillment:
 
     def create_fulfillment_ed25519sha256(self, sk_ilp, vk_ilp):
-        sk = Ed25519SigningKey(sk_ilp['b58'])
-        vk = Ed25519VerifyingKey(vk_ilp['b58'])
+        sk = SigningKey(sk_ilp['b58'])
+        vk = VerifyingKey(vk_ilp['b58'])
 
         fulfillment = Ed25519Fulfillment(public_key=vk)
         fulfillment.sign(MESSAGE, sk)
@@ -286,8 +286,8 @@ class TestBigchainILPThresholdSha256Fulfillment:
 
     def test_serialize_json_unsigned(self, vk_ilp):
         fulfillment = ThresholdSha256Fulfillment()
-        fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=Ed25519VerifyingKey(vk_ilp['b58'])))
-        fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=Ed25519VerifyingKey(vk_ilp['b58'])))
+        fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=VerifyingKey(vk_ilp['b58'])))
+        fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=VerifyingKey(vk_ilp['b58'])))
         fulfillment.threshold = 1
 
         assert json.loads(fulfillment.serialize_json()) == \
@@ -319,8 +319,8 @@ class TestBigchainILPThresholdSha256Fulfillment:
 
     def test_deserialize_json_unsigned(self, vk_ilp):
         fulfillment = ThresholdSha256Fulfillment()
-        fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=Ed25519VerifyingKey(vk_ilp['b58'])))
-        fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=Ed25519VerifyingKey(vk_ilp['b58'])))
+        fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=VerifyingKey(vk_ilp['b58'])))
+        fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=VerifyingKey(vk_ilp['b58'])))
         fulfillment.threshold = 1
         fulfillment_json = json.loads(fulfillment.serialize_json())
         parsed_fulfillment = fulfillment.from_json(fulfillment_json)

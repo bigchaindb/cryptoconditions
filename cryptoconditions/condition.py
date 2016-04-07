@@ -6,7 +6,8 @@ import base64
 import re
 from abc import ABCMeta
 
-from cryptoconditions.buffer import base64_add_padding, base64_remove_padding, Writer, Reader
+from cryptoconditions.ed25519 import base64_add_padding, base64_remove_padding
+from cryptoconditions.buffer import Writer, Reader
 
 CONDITION_REGEX = r'^cc:1:[1-9a-f][0-9a-f]{0,2}:[a-zA-Z0-9_-]{43}:[1-9][0-9]{0,50}$'
 

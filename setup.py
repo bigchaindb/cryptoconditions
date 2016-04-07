@@ -32,7 +32,7 @@ docs_require = [
 
 setup(
     name='cryptoconditions',
-    version='0.1.5',
+    version='0.1.6',
     description='cryptoconditions provide a mechanism to describe a signed '
                 'message such that multiple actors in a distributed system '
                 'can all verify the same signed message and agree on whether '
@@ -62,10 +62,7 @@ setup(
     packages=find_packages(exclude=['tests*']),
 
     install_requires=[
-        'pysha3==0.3',
-        'cryptography==1.2.3',
         'base58==0.2.2',
-        'bitcoin==1.1.42',
         'ed25519',
     ],
     setup_requires=['pytest-runner'],

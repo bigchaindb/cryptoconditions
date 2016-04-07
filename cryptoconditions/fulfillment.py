@@ -4,7 +4,8 @@ from abc import ABCMeta, abstractmethod
 from cryptoconditions import TypeRegistry
 
 from cryptoconditions.condition import Condition
-from cryptoconditions.buffer import Writer, base64_remove_padding, Reader, base64_add_padding, Predictor
+from cryptoconditions.buffer import Writer, Reader, Predictor
+from cryptoconditions.ed25519 import base64_remove_padding, base64_add_padding
 
 FULFILLMENT_REGEX = r'^cf:1:([1-9a-f][0-9a-f]{0,2}|0):[a-zA-Z0-9_-]+$'
 

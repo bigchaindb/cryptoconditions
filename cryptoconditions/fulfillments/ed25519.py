@@ -2,7 +2,7 @@ import json
 
 import base58
 
-from cryptoconditions.ed25519 import Ed25519VerifyingKey
+from cryptoconditions.ed25519 import VerifyingKey
 from cryptoconditions.fulfillment import Fulfillment
 
 
@@ -19,11 +19,11 @@ class Ed25519Fulfillment(Fulfillment):
         """
 
         Args:
-            public_key (Ed25519VerifyingKey): Ed25519 publicKey
+            public_key (VerifyingKey): Ed25519 publicKey
         """
         if public_key and isinstance(public_key, (str, bytes)):
-            public_key = Ed25519VerifyingKey(public_key)
-        if public_key and not isinstance(public_key, Ed25519VerifyingKey):
+            public_key = VerifyingKey(public_key)
+        if public_key and not isinstance(public_key, VerifyingKey):
             raise TypeError
         self.public_key = public_key
         self.signature = None
@@ -40,7 +40,7 @@ class Ed25519Fulfillment(Fulfillment):
             private_key (string) Ed25519 private key
         """
         sk = private_key
-        vk = Ed25519VerifyingKey(base58.b58encode(sk.get_verifying_key().to_bytes()))
+        vk = VerifyingKey(base58.b58encode(sk.get_verifying_key().to_bytes()))
 
         self.public_key = vk
 
@@ -71,7 +71,7 @@ class Ed25519Fulfillment(Fulfillment):
         Args:
             reader (Reader): Source to read the fulfillment payload from.
         """
-        self.public_key = Ed25519VerifyingKey(base58.b58encode(reader.read_var_bytes()))
+        self.public_key = VerifyingKey(base58.b58encode(reader.read_var_bytes()))
         self.signature = reader.read_var_bytes()
 
     def write_payload(self, writer):
@@ -120,7 +120,7 @@ class Ed25519Fulfillment(Fulfillment):
         Returns:
             Fulfillment
         """
-        self.public_key = Ed25519VerifyingKey(json_data['public_key'])
+        self.public_key = VerifyingKey(json_data['public_key'])
         self.signature = base58.b58decode(json_data['signature']) if json_data['signature'] else None
 
     def validate(self, message=None):

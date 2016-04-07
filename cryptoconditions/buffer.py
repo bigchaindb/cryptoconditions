@@ -404,37 +404,3 @@ class Reader:
         self.ensure_available(num_bytes)
 
         self.cursor += num_bytes
-
-
-def base64_add_padding(data):
-    """
-    Add enough padding for base64 encoding such that length is a multiple of 4
-
-    Args:
-        data: unpadded string or bytes
-    Return:
-        bytes: The padded bytes
-
-    """
-
-    if isinstance(data, str):
-        data = data.encode('utf-8')
-    missing_padding = 4 - len(data) % 4
-    if missing_padding:
-        data += b'=' * missing_padding
-    return data
-
-
-def base64_remove_padding(data):
-    """
-    Remove padding from base64 encoding
-
-    Args:
-        data: fully padded base64 data
-    Return:
-        base64: Unpadded base64 bytes
-
-    """
-    if isinstance(data, str):
-        data = data.encode('utf-8')
-    return data.rstrip(b'=')
