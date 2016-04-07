@@ -103,11 +103,25 @@ class Ed25519Fulfillment(Fulfillment):
         return json.dumps(
             {
                 'type': 'fulfillment',
-                'bitmask': Ed25519Fulfillment.FEATURE_BITMASK,
+                'type_id': Ed25519Fulfillment.TYPE_ID,
+                'bitmask': self.bitmask,
                 'public_key': self.public_key.to_ascii(encoding='base58').decode(),
-                'signature': base58.b58encode(self.signature)
+                'signature': base58.b58encode(self.signature) if self.signature else None
             }
         )
+
+    def parse_json(self, json_data):
+        """
+        Generate fulfillment payload from a json
+
+        Args:
+            json_data: json description of the fulfillment
+
+        Returns:
+            Fulfillment
+        """
+        self.public_key = Ed25519VerifyingKey(json_data['public_key'])
+        self.signature = base58.b58decode(json_data['signature']) if json_data['signature'] else None
 
     def validate(self, message=None):
         """

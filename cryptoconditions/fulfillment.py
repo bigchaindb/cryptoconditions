@@ -40,9 +40,9 @@ class Fulfillment(metaclass=ABCMeta):
         if not re.match(FULFILLMENT_REGEX, serialized_fulfillment):
             raise ValueError('Invalid fulfillment format')
 
-        bitmask = int(pieces[2])
+        type_id = int(pieces[2])
 
-        cls = TypeRegistry.get_class_from_type_id(bitmask)
+        cls = TypeRegistry.get_class_from_type_id(type_id)
         fulfillment = cls()
 
         payload = Reader.from_source(
@@ -73,6 +73,16 @@ class Fulfillment(metaclass=ABCMeta):
 
         fulfillment = cls()
         fulfillment.parse_payload(reader)
+
+        return fulfillment
+
+    @staticmethod
+    def from_json(json_data):
+        cls_type = json_data['type_id']
+        cls = TypeRegistry.get_class_from_type_id(cls_type)
+
+        fulfillment = cls()
+        fulfillment.parse_json(json_data)
 
         return fulfillment
 
@@ -221,6 +231,18 @@ class Fulfillment(metaclass=ABCMeta):
         Generate a JSON object of the fulfillment
 
         Returns:
+        """
+
+    @abstractmethod
+    def parse_json(self, json_data):
+        """
+        Generate fulfillment payload from a json
+
+        Args:
+            json_data: json description of the fulfillment
+
+        Returns:
+            Fulfillment
         """
 
     @abstractmethod

@@ -62,6 +62,17 @@ print(isinstance(parsed_fulfillment, PreimageSha256Fulfillment))
 # Validate a fulfillment
 parsed_fulfillment.validate()
 # prints True
+
+# Export to JSON
+json_data = parsed_fulfillment.serialize_json()
+print(json_data)
+# prints '{"type_id": 0, "type": "fulfillment", "bitmask": 3, "preimage": ""}'
+
+# Parse fulfillment from JSON
+import json
+json_fulfillment = Fulfillment.from_json(json.loads(json_data))
+print(json_fulfillment.serialize_uri())
+# prints 'cf:1:0:AA'
 ```
 
 ## ILP Format

@@ -432,11 +432,36 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         return json.dumps(
             {
                 'type': 'fulfillment',
-                'bitmask': ThresholdSha256Fulfillment.FEATURE_BITMASK,
+                'type_id': ThresholdSha256Fulfillment.TYPE_ID,
+                'bitmask': self.bitmask,
                 'threshold': self.threshold,
                 'subfulfillments': subfulfillments_json
             }
         )
+
+    def parse_json(self, json_data):
+        """
+        Generate fulfillment payload from a json
+
+        Args:
+            json_data: json description of the fulfillment
+
+        Returns:
+            Fulfillment
+        """
+        if not isinstance(json_data, dict):
+            raise TypeError('reader must be a dict instance')
+        self.threshold = json_data['threshold']
+
+        for subfulfillments_json in json_data['subfulfillments']:
+            weight = subfulfillments_json['weight']
+
+            if subfulfillments_json['type'] == FULFILLMENT:
+                self.add_subfulfillment(Fulfillment.from_json(subfulfillments_json), weight)
+            elif subfulfillments_json['type'] == CONDITION:
+                self.add_subcondition(Condition.from_json(subfulfillments_json), weight)
+            else:
+                raise TypeError('Subconditions must provide either subcondition or fulfillment.')
 
     def validate(self, message=None):
         """

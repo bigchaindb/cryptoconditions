@@ -89,10 +89,23 @@ class PreimageSha256Fulfillment(BaseSha256Fulfillment):
         return json.dumps(
             {
                 'type': 'fulfillment',
-                'bitmask': PreimageSha256Fulfillment.FEATURE_BITMASK,
+                'type_id': PreimageSha256Fulfillment.TYPE_ID,
+                'bitmask': self.bitmask,
                 'preimage': self.preimage.decode()
             }
         )
+
+    def parse_json(self, json_data):
+        """
+        Generate fulfillment payload from a json
+
+        Args:
+            json_data: json description of the fulfillment
+
+        Returns:
+            Fulfillment
+        """
+        self.preimage = json_data['preimage'].encode()
 
     def validate(self, *args, **kwargs):
         """

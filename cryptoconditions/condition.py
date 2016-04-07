@@ -70,6 +70,22 @@ class Condition(metaclass=ABCMeta):
 
         return condition
 
+    @staticmethod
+    def from_json(json_data):
+        """
+        Create a Condition object from a json dict.
+
+        Args:
+            json_data (dict): Dictionary containing the condition payload
+
+        Returns:
+            Condition: Resulting object
+        """
+        condition = Condition()
+        condition.parse_json(json_data)
+
+        return condition
+
     @property
     def bitmask(self):
         """
@@ -227,6 +243,20 @@ class Condition(metaclass=ABCMeta):
             {
                 'type': 'condition',
                 'bitmask': self.bitmask,
-                'hash': base58.b58encode(self.hash)
+                'hash': base58.b58encode(self.hash),
+                'max_fulfillment_length': self.max_fulfillment_length
             }
         )
+
+    def parse_json(self, json_data):
+        """
+
+        Args:
+            json_data (dict):
+        Returns:
+            Condition with payload
+        """
+        self.bitmask = json_data['bitmask']
+
+        self.hash = base58.b58decode(json_data['hash'])
+        self.max_fulfillment_length = json_data['max_fulfillment_length']

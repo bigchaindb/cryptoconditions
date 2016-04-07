@@ -1,6 +1,5 @@
 import binascii
 import json
-import pprint
 
 from math import ceil
 
@@ -13,12 +12,10 @@ from cryptoconditions.fulfillments.ed25519 import Ed25519Fulfillment
 from cryptoconditions.fulfillments.sha256 import PreimageSha256Fulfillment
 from cryptoconditions.fulfillments.threshold_sha256 import ThresholdSha256Fulfillment
 
-
 MESSAGE = 'Hello World! Conditions are here!'
 
 
 class TestBigchainILPSha256Condition:
-
     def test_deserialize_condition(self, fulfillment_sha256):
         example_condition = fulfillment_sha256['condition_uri']
         condition = Condition.from_uri(example_condition)
@@ -33,26 +30,37 @@ class TestBigchainILPSha256Condition:
 
 
 class TestBigchainILPSha256Fulfillment:
-
     def test_deserialize_and_validate_fulfillment(self, fulfillment_sha256):
         fulfillment = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
+
         assert fulfillment.serialize_uri() == fulfillment_sha256['fulfillment_uri']
         assert fulfillment.condition.serialize_uri() == fulfillment_sha256['condition_uri']
         assert fulfillment.validate()
 
-    def test_json(self, fulfillment_sha256):
+    def test_serialize_json(self, fulfillment_sha256):
         fulfillment = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
-        assert json.loads(fulfillment.serialize_json()) == {"bitmask": 3, "preimage": "", "type": "fulfillment"}
+
+        assert json.loads(fulfillment.serialize_json()) == \
+            {'bitmask': 3, 'preimage': '', 'type': 'fulfillment', 'type_id': 0}
+
+    def test_deserialize_json(self, fulfillment_sha256):
+        fulfillment = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
+        fulfillment_json = json.loads(fulfillment.serialize_json())
+        parsed_fulfillment = fulfillment.from_json(fulfillment_json)
+
+        assert parsed_fulfillment.serialize_uri() == fulfillment.serialize_uri()
+        assert parsed_fulfillment.condition.serialize_uri() == fulfillment.condition.serialize_uri()
+        assert parsed_fulfillment.serialize_json() == fulfillment.serialize_json()
 
     def test_deserialize_condition_and_validate_fulfillment(self, fulfillment_sha256):
         condition = Condition.from_uri(fulfillment_sha256['condition_uri'])
         fulfillment = PreimageSha256Fulfillment()
         fulfillment.preimage = ''
+
         assert fulfillment.serialize_uri() == fulfillment_sha256['fulfillment_uri']
         assert fulfillment.condition.serialize_uri() == condition.serialize_uri()
         assert fulfillment.validate()
-        assert fulfillment.validate() \
-            and fulfillment.condition.serialize_uri() == condition.serialize_uri()
+        assert fulfillment.validate() and fulfillment.condition.serialize_uri() == condition.serialize_uri()
 
     def test_condition_from_fulfillment(self):
         fulfillment = PreimageSha256Fulfillment()
@@ -69,7 +77,6 @@ class TestBigchainILPSha256Fulfillment:
 
 
 class TestBigchainILPEd25519Sha256Fulfillment:
-
     def test_ilp_keys(self, sk_ilp, vk_ilp):
         sk = Ed25519SigningKey(sk_ilp['b58'])
         assert sk.to_ascii(encoding='base64') == sk_ilp['b64']
@@ -108,13 +115,46 @@ class TestBigchainILPEd25519Sha256Fulfillment:
         assert deserialized_condition.serialize_uri() == fulfillment_ed25519['condition_uri']
         assert binascii.hexlify(deserialized_condition.hash) == fulfillment_ed25519['condition_hash']
 
-    def test_json(self, fulfillment_ed25519):
+    def test_serialize_json_signed(self, fulfillment_ed25519):
         fulfillment = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
+
         assert json.loads(fulfillment.serialize_json()) == \
-            {"bitmask": 32,
-             "public_key": "Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU",
-             "signature": "4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj",
-             "type": "fulfillment"}
+            {'bitmask': 32,
+             'public_key': 'Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU',
+             'signature': '4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj',
+             'type': 'fulfillment',
+             'type_id': 4}
+
+        assert fulfillment.validate(MESSAGE) == True
+
+    def test_serialize_json_unsigned(self, vk_ilp):
+        fulfillment = Ed25519Fulfillment(public_key=vk_ilp['b58'])
+
+        assert json.loads(fulfillment.serialize_json()) == \
+            {'bitmask': 32,
+             'public_key': 'Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU',
+             'signature': None,
+             'type': 'fulfillment',
+             'type_id': 4}
+        assert fulfillment.validate(MESSAGE) == False
+
+    def test_deserialize_json_signed(self, fulfillment_ed25519):
+        fulfillment = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
+        fulfillment_json = json.loads(fulfillment.serialize_json())
+        parsed_fulfillment = fulfillment.from_json(fulfillment_json)
+
+        assert parsed_fulfillment.serialize_uri() == fulfillment_ed25519['fulfillment_uri']
+        assert parsed_fulfillment.condition.serialize_uri() == fulfillment.condition.serialize_uri()
+        assert parsed_fulfillment.serialize_json() == fulfillment.serialize_json()
+
+    def test_deserialize_json_unsigned(self, vk_ilp):
+        fulfillment = Ed25519Fulfillment(public_key=vk_ilp['b58'])
+
+        fulfillment_json = json.loads(fulfillment.serialize_json())
+        parsed_fulfillment = fulfillment.from_json(fulfillment_json)
+
+        assert parsed_fulfillment.condition.serialize_uri() == fulfillment.condition.serialize_uri()
+        assert parsed_fulfillment.serialize_json() == fulfillment.serialize_json()
 
     def test_serialize_deserialize_condition(self, vk_ilp):
         vk = Ed25519VerifyingKey(vk_ilp['b58'])
@@ -210,6 +250,7 @@ class TestBigchainILPThresholdSha256Fulfillment:
         threshold = 2
 
         fulfillment = Fulfillment.from_uri(fulfillment_threshold['fulfillment_uri'])
+
         assert isinstance(fulfillment, ThresholdSha256Fulfillment)
         assert fulfillment.threshold == threshold
         assert len([f for f in fulfillment.subconditions if f['type'] == 'fulfillment']) == threshold
@@ -217,9 +258,75 @@ class TestBigchainILPThresholdSha256Fulfillment:
         assert len(fulfillment.subconditions) == num_fulfillments
         assert fulfillment.validate(MESSAGE)
 
-    def test_json(self, fulfillment_threshold):
+    def test_serialize_json_signed(self, fulfillment_threshold):
         fulfillment = Fulfillment.from_uri(fulfillment_threshold['fulfillment_uri'])
-        print(fulfillment.serialize_json())
+
+        assert json.loads(fulfillment.serialize_json()) == \
+            {'bitmask': 43,
+             'subfulfillments': [{'bitmask': 3,
+                                  'preimage': '',
+                                  'type': 'fulfillment',
+                                  'type_id': 0,
+                                  'weight': 1},
+                                 {'bitmask': 32,
+                                  'hash': 'CBK79fAE8AVxwprPumyLrW5JfHaDRAReSpmsg92FV3GL',
+                                  'max_fulfillment_length': 98,
+                                  'type': 'condition',
+                                  'weight': 1},
+                                 {'bitmask': 32,
+                                  'public_key': 'Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU',
+                                  'signature': '4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ'
+                                               '4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj',
+                                  'type': 'fulfillment',
+                                  'type_id': 4,
+                                  'weight': 1}],
+             'threshold': 2,
+             'type': 'fulfillment',
+             'type_id': 2}
+
+    def test_serialize_json_unsigned(self, vk_ilp):
+        fulfillment = ThresholdSha256Fulfillment()
+        fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=Ed25519VerifyingKey(vk_ilp['b58'])))
+        fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=Ed25519VerifyingKey(vk_ilp['b58'])))
+        fulfillment.threshold = 1
+
+        assert json.loads(fulfillment.serialize_json()) == \
+            {'bitmask': 41,
+             'subfulfillments': [{'bitmask': 32,
+                                  'public_key': 'Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU',
+                                  'signature': None,
+                                  'type': 'fulfillment',
+                                  'type_id': 4,
+                                  'weight': 1},
+                                 {'bitmask': 32,
+                                  'public_key': 'Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU',
+                                  'signature': None,
+                                  'type': 'fulfillment',
+                                  'type_id': 4,
+                                  'weight': 1}],
+             'threshold': 1,
+             'type': 'fulfillment',
+             'type_id': 2}
+
+    def test_deserialize_json_signed(self, fulfillment_threshold):
+        fulfillment = Fulfillment.from_uri(fulfillment_threshold['fulfillment_uri'])
+        fulfillment_json = json.loads(fulfillment.serialize_json())
+        parsed_fulfillment = fulfillment.from_json(fulfillment_json)
+
+        assert parsed_fulfillment.serialize_uri() == fulfillment_threshold['fulfillment_uri']
+        assert parsed_fulfillment.condition.serialize_uri() == fulfillment.condition.serialize_uri()
+        assert parsed_fulfillment.serialize_json() == fulfillment.serialize_json()
+
+    def test_deserialize_json_unsigned(self, vk_ilp):
+        fulfillment = ThresholdSha256Fulfillment()
+        fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=Ed25519VerifyingKey(vk_ilp['b58'])))
+        fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=Ed25519VerifyingKey(vk_ilp['b58'])))
+        fulfillment.threshold = 1
+        fulfillment_json = json.loads(fulfillment.serialize_json())
+        parsed_fulfillment = fulfillment.from_json(fulfillment_json)
+
+        assert parsed_fulfillment.condition.serialize_uri() == fulfillment.condition.serialize_uri()
+        assert parsed_fulfillment.serialize_json() == fulfillment.serialize_json()
 
     def test_serialize_deserialize_fulfillment(self,
                                                fulfillment_ed25519):
@@ -302,7 +409,6 @@ class TestBigchainILPThresholdSha256Fulfillment:
         assert fulfillment.validate(MESSAGE) is True
 
         fulfillment_uri = fulfillment.serialize_uri()
-        print(fulfillment_uri)
         deserialized_fulfillment = Fulfillment.from_uri(fulfillment_uri)
 
         condition_uri = fulfillment.condition.serialize_uri()
@@ -318,7 +424,7 @@ class TestBigchainILPThresholdSha256Fulfillment:
 
     def test_fulfillment_nested(self,
                                 fulfillment_sha256,
-                                fulfillment_ed25519_2,):
+                                fulfillment_ed25519_2, ):
         ilp_fulfillment_sha = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
         ilp_fulfillment_ed1 = Fulfillment.from_uri(fulfillment_ed25519_2['fulfillment_uri'])
 
