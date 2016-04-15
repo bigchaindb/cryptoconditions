@@ -1,6 +1,7 @@
 import json
 
 import copy
+from cryptoconditions.types.ed25519 import Ed25519Fulfillment
 from cryptoconditions.condition import Condition
 from cryptoconditions.fulfillment import Fulfillment
 from cryptoconditions.lib import Predictor, Reader, Writer
@@ -146,6 +147,29 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             bitmask |= cond['body'].bitmask
 
         return bitmask
+
+    def get_subcondition_from_vk(self, vk):
+        """
+        Retrieve the subcondition or fulfillment for a certain verifying key
+
+        Args:
+            vk (str, bytes): base58 representation of the verifying key
+
+        Returns:
+            Ed25519Fulfillment, Condition: a Ed25519Fulfillment with the vk
+        """
+        if isinstance(vk, str):
+            vk = vk.encode()
+
+        conditions = []
+        for c in self.subconditions:
+            if isinstance(c['body'], Ed25519Fulfillment) and c['body'].public_key.to_ascii(encoding='base58') == vk:
+                conditions.append(c['body'])
+            elif isinstance(c['body'], ThresholdSha256Fulfillment):
+                result = c['body'].get_subcondition_from_vk(vk)
+                if result is not None:
+                    conditions += result
+        return conditions
 
     def write_hash_payload(self, hasher):
         """

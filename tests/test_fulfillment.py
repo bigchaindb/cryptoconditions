@@ -419,6 +419,9 @@ class TestBigchainILPThresholdSha256Fulfillment:
         assert deserialized_fulfillment.serialize_uri() == fulfillment_uri
         assert deserialized_fulfillment.validate(MESSAGE)
         assert deserialized_condition.serialize_uri() == condition_uri
+        vk = ilp_fulfillment_ed.public_key.to_ascii(encoding='base58')
+        assert len(fulfillment.get_subcondition_from_vk(vk)) == 2
+        assert len(deserialized_fulfillment.get_subcondition_from_vk(vk)) == 1
 
     def test_fulfillment_nested(self,
                                 fulfillment_sha256,

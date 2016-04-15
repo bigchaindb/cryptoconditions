@@ -15,6 +15,8 @@ threshold_fulfillment.threshold = 1
 print(threshold_fulfillment.condition_uri)
 threshold_fulfillment_uri = threshold_fulfillment.serialize_uri()
 print(threshold_fulfillment_uri)
+subconditions = threshold_fulfillment.get_subcondition_from_vk('Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU')
+print(subconditions[0].serialize_uri())
 
 threshold_fulfillment_uri = 'cf:2:AQEBAgEBAwAAAAABAQAnAAQBICDsFyuTrV5WO_STLHDhJFA0w1Rn7y79TWTr-BloNGfivwFg'
 reparsed_fulfillment = cc.Fulfillment.from_uri(threshold_fulfillment_uri)

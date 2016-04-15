@@ -32,14 +32,12 @@ generic authenticated event handlers.
 
 ```python
 import binascii
-from cryptoconditions.condition import Condition
-from cryptoconditions.fulfillment import Fulfillment
-from cryptoconditions.fulfillments.sha256 import PreimageSha256Fulfillment
+import cryptoconditions as cc
 
 # Parse a condition from a URI
-example_condition_uri = 'cc:1:1:47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU:1'
-parsed_condition = Condition.from_uri(example_condition_uri)
-print(isinstance(parsed_condition, Condition))
+example_condition_uri = 'cc:0:3:47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU:0'
+parsed_condition = cc.Condition.from_uri(example_condition_uri)
+print(isinstance(parsed_condition, cc.Condition))
 # prints True
 
 print(binascii.hexlify(parsed_condition.hash))
@@ -48,16 +46,19 @@ print(binascii.hexlify(parsed_condition.hash))
 # Compile a condition
 parsed_condition_uri = parsed_condition.serialize_uri()
 print(parsed_condition_uri)
-# prints 'cc:1:3:47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU:1'
+# prints 'cc:0:3:47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU:0'
 print(parsed_condition_uri == example_condition_uri)
 # prints True
 
 # Parse a fulfillment
-example_fulfillment_uri = 'cf:1:0:AA'
-parsed_fulfillment = Fulfillment.from_uri(example_fulfillment_uri)
-print(isinstance(parsed_fulfillment, PreimageSha256Fulfillment))
+example_fulfillment_uri = 'cf:0:'
+parsed_fulfillment = cc.Fulfillment.from_uri(example_fulfillment_uri)
+print(isinstance(parsed_fulfillment, cc.PreimageSha256Fulfillment))
 # prints True
-# Note: Merely parsing a fulfillment DOES NOT validate it.
+
+# Retrieve the condition of the fulfillment 
+print(parsed_fulfillment.condition_uri)
+# prints 'cc:0:3:47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU:0'
 
 # Validate a fulfillment
 parsed_fulfillment.validate()
@@ -66,13 +67,13 @@ parsed_fulfillment.validate()
 # Export to JSON
 json_data = parsed_fulfillment.serialize_json()
 print(json_data)
-# prints '{"type_id": 0, "type": "fulfillment", "bitmask": 3, "preimage": ""}'
+# prints '{"bitmask": 3, "type_id": 0, "type": "fulfillment", "preimage": ""}'
 
 # Parse fulfillment from JSON
 import json
-json_fulfillment = Fulfillment.from_json(json.loads(json_data))
+json_fulfillment = cc.Fulfillment.from_json(json.loads(json_data))
 print(json_fulfillment.serialize_uri())
-# prints 'cf:1:0:AA'
+# prints 'cf:0:'
 ```
 
 ## ILP Format
@@ -131,8 +132,7 @@ FULFILLMENT_PAYLOAD =
 
 ```python
 import binascii, hashlib
-from cryptoconditions.condition import Condition
-from cryptoconditions.fulfillments.sha256 import PreimageSha256Fulfillment
+import cryptoconditions as cc
 
 secret = ''
 puzzle = binascii.hexlify(hashlib.sha256(secret.encode()).digest())
@@ -140,16 +140,17 @@ print(puzzle)
 # prints b'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
 
 # Create a SHA256 condition
-sha256condition = Condition()
-sha256condition.bitmask = PreimageSha256Fulfillment.FEATURE_BITMASK
+sha256condition = cc.Condition()
+sha256condition.type_id = cc.PreimageSha256Fulfillment.TYPE_ID
+sha256condition.bitmask = cc.PreimageSha256Fulfillment.FEATURE_BITMASK
 sha256condition.hash = binascii.unhexlify(puzzle)
-sha256condition.max_fulfillment_length = 1
+sha256condition.max_fulfillment_length = 0
 sha256condition_uri = sha256condition.serialize_uri()
 print(sha256condition_uri)
-# prints 'cc:1:3:47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU:1'
+# prints 'cc:0:3:47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU:0'
 
 # Create a fulfillment
-sha256fulfillment = PreimageSha256Fulfillment()
+sha256fulfillment = cc.PreimageSha256Fulfillment()
 
 # Create a condition from fulfillment
 sha256fulfillment.condition
@@ -160,7 +161,7 @@ print(sha256fulfillment.condition.serialize_uri() == sha256condition_uri)
 
 # Compile a fulfillment
 print(sha256fulfillment.serialize_uri())
-# prints 'cf:1:0:AA'
+# prints 'cf:0:'
 
 # Even better: verify that the fulfillment matches the condition
 print(sha256fulfillment.validate() and \
@@ -192,18 +193,17 @@ FULFILLMENT_PAYLOAD =
 ### Usage
 
 ```python
-from cryptoconditions.ed25519 import Ed25519SigningKey, Ed25519VerifyingKey
-from cryptoconditions.fulfillments.ed25519 import Ed25519Fulfillment
+import cryptoconditions as cc
 
 # We use base58 key encoding
-sk = Ed25519SigningKey(b'9qLvREC54mhKYivr88VpckyVWdAFmifJpGjbvV5AiTRs')
+sk = cc.crypto.Ed25519SigningKey(b'9qLvREC54mhKYivr88VpckyVWdAFmifJpGjbvV5AiTRs')
 vk = sk.get_verifying_key()
 
 # Create an ED25519-SHA256 condition
-ed25519_fulfillment = Ed25519Fulfillment(public_key=vk)
+ed25519_fulfillment = cc.Ed25519Fulfillment(public_key=vk)
 ed25519_condition_uri = ed25519_fulfillment.condition.serialize_uri()
 print (ed25519_condition_uri)
-# prints 'cc:1:20:7Bcrk61eVjv0kyxw4SRQNMNUZ-8u_U1k6_gZaDRn4r8:98'
+# prints 'cc:4:20:7Bcrk61eVjv0kyxw4SRQNMNUZ-8u_U1k6_gZaDRn4r8:96'
 
 # ED25519-SHA256 condition not fulfilled
 print(ed25519_fulfillment.validate())
@@ -216,19 +216,17 @@ print(ed25519_fulfillment.validate(message))
 # prints True
 
 print(ed25519_fulfillment.serialize_uri())
-# prints
-#  'cf:1:4:IOwXK5OtXlY79JMscOEkUDTDVGfvLv1NZOv4GWg0Z-K_QLYikfrZQy-PKYucSk'
-#  'iV2-KT9v_aGmja3wzN719HoMchKl_qPNqXo_TAPqny6Kwc7IalHUUhJ6vboJ0bbzMcBwo'
-print(ed25519_fulfillment.condition.serialize_uri())
-# prints 'cc:1:20:7Bcrk61eVjv0kyxw4SRQNMNUZ-8u_U1k6_gZaDRn4r8:98'
+# prints 'cf:4:7Bcrk61eVjv0kyxw4SRQNMNUZ-8u_U1k6_gZaDRn4r-2IpH62UMvjymLnEpIldvik_b_2hpo2t8Mze9fR6DHISpf6jzal6P0wD6p8uisHOyGpR1FISer26CdG28zHAcK'
+print(ed25519_fulfillment.condition_uri)
+# prints 'cc:4:20:7Bcrk61eVjv0kyxw4SRQNMNUZ-8u_U1k6_gZaDRn4r8:96'
 
 # Parse a fulfillment URI
-parsed_ed25519_fulfillment = Ed25519Fulfillment.from_uri('cf:1:4:IOwXK5OtXlY79JMscOEkUDTDVGfvLv1NZOv4GWg0Z-K_QLYikfrZQy-PKYucSkiV2-KT9v_aGmja3wzN719HoMchKl_qPNqXo_TAPqny6Kwc7IalHUUhJ6vboJ0bbzMcBwo')
+parsed_ed25519_fulfillment = cc.Ed25519Fulfillment.from_uri('cf:4:7Bcrk61eVjv0kyxw4SRQNMNUZ-8u_U1k6_gZaDRn4r-2IpH62UMvjymLnEpIldvik_b_2hpo2t8Mze9fR6DHISpf6jzal6P0wD6p8uisHOyGpR1FISer26CdG28zHAcK')
 
 print(parsed_ed25519_fulfillment.validate(message))
 # prints True
 print(parsed_ed25519_fulfillment.condition.serialize_uri())
-# prints 'cc:1:20:7Bcrk61eVjv0kyxw4SRQNMNUZ-8u_U1k6_gZaDRn4r8:98'
+# prints 'cc:4:20:7Bcrk61eVjv0kyxw4SRQNMNUZ-8u_U1k6_gZaDRn4r8:96'
 ```
 
 ## THRESHOLD-SHA-256
@@ -263,28 +261,25 @@ FULFILLMENT_PAYLOAD =
 ### Usage
 
 ```python
-from cryptoconditions.fulfillments.sha256 import PreimageSha256Fulfillment
-from cryptoconditions.fulfillments.ed25519 import Ed25519Fulfillment
-from cryptoconditions.fulfillments.threshold_sha256 import ThresholdSha256Fulfillment
+import cryptoconditions as cc
 
 # Parse some fulfillments
-sha256_fulfillment = Sha256Fulfillment.from_uri('cf:1:0:AA')
-ed25519_fulfillment = Ed25519Fulfillment.from_uri('cf:1:4:IOwXK5OtXlY79JMscOEkUDTDVGfvLv1NZOv4GWg0Z-K_QLYikfrZQy-PKYucSkiV2-KT9v_aGmja3wzN719HoMchKl_qPNqXo_TAPqny6Kwc7IalHUUhJ6vboJ0bbzMcBwo')
+ed25519_fulfillment = cc.Ed25519Fulfillment.from_uri('cf:4:7Bcrk61eVjv0kyxw4SRQNMNUZ-8u_U1k6_gZaDRn4r-2IpH62UMvjymLnEpIldvik_b_2hpo2t8Mze9fR6DHISpf6jzal6P0wD6p8uisHOyGpR1FISer26CdG28zHAcK')
 
-# Create a threshold condition
-threshold_fulfillment = ThresholdSha256Fulfillment()
-threshold_fulfillment.add_subfulfillment(sha256_fulfillment)
+# Create a 1-of-2 threshold condition (OR gate)
+threshold_fulfillment = cc.ThresholdSha256Fulfillment(threshold=1)
+# Add as an object or by URI
+threshold_fulfillment.add_subfulfillment_uri('cf:0:')
 threshold_fulfillment.add_subfulfillment(ed25519_fulfillment)
-threshold_fulfillment.threshold = 1  # OR gate
-print(threshold_fulfillment.condition.serialize_uri())
-# prints 'cc:1:29:ehSJGVIK3HVpRD0vEWHs9m7gez0q2Qm8C0DSK5bQ1zk:105'
+print(threshold_fulfillment.condition_uri)
+# prints 'cc:2:2b:mJUaGKCuF5n-3tfXM2U81VYtHbX-N8MP6kz8R-ASwNQ:146'
 
 # Compile a threshold fulfillment
 threshold_fulfillment_uri = threshold_fulfillment.serialize_uri()
 # Note: If there are more than enough fulfilled subconditions, shorter
 # fulfillments will be chosen over longer ones.
 print(threshold_fulfillment_uri)
-# prints 'cf:1:2:AQEBYwQg7Bcrk61eVjv0kyxw4SRQNMNUZ-8u_U1k6_gZaDRn4r9AtiKR-tlDL48pi5xKSJXb4pP2_9oaaNrfDM3vX0egxyEqX-o82pej9MA-qfLorBzshqUdRSEnq9ugnRtvMxwHCgA'
+# prints 'cf:2:AQEBAgEBAwAAAAABAQAnAAQBICDsFyuTrV5WO_STLHDhJFA0w1Rn7y79TWTr-BloNGfivwFg'
 
 # Validate fulfillment
 message = 'Hello World! Conditions are here!'
@@ -292,8 +287,7 @@ print(threshold_fulfillment.validate(message))
 # prints True
 
 # Parse the fulfillment
-reparsed_fulfillment = \
-    ThresholdSha256Fulfillment.from_uri(threshold_fulfillment_uri)
+reparsed_fulfillment = cc.ThresholdSha256Fulfillment.from_uri(threshold_fulfillment_uri)
 print(reparsed_fulfillment.validate(message))
 # prints True
 
@@ -304,18 +298,61 @@ print(threshold_fulfillment.validate(message))
 
 # Create a nested threshold condition
 # VALID = SHA and DSA and (DSA or DSA)
-nested_fulfillment = ThresholdSha256Fulfillment()
+nested_fulfillment = cc.ThresholdSha256Fulfillment(threshold=1)
 nested_fulfillment.add_subfulfillment(ed25519_fulfillment)
 nested_fulfillment.add_subfulfillment(ed25519_fulfillment)
-nested_fulfillment.threshold = 1  # OR gate
-threshold_fulfillment.threshold = 2 # AND gate
-
 threshold_fulfillment.add_subfulfillment(nested_fulfillment)
+threshold_fulfillment.threshold = 3 # AND gate
+
 print(threshold_fulfillment.serialize_uri())
-# prints
-#  'cf:1:2:AgIBYwQg7Bcrk61eVjv0kyxw4SRQNMNUZ-8u_U1k6_gZaDRn4r9AtiKR-tlDL'
-#  '48pi5xKSJXb4pP2_9oaaNrfDM3vX0egxyEqX-o82pej9MA-qfLorBzshqUdRSEnq9ugn'
-#  'RtvMxwHCgABjwECAQIBACMgIOwXK5OtXlY79JMscOEkUDTDVGfvLv1NZOv4GWg0Z-K_Y'
-#  'gFjBCDsFyuTrV5WO_STLHDhJFA0w1Rn7y79TWTr-BloNGfiv0C2IpH62UMvjymLnEpIl'
-#  'dvik_b_2hpo2t8Mze9fR6DHISpf6jzal6P0wD6p8uisHOyGpR1FISer26CdG28zHAcKAAA'
+# prints 'cf:2:AQMBAwEBAwAAAAABAWMABGDsFyuTrV5WO_STLHDhJFA0w1Rn7y79TWTr-BloNGfiv7YikfrZQy-PKYucSkiV2-KT9v_aGmja3wzN719HoMchKl_qPNqXo_TAPqny6Kwc7IalHUUhJ6vboJ0bbzMcBwoAAQGBmgACgZYBAQECAQEAJwAEASAg7Bcrk61eVjv0kyxw4SRQNMNUZ-8u_U1k6_gZaDRn4r8BYAEBYwAEYOwXK5OtXlY79JMscOEkUDTDVGfvLv1NZOv4GWg0Z-K_tiKR-tlDL48pi5xKSJXb4pP2_9oaaNrfDM3vX0egxyEqX-o82pej9MA-qfLorBzshqUdRSEnq9ugnRtvMxwHCgAA'
+print(json.dumps(json.loads(threshold_fulfillment.serialize_json()), sort_keys=True, indent=2, separators=(',', ':')))
+#  {
+#   "bitmask":43,
+#   "subfulfillments":[
+#     {
+#       "bitmask":3,
+#       "preimage":"",
+#       "type":"fulfillment",
+#       "type_id":0,
+#       "weight":1
+#     },
+#     {
+#       "bitmask":32,
+#       "public_key":"Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU",
+#       "signature":"4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj",
+#       "type":"fulfillment",
+#       "type_id":4,
+#       "weight":1
+#     },
+#     {
+#       "bitmask":41,
+#       "subfulfillments":[
+#         {
+#           "bitmask":32,
+#           "public_key":"Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU",
+#           "signature":"4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj",
+#           "type":"fulfillment",
+#           "type_id":4,
+#           "weight":1
+#         },
+#         {
+#           "bitmask":32,
+#           "public_key":"Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU",
+#           "signature":"4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj",
+#           "type":"fulfillment",
+#           "type_id":4,
+#           "weight":1
+#         }
+#       ],
+#       "threshold":1,
+#       "type":"fulfillment",
+#       "type_id":2,
+#       "weight":1
+#     }
+#   ],
+#   "threshold":3,
+#   "type":"fulfillment",
+#   "type_id":2
+# }
 ```

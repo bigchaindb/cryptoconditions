@@ -8,13 +8,13 @@ my_fulfillment = cc.PreimageSha256Fulfillment('')
 print(my_fulfillment.condition_uri)
 # prints 'cc:0:3:47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU:0'
 print(my_fulfillment.serialize_uri())
-# prints 'cc:0:'
+# prints 'cf:0:'
 
 my_fulfillment = cc.PreimageSha256Fulfillment(b'\x00')
 print(my_fulfillment.condition_uri)
 # prints 'cc:0:3:bjQLnP-zepicpUTmu3gKLHiQHT-zNzh2hRGjBhevoB0:1'
 print(my_fulfillment.serialize_uri())
-# prints 'cc:0:AA'
+# prints 'cf:0:AA'
 
 my_fulfillment = cc.PreimageSha256Fulfillment(b'\xff')
 print(my_fulfillment.condition_uri)
