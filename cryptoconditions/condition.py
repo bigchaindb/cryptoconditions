@@ -1,19 +1,64 @@
 import json
-
 import base58
-
 import base64
 import re
+
 from abc import ABCMeta
 
-from cryptoconditions.ed25519 import base64_add_padding, base64_remove_padding
-from cryptoconditions.buffer import Writer, Reader
+from cryptoconditions import TypeRegistry
+from cryptoconditions.crypto import base64_add_padding, base64_remove_padding
+from cryptoconditions.lib import Writer, Reader
 
-CONDITION_REGEX = r'^cc:1:[1-9a-f][0-9a-f]{0,2}:[a-zA-Z0-9_-]{43}:[1-9][0-9]{0,50}$'
+
+# Regex for validating conditions
+# This is a generic, future-proof version of the crypto-condition regular expression.
+CONDITION_REGEX = \
+    r'^cc:([1-9a-f][0-9a-f]{0,3}|0):[1-9a-f][0-9a-f]{0,15}:[a-zA-Z0-9_-]{0,86}:([1-9][0-9]{0,17}|0)$'
+# This is a stricter version based on limitations of the current implementation.
+# Specifically, we can't handle bitmasks greater than 32 bits.
+CONDITION_REGEX_STRICT = \
+    r'^cc:([1-9a-f][0-9a-f]{0,3}|0):[1-9a-f][0-9a-f]{0,7}:[a-zA-Z0-9_-]{0,86}:([1-9][0-9]{0,17}|0)$'
 
 
 class Condition(metaclass=ABCMeta):
-    _bitmask = None
+    """
+    Crypto-condition.
+
+    A primary design goal of crypto-conditions was to keep the size of conditions
+    constant. Even a complex multi-signature can be represented by the same size
+    condition as a simple hashlock.
+
+    However, this means that a condition only carries the absolute minimum
+    information required. It does not tell you anything about its structure.
+
+    All that is included with a condition is the fingerprint (usually a hash of
+    the parts of the fulfillment that are known up-front, e.g. public keys), the
+    maximum fulfillment size, the set of features used and the condition type.
+
+    This information is just enough that an implementation can tell with
+    certainty whether it would be able to process the corresponding fulfillment.
+    """
+    # Our current implementation can only represent up to 32 bits for our bitmask
+    MAX_SAFE_BITMASK = 0xffffffff
+
+    # Feature suites supported by this implementation
+    SUPPORTED_BITMASK = 0x3f
+
+    # Max fulfillment size supported by this implementation
+    MAX_FULFILLMENT_LENGTH = 65535
+
+    # Expose regular expressions
+    REGEX = CONDITION_REGEX
+    REGEX_STRICT = CONDITION_REGEX_STRICT
+
+    # For simple condition types this is simply the bit representing this type.
+    # For structural conditions, this is the bitwise OR of the bitmasks of
+    # the condition and all its subconditions, recursively.
+    bitmask = None
+
+    # The type is a unique integer ID assigned to each type of condition.
+    type_id = None
+
     _hash = None
     _max_fulfillment_length = None
 
@@ -37,13 +82,11 @@ class Condition(metaclass=ABCMeta):
         if not pieces[0] == 'cc':
             raise ValueError('Serialized condition must start with "cc:"')
 
-        if not pieces[1] == '1':
-            raise ValueError('Condition must be version 1')
-
-        if not re.match(CONDITION_REGEX, serialized_condition):
+        if not re.match(CONDITION_REGEX_STRICT, serialized_condition):
             raise ValueError('Invalid condition format')
 
         condition = Condition()
+        condition.type_id = int(pieces[1], 16)
         condition.bitmask = int(pieces[2], 16)
         condition.hash = base64.urlsafe_b64decode(base64_add_padding(pieces[3]))
         condition.max_fulfillment_length = int(pieces[4])
@@ -86,31 +129,6 @@ class Condition(metaclass=ABCMeta):
         condition.parse_json(json_data)
 
         return condition
-
-    @property
-    def bitmask(self):
-        """
-        Return the bitmask of this condition.
-
-        For simple condition types this is simply the bit representing this type.
-        For meta-conditions, these are the bits representing the types of the subconditions.
-
-        Return:
-            int: Bitmask corresponding to this condition.
-        """
-        return self._bitmask
-
-    @bitmask.setter
-    def bitmask(self, value):
-        """
-        Set the bitmask.
-
-        Sets the required bitmask to validate a fulfillment for this condition.
-
-        Args:
-            value (int): representation of bitmask.
-        """
-        self._bitmask = value
 
     @property
     def hash(self):
@@ -165,7 +183,7 @@ class Condition(metaclass=ABCMeta):
         Return:
              (int) Maximum length (in bytes) of any fulfillment payload that fulfills this condition..
         """
-        if not self._max_fulfillment_length:
+        if not isinstance(self._max_fulfillment_length, int):
             raise ValueError
         return self._max_fulfillment_length
 
@@ -189,17 +207,18 @@ class Condition(metaclass=ABCMeta):
         Turns the condition into a URI containing only URL-safe characters. This
         format is convenient for passing around conditions in URLs, JSON and other text-based formats.
 
-        "cc:" BASE10(VERSION) ":" BASE16(TYPE_BITMASK) ":" BASE64URL(HASH) ":" BASE10(MAX_FULFILLMENT_LENGTH)
+        "cc:" BASE16(TYPE_ID) ":" BASE16(BITMASK) ":" BASE64URL(HASH) ":" BASE10(MAX_FULFILLMENT_LENGTH)
 
         Returns:
             string: Condition as a URI
         """
 
-        return 'cc:1:{:x}:{}:{}'.format(self.bitmask,
-                                        base64_remove_padding(
-                                            base64.urlsafe_b64encode(self.hash)
-                                        ).decode('utf-8'),
-                                        self.max_fulfillment_length)
+        return 'cc:{:x}:{:x}:{}:{}'.format(
+            self.type_id,
+            self.bitmask,
+            base64_remove_padding(base64.urlsafe_b64encode(self.hash)).decode('utf-8'),
+            self.max_fulfillment_length
+        )
 
     def serialize_binary(self):
         """
@@ -218,10 +237,11 @@ class Condition(metaclass=ABCMeta):
             Serialized condition
         """
         writer = Writer()
+        writer.write_uint16(self.type_id)
         writer.write_var_uint(self.bitmask)
-        writer.write_var_bytes(self.hash)
+        writer.write_var_octet_string(self.hash)
         writer.write_var_uint(self.max_fulfillment_length)
-        return b''.join(writer.components)
+        return writer.buffer
 
     def parse_binary(self, reader):
         """
@@ -233,16 +253,18 @@ class Condition(metaclass=ABCMeta):
         Args:
              reader (Reader): Binary stream containing the condition.
         """
+        self.type_id = reader.read_uint16()
         self.bitmask = reader.read_var_uint()
 
         # TODO: Ensure bitmask is supported?
-        self.hash = reader.read_var_bytes()
+        self.hash = reader.read_var_octet_string()
         self.max_fulfillment_length = reader.read_var_uint()
 
     def serialize_json(self):
         return json.dumps(
             {
                 'type': 'condition',
+                'type_id': self.type_id,
                 'bitmask': self.bitmask,
                 'hash': base58.b58encode(self.hash),
                 'max_fulfillment_length': self.max_fulfillment_length
@@ -257,7 +279,35 @@ class Condition(metaclass=ABCMeta):
         Returns:
             Condition with payload
         """
+        self.type_id = json_data['type_id']
         self.bitmask = json_data['bitmask']
 
         self.hash = base58.b58decode(json_data['hash'])
         self.max_fulfillment_length = json_data['max_fulfillment_length']
+
+    def validate(self):
+        """
+        Ensure the condition is valid according the local rules.
+
+        Checks the condition against the local bitmask (supported condition types)
+        and the local maximum fulfillment size.
+
+        Returns:
+            bool: Whether the condition is valid according to local rules.
+        """
+        # Get class for type ID, throws on error
+        TypeRegistry.get_class_from_type_id(self.type_id)
+
+        # Bitmask can have at most 32 bits with current implementation
+        if self.bitmask > Condition.MAX_SAFE_BITMASK:
+            raise ValueError('Bitmask too large to be safely represented')
+
+        # Assert all requested features are supported by this implementation
+        if self.bitmask & ~Condition.SUPPORTED_BITMASK:
+            raise ValueError('Condition requested unsupported feature suites')
+
+        # Assert the requested fulfillment size is supported by this implementation
+        if self.max_fulfillment_length > Condition.MAX_FULFILLMENT_LENGTH:
+            raise ValueError('Condition requested too large of a max fulfillment size')
+
+        return True

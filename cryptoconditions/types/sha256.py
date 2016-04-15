@@ -1,7 +1,7 @@
 import json
 
-from cryptoconditions.fulfillments.base_sha256 import BaseSha256Fulfillment
-from cryptoconditions.buffer import Hasher, Reader, Writer, Predictor
+from cryptoconditions.types.base_sha256 import BaseSha256Fulfillment
+from cryptoconditions.lib import Hasher, Reader, Writer, Predictor
 
 
 class PreimageSha256Fulfillment(BaseSha256Fulfillment):
@@ -11,7 +11,18 @@ class PreimageSha256Fulfillment(BaseSha256Fulfillment):
 
     def __init__(self, preimage=None):
         """
-        Provide a preimage.
+        PREIMAGE-SHA-256: Hashlock condition using SHA-256.
+
+        This type of condition is also called a hashlock. By creating a hash
+        of a difficult-to-guess 256-bit random or pseudo-random integer it
+        is possible to create a condition which the creator can trivially
+        fulfill by publishing the random value. However, for anyone else,
+        the condition is cryptgraphically hard to fulfill, because they
+        would have to find a preimage for the given condition hash.
+
+        PREIMAGE-SHA-256 is assigned the type ID 0. It relies on the SHA-256
+        and PREIMAGE feature suites which corresponds to a feature bitmask
+        of 0x03.
 
         The preimage is the only input to a SHA256 hashlock condition.
 
@@ -47,7 +58,7 @@ class PreimageSha256Fulfillment(BaseSha256Fulfillment):
             raise ValueError('Could not calculate hash, no preimage provided')
         hasher.write(self.preimage)
 
-    def parse_payload(self, reader):
+    def parse_payload(self, reader, payload_size):
         """
         Parse the payload of a SHA256 hashlock fulfillment.
 
@@ -58,10 +69,11 @@ class PreimageSha256Fulfillment(BaseSha256Fulfillment):
 
         Args:
             reader (Reader): Source to read the fulfillment payload from.
+            payload_size (int): Total size of the fulfillment payload.
         """
         if not isinstance(reader, Reader):
             raise TypeError('reader must be a Reader instance')
-        self.preimage = reader.read_var_bytes()
+        self.preimage = reader.read(payload_size)
 
     def write_payload(self, writer):
         """
@@ -77,7 +89,7 @@ class PreimageSha256Fulfillment(BaseSha256Fulfillment):
         if self.preimage is None:
             raise ValueError('Preimage must be specified')
 
-        writer.write_var_bytes(self.preimage)
+        writer.write(self.preimage)
         return writer
 
     def serialize_json(self):

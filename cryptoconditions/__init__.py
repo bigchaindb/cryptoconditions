@@ -1,7 +1,10 @@
 from cryptoconditions.type_registry import TypeRegistry
-from cryptoconditions.fulfillments.sha256 import PreimageSha256Fulfillment
-from cryptoconditions.fulfillments.threshold_sha256 import ThresholdSha256Fulfillment
-from cryptoconditions.fulfillments.ed25519 import Ed25519Fulfillment
+from cryptoconditions.types.sha256 import PreimageSha256Fulfillment
+from cryptoconditions.types.threshold_sha256 import ThresholdSha256Fulfillment
+from cryptoconditions.types.ed25519 import Ed25519Fulfillment
+from cryptoconditions.fulfillment import Fulfillment
+from cryptoconditions.condition import Condition
+
 
 TypeRegistry.register_type(PreimageSha256Fulfillment)
 TypeRegistry.register_type(ThresholdSha256Fulfillment)

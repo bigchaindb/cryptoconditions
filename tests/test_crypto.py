@@ -2,7 +2,10 @@ import binascii
 import base58
 import base64
 
-from cryptoconditions.ed25519 import SigningKey, VerifyingKey, ed25519_generate_key_pair, base64_add_padding
+from cryptoconditions.crypto import \
+    Ed25519SigningKey as SigningKey, \
+    Ed25519VerifyingKey as VerifyingKey, \
+    ed25519_generate_key_pair, base64_add_padding
 
 
 class TestBigchainCryptoED25519(object):

@@ -2,21 +2,26 @@ import json
 
 import base58
 
-from cryptoconditions.ed25519 import VerifyingKey
+from cryptoconditions.crypto import Ed25519VerifyingKey as VerifyingKey
 from cryptoconditions.fulfillment import Fulfillment
 
 
 class Ed25519Fulfillment(Fulfillment):
+
     TYPE_ID = 4
     FEATURE_BITMASK = 0x20
     PUBKEY_LENGTH = 32
     SIGNATURE_LENGTH = 64
-    FULFILLMENT_LENGTH = \
-        1 + PUBKEY_LENGTH + \
-        1 + SIGNATURE_LENGTH
+    FULFILLMENT_LENGTH = PUBKEY_LENGTH + SIGNATURE_LENGTH
 
     def __init__(self, public_key=None):
         """
+        ED25519: Ed25519 signature condition.
+
+        This condition implements Ed25519 signatures.
+
+        ED25519 is assigned the type ID 4. It relies only on the ED25519 feature suite
+        which corresponds to a bitmask of 0x20.
 
         Args:
             public_key (VerifyingKey): Ed25519 publicKey
@@ -27,6 +32,20 @@ class Ed25519Fulfillment(Fulfillment):
             raise TypeError
         self.public_key = public_key
         self.signature = None
+
+    def write_common_header(self, writer):
+        """
+        Write static header fields.
+
+        Some fields are common between the hash and the fulfillment payload. This
+        method writes those field to anything implementing the Writer interface.
+        It is used internally when generating the hash of the condition, when
+        generating the fulfillment payload and when calculating the maximum fulfillment size.
+
+        Args:
+            writer (Writer, Hasher, Predictor): Target for outputting the header.
+        """
+        writer.write_var_octet_string(self.public_key)
 
     def sign(self, message, private_key):
         """
@@ -62,7 +81,7 @@ class Ed25519Fulfillment(Fulfillment):
             raise ValueError('Requires a public publicKey')
         return self.public_key.to_bytes()
 
-    def parse_payload(self, reader):
+    def parse_payload(self, reader, *args):
         """
         Parse the payload of an Ed25519 fulfillment.
 
@@ -71,8 +90,8 @@ class Ed25519Fulfillment(Fulfillment):
         Args:
             reader (Reader): Source to read the fulfillment payload from.
         """
-        self.public_key = VerifyingKey(base58.b58encode(reader.read_var_bytes()))
-        self.signature = reader.read_var_bytes()
+        self.public_key = VerifyingKey(base58.b58encode(reader.read_octet_string(Ed25519Fulfillment.PUBKEY_LENGTH)))
+        self.signature = reader.read_octet_string(Ed25519Fulfillment.SIGNATURE_LENGTH)
 
     def write_payload(self, writer):
         """
@@ -87,12 +106,12 @@ class Ed25519Fulfillment(Fulfillment):
         Args:
             writer (Writer): Subject for writing the fulfillment payload.
         """
-        writer.write_var_bytes(bytearray(self.public_key.to_bytes()))
-        writer.write_var_bytes(self.signature)
+        writer.write_octet_string(self.public_key.to_bytes(), Ed25519Fulfillment.PUBKEY_LENGTH)
+        writer.write_octet_string(self.signature, Ed25519Fulfillment.SIGNATURE_LENGTH)
         return writer
 
     def calculate_max_fulfillment_length(self):
-        return self.FULFILLMENT_LENGTH
+        return Ed25519Fulfillment.FULFILLMENT_LENGTH
 
     def serialize_json(self):
         """

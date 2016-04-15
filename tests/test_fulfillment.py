@@ -5,12 +5,15 @@ from math import ceil
 
 import pytest
 
-from cryptoconditions.condition import Condition
-from cryptoconditions.ed25519 import SigningKey, VerifyingKey
-from cryptoconditions.fulfillment import Fulfillment
-from cryptoconditions.fulfillments.ed25519 import Ed25519Fulfillment
-from cryptoconditions.fulfillments.sha256 import PreimageSha256Fulfillment
-from cryptoconditions.fulfillments.threshold_sha256 import ThresholdSha256Fulfillment
+from cryptoconditions import \
+    Condition, \
+    Fulfillment, \
+    PreimageSha256Fulfillment, \
+    Ed25519Fulfillment, \
+    ThresholdSha256Fulfillment
+from cryptoconditions.crypto import \
+    Ed25519SigningKey as SigningKey, \
+    Ed25519VerifyingKey as VerifyingKey
 
 MESSAGE = 'Hello World! Conditions are here!'
 
@@ -23,9 +26,10 @@ class TestBigchainILPSha256Condition:
 
     def test_create_condition(self, fulfillment_sha256):
         sha256condition = Condition()
-        sha256condition._bitmask = PreimageSha256Fulfillment.FEATURE_BITMASK
+        sha256condition.type_id = PreimageSha256Fulfillment.TYPE_ID
+        sha256condition.bitmask = PreimageSha256Fulfillment.FEATURE_BITMASK
         sha256condition.hash = binascii.unhexlify(fulfillment_sha256['condition_hash'])
-        sha256condition.max_fulfillment_length = 1
+        sha256condition.max_fulfillment_length = 0
         assert sha256condition.serialize_uri() == fulfillment_sha256['condition_uri']
 
 
@@ -219,23 +223,20 @@ class TestBigchainILPThresholdSha256Fulfillment:
     def test_serialize_condition_and_validate_fulfillment(self,
                                                           fulfillment_sha256,
                                                           fulfillment_ed25519,
-                                                          fulfillment_ed25519_2,
                                                           fulfillment_threshold):
 
-        ilp_fulfillment = Fulfillment.from_uri(fulfillment_ed25519_2['fulfillment_uri'])
-        ilp_fulfillment_2 = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
-        ilp_fulfillment_3 = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
+        ilp_fulfillment_ed25519 = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
+        ilp_fulfillment_sha = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
 
-        assert ilp_fulfillment.validate(MESSAGE) == True
-        assert ilp_fulfillment_2.validate(MESSAGE) == True
+        assert ilp_fulfillment_ed25519.validate(MESSAGE) == True
+        assert ilp_fulfillment_sha.validate(MESSAGE) == True
 
-        threshold = 2
+        threshold = 1
 
         # Create a threshold condition
         fulfillment = ThresholdSha256Fulfillment()
-        fulfillment.add_subfulfillment(ilp_fulfillment)
-        fulfillment.add_subfulfillment(ilp_fulfillment_2)
-        fulfillment.add_subfulfillment(ilp_fulfillment_3)
+        fulfillment.add_subfulfillment(ilp_fulfillment_ed25519)
+        fulfillment.add_subfulfillment(ilp_fulfillment_sha)
         fulfillment.threshold = threshold  # defaults to subconditions.length
 
         assert fulfillment.condition.serialize_uri() == fulfillment_threshold['condition_uri']
@@ -246,8 +247,8 @@ class TestBigchainILPThresholdSha256Fulfillment:
         assert fulfillment.validate(MESSAGE)
 
     def test_deserialize_fulfillment(self, fulfillment_threshold):
-        num_fulfillments = 3
-        threshold = 2
+        num_fulfillments = 2
+        threshold = 1
 
         fulfillment = Fulfillment.from_uri(fulfillment_threshold['fulfillment_uri'])
 
@@ -269,18 +270,12 @@ class TestBigchainILPThresholdSha256Fulfillment:
                                   'type_id': 0,
                                   'weight': 1},
                                  {'bitmask': 32,
-                                  'hash': 'CBK79fAE8AVxwprPumyLrW5JfHaDRAReSpmsg92FV3GL',
-                                  'max_fulfillment_length': 98,
+                                  'hash': 'Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU',
+                                  'max_fulfillment_length': 96,
                                   'type': 'condition',
-                                  'weight': 1},
-                                 {'bitmask': 32,
-                                  'public_key': 'Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU',
-                                  'signature': '4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ'
-                                               '4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj',
-                                  'type': 'fulfillment',
                                   'type_id': 4,
                                   'weight': 1}],
-             'threshold': 2,
+             'threshold': 1,
              'type': 'fulfillment',
              'type_id': 2}
 
@@ -385,10 +380,9 @@ class TestBigchainILPThresholdSha256Fulfillment:
     def test_fulfillment_nested_and_or(self,
                                        fulfillment_sha256,
                                        fulfillment_ed25519,
-                                       fulfillment_ed25519_2):
+                                       fulfillment_threshold_nested_and_or):
         ilp_fulfillment_sha = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
-        ilp_fulfillment_ed1 = Fulfillment.from_uri(fulfillment_ed25519_2['fulfillment_uri'])
-        ilp_fulfillment_ed2 = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
+        ilp_fulfillment_ed = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
 
         # 2-of-2 (AND with 2 inputs)
         fulfillment = ThresholdSha256Fulfillment()
@@ -400,15 +394,19 @@ class TestBigchainILPThresholdSha256Fulfillment:
         # 1-of-2 (OR with 2 inputs)
         nested_fulfillment = ThresholdSha256Fulfillment()
         nested_fulfillment.threshold = 1
-        nested_fulfillment.add_subfulfillment(ilp_fulfillment_ed1)
+        nested_fulfillment.add_subfulfillment(ilp_fulfillment_ed)
         assert nested_fulfillment.validate(MESSAGE) is True
-        nested_fulfillment.add_subfulfillment(ilp_fulfillment_ed2)
+        nested_fulfillment.add_subfulfillment(ilp_fulfillment_ed)
         assert nested_fulfillment.validate(MESSAGE) is True
 
         fulfillment.add_subfulfillment(nested_fulfillment)
         assert fulfillment.validate(MESSAGE) is True
 
         fulfillment_uri = fulfillment.serialize_uri()
+        assert fulfillment.condition_uri == fulfillment_threshold_nested_and_or['condition_uri']
+        assert fulfillment_uri == fulfillment_threshold_nested_and_or['fulfillment_uri']
+
+        print(fulfillment_uri)
         deserialized_fulfillment = Fulfillment.from_uri(fulfillment_uri)
 
         condition_uri = fulfillment.condition.serialize_uri()

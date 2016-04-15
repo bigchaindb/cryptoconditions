@@ -2,17 +2,17 @@ import base64
 import re
 from abc import ABCMeta, abstractmethod
 from cryptoconditions import TypeRegistry
-
 from cryptoconditions.condition import Condition
-from cryptoconditions.buffer import Writer, Reader, Predictor
-from cryptoconditions.ed25519 import base64_remove_padding, base64_add_padding
+from cryptoconditions.crypto import base64_remove_padding, base64_add_padding
+from cryptoconditions.lib import Writer, Reader, Predictor
 
-FULFILLMENT_REGEX = r'^cf:1:([1-9a-f][0-9a-f]{0,2}|0):[a-zA-Z0-9_-]+$'
+FULFILLMENT_REGEX = r'^cf:([1-9a-f][0-9a-f]{0,3}|0):[a-zA-Z0-9_-]*$'
 
 
 class Fulfillment(metaclass=ABCMeta):
 
     TYPE_ID = None
+    REGEX = FULFILLMENT_REGEX
     FEATURE_BITMASK = None
 
     @staticmethod
@@ -35,22 +35,16 @@ class Fulfillment(metaclass=ABCMeta):
         if not pieces[0] == 'cf':
             raise ValueError('Serialized fulfillment must start with "cf:"')
 
-        if not pieces[1] == '1':
-            raise ValueError('Fulfillment must be version 1')
-
-        if not re.match(FULFILLMENT_REGEX, serialized_fulfillment):
+        if not re.match(Fulfillment.REGEX, serialized_fulfillment):
             raise ValueError('Invalid fulfillment format')
 
-        type_id = int(pieces[2])
+        type_id = int(pieces[1], 16)
+        payload = base64.urlsafe_b64decode(base64_add_padding(pieces[2]))
 
         cls = TypeRegistry.get_class_from_type_id(type_id)
         fulfillment = cls()
 
-        payload = Reader.from_source(
-            base64.urlsafe_b64decode(
-                base64_add_padding(pieces[3])))
-
-        fulfillment.parse_payload(payload)
+        fulfillment.parse_payload(Reader.from_source(payload), len(payload))
 
         return fulfillment
 
@@ -69,11 +63,12 @@ class Fulfillment(metaclass=ABCMeta):
         """
         reader = Reader.from_source(reader)
 
-        cls_type = reader.read_var_uint()
+        cls_type = reader.read_uint16()
         cls = TypeRegistry.get_class_from_type_id(cls_type)
 
         fulfillment = cls()
-        fulfillment.parse_payload(reader)
+        payload_length = reader.read_length_prefix()
+        fulfillment.parse_payload(reader, payload_length)
 
         return fulfillment
 
@@ -126,10 +121,31 @@ class Fulfillment(metaclass=ABCMeta):
             Condition: Condition corresponding to this fulfillment.
         """
         condition = Condition()
+        condition.type_id = self.type_id
         condition.bitmask = self.bitmask
         condition.hash = self.generate_hash()
         condition.max_fulfillment_length = self.calculate_max_fulfillment_length()
         return condition
+
+    @property
+    def condition_uri(self):
+        """
+        Shorthand for getting condition URI.
+
+        Returns:
+            str: Condition URI.
+        """
+        return self.condition.serialize_uri()
+
+    @property
+    def condition_binary(self):
+        """
+        Shorthand for getting condition encoded as binary.
+
+        Returns:
+            bytes: Binary encoded condition.
+        """
+        return self.condition.serialize_binary()
 
     @abstractmethod
     def generate_hash(self):
@@ -137,6 +153,9 @@ class Fulfillment(metaclass=ABCMeta):
         Generate the hash of the fulfillment.
 
         This method is a stub and will be overridden by subclasses.
+
+        Returns:
+            bytes: Fingerprint of the condition.
         """
         raise NotImplementedError
 
@@ -163,17 +182,14 @@ class Fulfillment(metaclass=ABCMeta):
         format is convenient for passing around fulfillments in URLs, JSON and
         other text-based formats.
 
-        "cf:" BASE10(VERSION) ":" BASE16(TYPE_BIT) ":" BASE64URL(FULFILLMENT_PAYLOAD)
+        "cf:" BASE16(TYPE_BIT) ":" BASE64URL(FULFILLMENT_PAYLOAD)
 
         Return:
              string: Fulfillment as a URI
         """
-        return 'cf:1:{:x}:{}'.format(self.type_id,
-                                     base64_remove_padding(
-                                         base64.urlsafe_b64encode(
-                                             b''.join(self.serialize_payload().components)
-                                         )
-                                     ).decode('utf-8'))
+        return 'cf:{:x}:{}'.format(
+            self.type_id,
+            base64_remove_padding(base64.urlsafe_b64encode(self.serialize_payload())).decode('utf-8'))
 
     def serialize_binary(self):
         """
@@ -191,9 +207,9 @@ class Fulfillment(metaclass=ABCMeta):
             Serialized fulfillment
         """
         writer = Writer()
-        writer.write_var_uint(self.type_id)
-        self.write_payload(writer)
-        return b''.join(writer.components)
+        writer.write_uint16(self.type_id)
+        writer.write_var_octet_string(self.serialize_payload())
+        return writer.buffer
 
     def serialize_payload(self):
         """
@@ -206,7 +222,9 @@ class Fulfillment(metaclass=ABCMeta):
         Return:
             Buffer: Fulfillment payload
         """
-        return self.write_payload(Writer())
+        writer = Writer()
+        self.write_payload(writer)
+        return writer.buffer
 
     @abstractmethod
     def write_payload(self, writer):
@@ -218,7 +236,7 @@ class Fulfillment(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def parse_payload(self, reader):
+    def parse_payload(self, reader, *args):
         """
         Parse the payload of the fulfillment.
 

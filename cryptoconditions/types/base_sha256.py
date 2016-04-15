@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
 from cryptoconditions.fulfillment import Fulfillment
-from cryptoconditions.buffer import Hasher
+from cryptoconditions.lib.hasher import Hasher
 
 
 class BaseSha256Fulfillment(Fulfillment):

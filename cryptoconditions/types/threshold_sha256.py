@@ -1,12 +1,10 @@
 import json
 
 import copy
-
 from cryptoconditions.condition import Condition
 from cryptoconditions.fulfillment import Fulfillment
-from cryptoconditions.fulfillments.base_sha256 import BaseSha256Fulfillment
-from cryptoconditions.buffer import Predictor, Reader, Writer
-
+from cryptoconditions.lib import Predictor, Reader, Writer
+from cryptoconditions.types.base_sha256 import BaseSha256Fulfillment
 
 CONDITION = 'condition'
 FULFILLMENT = 'fulfillment'
@@ -18,9 +16,30 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
 
     def __init__(self, threshold=None):
         """
-        Create a ThresholdSha256Fulfillment and set the threshold.
+        THRESHOLD-SHA-256: Threshold gate condition using SHA-256.
 
-        Determines the weighted threshold that is used to consider this condition
+        Threshold conditions can be used to create m-of-n multi-signature groups.
+
+        Threshold conditions can represent the AND operator by setting the threshold
+        to equal the number of subconditions (n-of-n) or the OR operator by setting the thresold to one (1-of-n).
+
+        Threshold conditions allows each subcondition to carry an integer weight.
+
+        Since threshold conditions operate on conditions, they can be nested as well
+        which allows the creation of deep threshold trees of public keys.
+
+        By using Merkle trees, threshold fulfillments do not need to to provide the
+        structure of unfulfilled subtrees. That means only the public keys that are
+        actually used in a fulfillment, will actually appear in the fulfillment, saving space.
+
+        One way to formally interpret threshold conditions is as a boolean weighted
+        threshold gate. A tree of threshold conditions forms a boolean weighted
+        threhsold circuit.
+
+        THRESHOLD-SHA-256 is assigned the type ID 2. It relies on the SHA-256 and
+        THRESHOLD feature suites which corresponds to a feature bitmask of 0x09.
+
+        Threshold determines the weighted threshold that is used to consider this condition
         fulfilled. If the added weight of all valid subfulfillments is greater or
         equal to this number, the threshold condition is considered to be fulfilled.
 
@@ -38,11 +57,13 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         subconditions or to provide a non-fulfilled subcondition when creating a threshold fulfillment.
 
         Args:
-            subcondition (Condition): Condition to add
+            subcondition (Condition, str): Condition to add
             weight (int): Integer weight of the subcondition.
         """
-        if not isinstance(subcondition, Condition):
-            raise TypeError('Subconditions must be objects of type Condition')
+        if isinstance(subcondition, str):
+            subcondition = Condition.from_uri(subcondition)
+        elif not isinstance(subcondition, Condition):
+            raise TypeError('Subconditions must be URIs or objects of type Condition')
         if not isinstance(weight, int):
             raise ValueError('Invalid weight, not an integer: {}'.format(weight))
         self.subconditions.append(
@@ -51,6 +72,19 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
                 'body': subcondition,
                 'weight': weight
             })
+
+    def add_subcondition_uri(self, subcondition_uri):
+        """
+        Add a subcondition (unfulfilled).
+
+        This will automatically parse the URI and call addSubcondition.
+
+        Args:
+            subcondition_uri (str): Subcondition URI.
+        """
+        if not isinstance(subcondition_uri, str):
+            raise TypeError('Subcondition must be provided as a URI string')
+        self.add_subcondition(Condition.from_uri(subcondition_uri))
 
     def add_subfulfillment(self, subfulfillment, weight=1):
         """
@@ -67,8 +101,10 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
              subfulfillment (Fulfillment): Fulfillment to add
              weight (int): Integer weight of the subcondition.
         """
-        if not isinstance(subfulfillment, Fulfillment):
-            raise TypeError('Subfulfillments must be objects of type Fulfillment')
+        if isinstance(subfulfillment, str):
+            subfulfillment = Fulfillment.from_uri(subfulfillment)
+        elif not isinstance(subfulfillment, Fulfillment):
+            raise TypeError('Subfulfillments must be URIs or objects of type Fulfillment')
         if not isinstance(weight, int):
             raise ValueError('Invalid weight, not an integer: {}'.format(weight))
         self.subconditions.append(
@@ -78,6 +114,19 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
                 'weight': weight
             })
 
+    def add_subfulfillment_uri(self, subfulfillment_uri):
+        """
+        Add a fulfilled subcondition.
+
+        This will automatically parse the URI and call addSubfulfillment.
+
+        Args:
+            subfulfillment_uri (str): Subfulfillment URI.
+        """
+        if not isinstance(subfulfillment_uri, str):
+            raise TypeError('Subfulfillment must be provided as a URI string')
+        self.add_subfulfillment(Fulfillment.from_uri(subfulfillment_uri))
+
     @property
     def bitmask(self):
         """
@@ -86,7 +135,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         This is a type of condition that can contain subconditions. A complete
         bitmask must contain the set of types that must be supported in order to
         validate this fulfillment. Therefore, we need to calculate the bitwise OR
-        of this condition's TYPE_BIT and all subcondition's and subfulfillment's bitmasks.
+        of this condition's FEATURE_BITMASK and all subcondition's and subfulfillment's bitmasks.
 
         Returns:
              int: Complete bitmask for this fulfillment.
@@ -123,7 +172,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             # Serialize each subcondition with weight
             writer = Writer()
             writer.write_var_uint(c['weight'])
-            writer.write(c['body'].condition.serialize_binary()
+            writer.write(c['body'].condition_binary
                          if c['type'] == FULFILLMENT
                          else c['body'].serialize_binary())
             subconditions.append(b''.join(writer.components))
@@ -131,8 +180,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         # Canonically sort all conditions, first by length, then lexicographically
         sorted_subconditions = ThresholdSha256Fulfillment.sort_buffers(subconditions)
 
-        hasher.write_var_uint(ThresholdSha256Fulfillment.TYPE_ID)
-        hasher.write_var_uint(self.threshold)
+        hasher.write_uint32(self.threshold)
         hasher.write_var_uint(len(sorted_subconditions))
         for cond in sorted_subconditions:
             hasher.write(cond)
@@ -170,16 +218,17 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         worst_case_fulfillments_length = total_condition_len + \
             ThresholdSha256Fulfillment.calculate_worst_case_length(self.threshold, subconditions)
 
-        if worst_case_fulfillments_length == -1:
+        if worst_case_fulfillments_length == float('-inf'):
             raise ValueError('Insufficient subconditions/weights to meet the threshold')
 
         # Calculate resulting total maximum fulfillment size
         predictor = Predictor()
-        predictor.write_var_uint(self.threshold)   # THRESHOLD
-        predictor.write_var_uint(len(self.subconditions))
+        predictor.write_uint32(self.threshold)             # threshold
+        predictor.write_var_uint(len(self.subconditions))  # count
         for c in self.subconditions:
-            predictor.write_uint8()                # IS_FULFILLMENT
-            predictor.write_var_uint(c['weight'])  # WEIGHT
+            predictor.write_uint8(None)                        # presence bitmask
+            if not c['weight'] == 1:
+                predictor.write_var_uint(c['weight'])      # weight
 
         # Represents the sum of CONDITION/FULFILLMENT values
         predictor.skip(worst_case_fulfillments_length)
@@ -188,17 +237,9 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
 
     @staticmethod
     def predict_subcondition_length(cond):
-        condition_len = len(cond['body'].condition.serialize_binary()) \
+        return len(cond['body'].condition_binary) \
             if cond['type'] == FULFILLMENT \
             else len(cond['body'].serialize_binary())
-
-        predictor = Predictor()
-        predictor.write_var_uint(cond['weight'])  # WEIGHT
-        predictor.write_var_bytes('')             # FULFILLMENT
-        predictor.write_var_uint(condition_len)   # CONDITION
-        predictor.skip(condition_len)
-
-        return predictor.size
 
     @staticmethod
     def predict_subfulfillment_length(cond):
@@ -207,10 +248,8 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             else cond['body'].max_fulfillment_length
 
         predictor = Predictor()
-        predictor.write_var_uint(cond['weight'])   # WEIGHT
-        predictor.write_var_uint(fulfillment_len)  # FULFILLMENT
-        predictor.skip(fulfillment_len)
-        predictor.write_var_bytes('')              # CONDITION
+        predictor.write_uint16(None)                       # type
+        predictor.write_var_octet_string(b'0'*fulfillment_len)  # payload
 
         return predictor.size
 
@@ -242,7 +281,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             index (int): Current index in the subconditions array (used by the recursive calls.)
 
         Returns:
-            (int): Maximum size of a valid, minimal set of fulfillments or -1 if there is no valid set.
+            int: Maximum size of a valid, minimal set of fulfillments or -inf if there is no valid set.
         """
         if threshold <= 0:
             return 0
@@ -256,7 +295,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         else:
             return float('-inf')
 
-    def parse_payload(self, reader):
+    def parse_payload(self, reader, *args):
         """
         Parse a fulfillment payload.
 
@@ -272,8 +311,8 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         condition_count = reader.read_var_uint()
         for i in range(condition_count):
             weight = reader.read_var_uint()
-            fulfillment = reader.read_var_bytes()
-            condition = reader.read_var_bytes()
+            fulfillment = reader.read_var_octet_string()
+            condition = reader.read_var_octet_string()
 
             if len(fulfillment) and len(condition):
                 raise TypeError('Subconditions may not provide both subcondition and fulfillment.')
@@ -313,7 +352,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
                     {
                         'index': i,
                         'size': len(c['body'].serialize_binary()),
-                        'omit_size': len(c['body'].condition.serialize_binary())
+                        'omit_size': len(c['body'].condition_binary)
                     }
                 )
                 subfulfillments.append(subfulfillment)
@@ -338,10 +377,9 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         for c in optimized_subfulfillments:
             writer_ = Writer()
             writer_.write_var_uint(c['weight'])
-            writer_.write_var_bytes(c['body'].serialize_binary() if c['type'] == FULFILLMENT else '')
-            # TODO: check if correct
-            writer_.write_var_bytes(c['body'].serialize_binary() if c['type'] == CONDITION else '')
-            serialized_subconditions.append(b''.join(writer_.components))
+            writer_.write_var_octet_string(c['body'].serialize_binary() if c['type'] == FULFILLMENT else '')
+            writer_.write_var_octet_string(c['body'].serialize_binary() if c['type'] == CONDITION else '')
+            serialized_subconditions.append(writer_.buffer)
 
         sorted_subconditions = ThresholdSha256Fulfillment.sort_buffers(serialized_subconditions)
 
@@ -476,7 +514,22 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             boolean: Whether this fulfillment is valid.
         """
         fulfillments = [c for c in self.subconditions if c['type'] == FULFILLMENT]
-        total_weight = sum([f['weight'] for f in fulfillments])
+
+        # Find total weight and smallest individual weight
+        min_weight = float('inf')
+        total_weight = 0
+        for fulfillment in fulfillments:
+            min_weight = min(min_weight, fulfillment['weight'])
+            total_weight += min_weight
+
+        # Total weight must meet the threshold
         if total_weight < self.threshold:
+            # Threshold not met
             return False
+
+        # TODO: Discuss with ILP
+        ## But the set must be minimal, there mustn't be any fulfillments we could take out
+        # if self.threshold + min_weight <= total_weight:
+        #     # Fulfillment is not minimal
+        #     return False
         return all([f['body'].validate(message) for f in fulfillments])

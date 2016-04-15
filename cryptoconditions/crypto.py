@@ -1,14 +1,113 @@
 # Separate all crypto code so that we can easily test several implementations
-
+from abc import ABCMeta, abstractmethod
 import base64
 
 import base58
 import ed25519
 
-from cryptoconditions.asymmetric import SigningKey, VerifyingKey
+
+class SigningKey(metaclass=ABCMeta):
+    """
+    SigningKey instance
+    """
+
+    @abstractmethod
+    def sign(self, data):
+        """
+        Sign data with private key
+
+        Args:
+            data:
+        """
+
+    @abstractmethod
+    def get_verifying_key(self):
+        """
+        Get the associated verifying key
+
+        Returns:
+            A VerifyingKey object
+        """
+
+    @abstractmethod
+    def to_ascii(self, prefix, encoding):
+        """
+        Encode the external value
+
+        Args:
+            prefix:
+            encoding:
+        """
+
+    @staticmethod
+    @abstractmethod
+    def encode(private_value):
+        """
+        Encode the internal private_value to base58
+
+        Args:
+            private_value:
+        """
+
+    @staticmethod
+    @abstractmethod
+    def decode(private_base58):
+        """
+        Decode the base58 private value to internal value
+
+        Args:
+            private_base58 (base58):
+        """
+        raise NotImplementedError
 
 
-class SigningKey(ed25519.SigningKey, SigningKey):
+class VerifyingKey(metaclass=ABCMeta):
+
+    @abstractmethod
+    def verify(self, data, signature):
+        """
+        Check the if the signature matches the data and this verifyingkey
+
+        Args:
+            data:
+            signature:
+
+        Returns:
+            boolean:
+        """
+
+    @abstractmethod
+    def to_ascii(self, prefix, encoding):
+        """
+        Encode the external value
+
+        Args:
+            prefix:
+            encoding:
+        """
+
+    @staticmethod
+    @abstractmethod
+    def encode(public_value):
+        """
+        Encode the public key to base58 represented by the internal values
+
+        Args:
+            public_value
+        """
+
+    @staticmethod
+    @abstractmethod
+    def decode(public_base58):
+        """
+        Decode the base58 public_value to internal value
+
+        Args:
+            public_base58 (base58):
+        """
+
+
+class Ed25519SigningKey(ed25519.SigningKey, SigningKey):
     """
     PrivateKey instance
     """
@@ -31,7 +130,7 @@ class SigningKey(ed25519.SigningKey, SigningKey):
             VerifyingKey
         """
         vk = super().get_verifying_key()
-        return VerifyingKey(base58.b58encode(vk.to_bytes()))
+        return Ed25519VerifyingKey(base58.b58encode(vk.to_bytes()))
 
     def to_ascii(self, prefix="", encoding='base58'):
         """
@@ -87,7 +186,7 @@ class SigningKey(ed25519.SigningKey, SigningKey):
         return base64.b64encode(base58.b58decode(key))
 
 
-class VerifyingKey(ed25519.VerifyingKey, VerifyingKey):
+class Ed25519VerifyingKey(ed25519.VerifyingKey, VerifyingKey):
 
     def __init__(self, key):
         """
@@ -142,7 +241,7 @@ class VerifyingKey(ed25519.VerifyingKey, VerifyingKey):
         Args:
             public_base64
         """
-        return SigningKey.encode(public_base64)
+        return Ed25519SigningKey.encode(public_base64)
 
     @staticmethod
     def decode(public_base58):
@@ -152,7 +251,7 @@ class VerifyingKey(ed25519.VerifyingKey, VerifyingKey):
         Args:
             public_base58
         """
-        return SigningKey.decode(public_base58)
+        return Ed25519SigningKey.decode(public_base58)
 
 
 def ed25519_generate_key_pair():
@@ -161,10 +260,10 @@ def ed25519_generate_key_pair():
     """
     sk, vk = ed25519.create_keypair()
     # Private key
-    private_value_base58 = SigningKey(base58.b58encode(sk.to_bytes())).to_ascii()
+    private_value_base58 = Ed25519SigningKey(base58.b58encode(sk.to_bytes())).to_ascii()
 
     # Public key
-    public_value_compressed_base58 = VerifyingKey(base58.b58encode(vk.to_bytes())).to_ascii()
+    public_value_compressed_base58 = Ed25519VerifyingKey(base58.b58encode(vk.to_bytes())).to_ascii()
 
     return private_value_base58, public_value_compressed_base58
 
