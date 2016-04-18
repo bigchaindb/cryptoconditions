@@ -347,7 +347,7 @@ class TestBigchainILPThresholdSha256Fulfillment:
         assert deserialized_fulfillment.serialize_uri() == fulfillment_uri
         assert deserialized_fulfillment.validate(MESSAGE)
 
-    def test_fulfillment_didnt_reach_threshold(self, fulfillment_ed25519):
+    def test_fulfillment_didnt_reach_threshold(self, vk_ilp, fulfillment_ed25519):
         ilp_fulfillment = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
         threshold = 10
 
@@ -376,6 +376,10 @@ class TestBigchainILPThresholdSha256Fulfillment:
         assert len(deserialized_fulfillment.subconditions) == threshold
         assert deserialized_fulfillment.serialize_uri() == fulfillment_uri
         assert deserialized_fulfillment.validate(MESSAGE)
+
+        fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=VerifyingKey(vk_ilp['b58'])))
+
+        assert fulfillment.validate(MESSAGE) == True
 
     def test_fulfillment_nested_and_or(self,
                                        fulfillment_sha256,

@@ -552,8 +552,10 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             return False
 
         # TODO: Discuss with ILP
-        ## But the set must be minimal, there mustn't be any fulfillments we could take out
+        # But the set must be minimal, there mustn't be any fulfillments we could take out
         # if self.threshold + min_weight <= total_weight:
         #     # Fulfillment is not minimal
         #     return False
-        return all([f['body'].validate(message) for f in fulfillments])
+        # TODO: ILP specs see unfulfilled conditions as conditions and not fulfillments
+        valid_decisions = [valid for valid in [f['body'].validate(message) for f in fulfillments] if valid is True]
+        return len(valid_decisions) >= self.threshold
