@@ -199,7 +199,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             writer.write(c['body'].condition_binary
                          if c['type'] == FULFILLMENT
                          else c['body'].serialize_binary())
-            subconditions.append(b''.join(writer.components))
+            subconditions.append(writer.buffer)
 
         # Canonically sort all conditions, first by length, then lexicographically
         sorted_subconditions = ThresholdSha256Fulfillment.sort_buffers(subconditions)

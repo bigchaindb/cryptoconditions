@@ -157,7 +157,6 @@ class Fulfillment(metaclass=ABCMeta):
         Returns:
             bytes: Fingerprint of the condition.
         """
-        raise NotImplementedError
 
     def calculate_max_fulfillment_length(self):
         """
