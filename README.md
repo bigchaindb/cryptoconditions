@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/bigchaindb/cryptoconditions.svg?branch=master)](https://travis-ci.org/bigchaindb/cryptoconditions)
+[![PyPI](https://img.shields.io/pypi/v/cryptoconditions.svg)](https://pypi.python.org/pypi/cryptoconditions)
 [![codecov.io](https://codecov.io/github/bigchaindb/cryptoconditions/coverage.svg?branch=master)](https://codecov.io/github/bigchaindb/cryptoconditions?branch=master)
 
 
@@ -7,6 +8,13 @@
 First clone this repository (optional: and a virtual env).
 Note that we support **Python>=3.4**.
 
+Install from pypi:
+
+```
+$ pip install cryptocondtions
+```
+
+Or install from source
 ```
 $ pip install -e .[dev]
 $ py.test -v
