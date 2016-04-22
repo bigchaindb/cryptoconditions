@@ -33,13 +33,11 @@ docs_require = [
 setup(
     name='cryptoconditions',
     version='0.2.1',
-    description='cryptoconditions provide a mechanism to describe a signed '
-                'message such that multiple actors in a distributed system '
-                'can all verify the same signed message and agree on whether '
-                'it matches the description.',
+    description='Multi-algorithm, multi-level, multi-signature format for 
+                'expressing conditions and fulfillments according to the Interledger Protocol (ILP).',
     long_description=__doc__,
-    summary="cryptoconditions as specified by the interledger protocol",
-    keywords="cryptoconditions interledger merkle tree ed25519 threshold signatures",
+    summary="Cryptoconditions as specified by the interledger protocol",
+    keywords="cryptoconditions, interledger, merkle tree, ed25519, threshold signatures, hash lock",
     url='https://github.com/bigchaindb/cryptoconditions/',
     author='Cryptoconditions Contributors',
     author_email='dev@bigchaindb.com',
