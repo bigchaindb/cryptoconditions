@@ -4,6 +4,7 @@ from abc import ABCMeta, abstractmethod
 from cryptoconditions import TypeRegistry
 from cryptoconditions.condition import Condition
 from cryptoconditions.crypto import base64_remove_padding, base64_add_padding
+from cryptoconditions.exceptions import ParsingError
 from cryptoconditions.lib import Writer, Reader, Predictor
 
 FULFILLMENT_REGEX = r'^cf:([1-9a-f][0-9a-f]{0,3}|0):[a-zA-Z0-9_-]*$'
@@ -37,14 +38,16 @@ class Fulfillment(metaclass=ABCMeta):
 
         if not re.match(Fulfillment.REGEX, serialized_fulfillment):
             raise ValueError('Invalid fulfillment format')
+        try:
+            type_id = int(pieces[1], 16)
+            payload = base64.urlsafe_b64decode(base64_add_padding(pieces[2]))
 
-        type_id = int(pieces[1], 16)
-        payload = base64.urlsafe_b64decode(base64_add_padding(pieces[2]))
+            cls = TypeRegistry.get_class_from_type_id(type_id)
+            fulfillment = cls()
 
-        cls = TypeRegistry.get_class_from_type_id(type_id)
-        fulfillment = cls()
-
-        fulfillment.parse_payload(Reader.from_source(payload), len(payload))
+            fulfillment.parse_payload(Reader.from_source(payload), len(payload))
+        except Exception as e:
+            raise ParsingError(str(e))
 
         return fulfillment
 
