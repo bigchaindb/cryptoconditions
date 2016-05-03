@@ -381,6 +381,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
                 )
                 subfulfillments.append(subfulfillment)
 
+        # FIXME: KeyError due to returned `{'size': inf}` when self.threshold > len(subfulfillments)
         smallest_set = \
             ThresholdSha256Fulfillment.calculate_smallest_valid_fulfillment_set(self.threshold, subfulfillments)['set']
 
