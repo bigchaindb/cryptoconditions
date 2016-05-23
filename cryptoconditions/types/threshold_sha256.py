@@ -47,6 +47,8 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         Args:
             threshold (int): Integer threshold
         """
+        if not isinstance(threshold, int) or threshold < 1:
+            raise ValueError('Threshold must be a integer greater than zero, was: {}'.format(threshold))
         self.threshold = threshold
         self.subconditions = []
 
@@ -65,7 +67,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             subcondition = Condition.from_uri(subcondition)
         elif not isinstance(subcondition, Condition):
             raise TypeError('Subconditions must be URIs or objects of type Condition')
-        if not isinstance(weight, int):
+        if not isinstance(weight, int) or weight < 1:
             raise ValueError('Invalid weight, not an integer: {}'.format(weight))
         self.subconditions.append(
             {
@@ -84,7 +86,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             subcondition_uri (str): Subcondition URI.
         """
         if not isinstance(subcondition_uri, str):
-            raise TypeError('Subcondition must be provided as a URI string')
+            raise TypeError('Subcondition must be provided as a URI string, was {}'.format(subcondition_uri))
         self.add_subcondition(Condition.from_uri(subcondition_uri))
 
     def add_subfulfillment(self, subfulfillment, weight=1):
@@ -125,7 +127,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             subfulfillment_uri (str): Subfulfillment URI.
         """
         if not isinstance(subfulfillment_uri, str):
-            raise TypeError('Subfulfillment must be provided as a URI string')
+            raise TypeError('Subfulfillment must be provided as a URI string, was: {}'.format(subfulfillment_uri))
         self.add_subfulfillment(Fulfillment.from_uri(subfulfillment_uri))
 
     @property

@@ -75,7 +75,9 @@ class Condition(metaclass=ABCMeta):
         Returns:
             Condition: Resulting object
         """
-        if not isinstance(serialized_condition, str):
+        if isinstance(serialized_condition, Condition):
+            return serialized_condition
+        elif not isinstance(serialized_condition, str):
             raise TypeError('Serialized condition must be a string')
 
         pieces = serialized_condition.split(':')

@@ -29,7 +29,9 @@ class Fulfillment(metaclass=ABCMeta):
         Return:
             Fulfillment: Resulting object
         """
-        if not isinstance(serialized_fulfillment, str):
+        if isinstance(serialized_fulfillment, Fulfillment):
+            return serialized_fulfillment
+        elif not isinstance(serialized_fulfillment, str):
             raise TypeError('Serialized fulfillment must be a string')
 
         pieces = serialized_fulfillment.split(':')
