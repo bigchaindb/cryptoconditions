@@ -47,7 +47,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         Args:
             threshold (int): Integer threshold
         """
-        if not isinstance(threshold, int) or threshold < 1:
+        if threshold and (not isinstance(threshold, int) or threshold < 1):
             raise ValueError('Threshold must be a integer greater than zero, was: {}'.format(threshold))
         self.threshold = threshold
         self.subconditions = []

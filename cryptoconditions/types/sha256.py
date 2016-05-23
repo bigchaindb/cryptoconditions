@@ -34,7 +34,7 @@ class PreimageSha256Fulfillment(BaseSha256Fulfillment):
         Args:
              preimage: Secret data that will be hashed to form the condition.
         """
-        if not isinstance(preimage, bytes):
+        if preimage and (not isinstance(preimage, bytes)):
             raise TypeError('Preimage must be bytes, was: {}'.format(preimage))
         self.preimage = preimage
 
