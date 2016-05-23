@@ -59,7 +59,7 @@ setup(
         'Operating System :: POSIX :: Linux',
     ],
 
-    packages=find_packages(exclude=['tests*']),
+    packages=find_packages(exclude=['tests*', 'examples']),
 
     install_requires=[
         'base58==0.2.2',
