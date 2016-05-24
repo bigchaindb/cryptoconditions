@@ -1,8 +1,7 @@
 import binascii
 import json
-import time
+from time import sleep
 
-from datetime import datetime
 from math import ceil
 
 import pytest
@@ -17,6 +16,7 @@ from cryptoconditions import \
 from cryptoconditions.crypto import \
     Ed25519SigningKey as SigningKey, \
     Ed25519VerifyingKey as VerifyingKey
+from cryptoconditions.types.timeout import timestamp
 
 MESSAGE = 'Hello World! Conditions are here!'
 
@@ -515,6 +515,26 @@ class TestThresholdSha256Fulfillment:
 
 class TestTimeoutFulfillment:
 
+    def test_serialize_condition_and_validate_fulfillment(self):
+
+        fulfillment = TimeoutFulfillment(expire_time=timestamp())
+        fulfillment_json = json.loads(fulfillment.serialize_json())
+        parsed_fulfillment = fulfillment.from_json(fulfillment_json)
+
+        assert parsed_fulfillment.condition_uri == fulfillment.condition_uri
+        assert parsed_fulfillment.serialize_uri() == fulfillment.serialize_uri()
+        assert parsed_fulfillment.validate(timestamp()) is False
+
+        fulfillment = TimeoutFulfillment(expire_time=str(float(timestamp())+1000))
+        fulfillment_json = json.loads(fulfillment.serialize_json())
+        parsed_fulfillment = fulfillment.from_json(fulfillment_json)
+
+        assert parsed_fulfillment.condition_uri == fulfillment.condition_uri
+        assert parsed_fulfillment.serialize_uri() == fulfillment.serialize_uri()
+        assert parsed_fulfillment.validate(timestamp()) is True
+
+
+class TestEscrow:
     def create_fulfillment_ed25519sha256(self, sk_ilp, vk_ilp):
         sk = SigningKey(sk_ilp['b58'])
         vk = VerifyingKey(vk_ilp['b58'])
@@ -523,23 +543,135 @@ class TestTimeoutFulfillment:
         fulfillment.sign(MESSAGE, sk)
         return fulfillment
 
-    def timestamp(self):
-        """Calculate a UTC timestamp with microsecond precision.
-
-        Returns:
-            str: UTC timestamp.
-
-        """
-        dt = datetime.utcnow()
-        return "{0:.6f}".format(time.mktime(dt.timetuple()) + dt.microsecond / 1e6)
-
     def test_serialize_condition_and_validate_fulfillment(self,
                                                           fulfillment_sha256,
-                                                          fulfillment_ed25519,
-                                                          fulfillment_threshold):
-
-        ilp_fulfillment_ed25519 = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
+                                                          fulfillment_ed25519):
         ilp_fulfillment_sha = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
+        ilp_fulfillment_ed = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
 
-        assert ilp_fulfillment_ed25519.validate(MESSAGE) == True
-        assert ilp_fulfillment_sha.validate(MESSAGE) == True
+        fulfillment_escrow = ThresholdSha256Fulfillment(threshold=1)
+        fulfillment_timeout = TimeoutFulfillment(expire_time=str(float(timestamp()) + 1000))
+
+        fulfillment_and_execute = ThresholdSha256Fulfillment(threshold=2)
+        fulfillment_and_execute.add_subfulfillment(ilp_fulfillment_ed)
+        fulfillment_and_execute.add_subfulfillment(fulfillment_timeout)
+
+        assert fulfillment_and_execute.validate(MESSAGE, now=timestamp()) is True
+
+        fulfillment_and_abort = ThresholdSha256Fulfillment(threshold=2)
+        fulfillment_and_abort.add_subfulfillment(ilp_fulfillment_sha)
+        fulfillment_and_abort.add_subfulfillment(fulfillment_timeout, weight=-1)
+
+        # timeout has not occured (over about 1000 seconds)
+        assert fulfillment_and_abort.validate(MESSAGE, now=timestamp()) is False
+
+        fulfillment_escrow.add_subfulfillment(fulfillment_and_execute)
+        fulfillment_escrow.add_subfulfillment(fulfillment_and_abort)
+
+        fulfillment_json = json.loads(fulfillment_escrow.serialize_json())
+        parsed_fulfillment = fulfillment_escrow.from_json(fulfillment_json)
+
+        assert parsed_fulfillment.condition_uri == fulfillment_escrow.condition_uri
+        assert parsed_fulfillment.serialize_uri() == fulfillment_escrow.serialize_uri()
+        assert parsed_fulfillment.validate(MESSAGE, now=timestamp()) is True
+
+    def test_escrow_execute(self, fulfillment_sha256, fulfillment_ed25519):
+
+        ilp_fulfillment_sha = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
+        ilp_fulfillment_ed = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
+
+        time_sleep = 3
+
+        fulfillment_escrow = ThresholdSha256Fulfillment(threshold=1)
+        fulfillment_timeout = TimeoutFulfillment(expire_time=str(float(timestamp()) + time_sleep))
+
+        # fulfill execute branch
+        fulfillment_and_execute = ThresholdSha256Fulfillment(threshold=2)
+        fulfillment_and_execute.add_subfulfillment(ilp_fulfillment_ed)
+        fulfillment_and_execute.add_subfulfillment(fulfillment_timeout)
+
+        # do not fulfill abort branch
+        fulfillment_and_abort = ThresholdSha256Fulfillment(threshold=2)
+        fulfillment_and_abort.add_subcondition(ilp_fulfillment_sha.condition)
+        fulfillment_and_abort.add_subfulfillment(fulfillment_timeout, weight=-1)
+
+        fulfillment_escrow.add_subfulfillment(fulfillment_and_execute)
+        fulfillment_escrow.add_subfulfillment(fulfillment_and_abort)
+
+        # in-time validation
+        assert fulfillment_escrow.validate(MESSAGE, now=timestamp()) is True
+
+        sleep(3)
+        # out-of-time validation
+        assert fulfillment_escrow.validate(MESSAGE, now=timestamp()) is False
+
+    def test_escrow_abort(self, fulfillment_sha256, fulfillment_ed25519):
+        ilp_fulfillment_sha = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
+        ilp_fulfillment_ed = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
+
+        time_sleep = 0
+
+        fulfillment_escrow = ThresholdSha256Fulfillment(threshold=1)
+        fulfillment_timeout = TimeoutFulfillment(expire_time=str(float(timestamp()) + time_sleep))
+
+        # do not fulfill execute branch
+        fulfillment_and_execute = ThresholdSha256Fulfillment(threshold=2)
+        fulfillment_and_execute.add_subcondition(ilp_fulfillment_ed.condition)
+        fulfillment_and_execute.add_subfulfillment(fulfillment_timeout)
+
+        fulfillment_and_abort = ThresholdSha256Fulfillment(threshold=2)
+        fulfillment_and_abort.add_subfulfillment(ilp_fulfillment_sha)
+        fulfillment_and_abort.add_subfulfillment(fulfillment_timeout, weight=-1)
+
+        fulfillment_escrow.add_subfulfillment(fulfillment_and_execute)
+        fulfillment_escrow.add_subfulfillment(fulfillment_and_abort)
+
+        # out-of-time validation
+        assert fulfillment_escrow.validate(MESSAGE, now=timestamp()) is True
+
+    def test_escrow_execute_abort(self, fulfillment_sha256, fulfillment_ed25519):
+        ilp_fulfillment_sha = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
+        ilp_fulfillment_ed = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
+
+        time_sleep = 3
+
+        fulfillment_escrow_execute = ThresholdSha256Fulfillment(threshold=1)
+        fulfillment_timeout = TimeoutFulfillment(expire_time=str(float(timestamp()) + time_sleep))
+
+        # fulfill execute branch
+        fulfillment_and_execute = ThresholdSha256Fulfillment(threshold=2)
+        fulfillment_and_execute.add_subfulfillment(ilp_fulfillment_ed)
+        fulfillment_and_execute.add_subfulfillment(fulfillment_timeout)
+
+        # do not fulfill abort branch
+        fulfillment_and_abort = ThresholdSha256Fulfillment(threshold=2)
+        fulfillment_and_abort.add_subcondition(ilp_fulfillment_sha.condition)
+        fulfillment_and_abort.add_subfulfillment(fulfillment_timeout, weight=-1)
+
+        fulfillment_escrow_execute.add_subfulfillment(fulfillment_and_execute)
+        fulfillment_escrow_execute.add_subfulfillment(fulfillment_and_abort)
+
+        # in-time validation
+        assert fulfillment_escrow_execute.validate(MESSAGE, now=timestamp()) is True
+
+        sleep(3)
+        # out-of-time validation
+        assert fulfillment_escrow_execute.validate(MESSAGE, now=timestamp()) is False
+
+        fulfillment_escrow_abort = ThresholdSha256Fulfillment(threshold=1)
+
+        # do not fulfill execute branch
+        fulfillment_and_execute = ThresholdSha256Fulfillment(threshold=2)
+        fulfillment_and_execute.add_subcondition(ilp_fulfillment_ed.condition)
+        fulfillment_and_execute.add_subfulfillment(fulfillment_timeout)
+
+        # fulfill abort branch
+        fulfillment_and_abort = ThresholdSha256Fulfillment(threshold=2)
+        fulfillment_and_abort.add_subfulfillment(ilp_fulfillment_sha)
+        fulfillment_and_abort.add_subfulfillment(fulfillment_timeout, weight=-1)
+
+        fulfillment_escrow_abort.add_subfulfillment(fulfillment_and_execute)
+        fulfillment_escrow_abort.add_subfulfillment(fulfillment_and_abort)
+
+        assert fulfillment_escrow_abort.validate(MESSAGE, now=timestamp()) is True
+

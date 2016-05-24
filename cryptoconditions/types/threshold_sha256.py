@@ -531,7 +531,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             else:
                 raise TypeError('Subconditions must provide either subcondition or fulfillment.')
 
-    def validate(self, message=None):
+    def validate(self, message=None, **kwargs):
         """
         Check whether this fulfillment meets all validation criteria.
 
@@ -565,8 +565,8 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         # TODO: ILP specs see unfulfilled conditions as conditions and not fulfillments
         valid_decisions = []
         for fulfillment in fulfillments:
-            if (fulfillment['weight'] > 0 and fulfillment['body'].validate(message)) or \
-                    (fulfillment['weight'] < 0 and not fulfillment['body'].validate(message)):
+            if (fulfillment['weight'] > 0 and fulfillment['body'].validate(message, **kwargs)) or \
+                    (fulfillment['weight'] < 0 and not fulfillment['body'].validate(message, **kwargs)):
                 valid_decisions += [True] * abs(fulfillment['weight'])
         return len(valid_decisions) >= self.threshold
 
