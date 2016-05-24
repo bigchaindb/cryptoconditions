@@ -67,8 +67,8 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             subcondition = Condition.from_uri(subcondition)
         elif not isinstance(subcondition, Condition):
             raise TypeError('Subconditions must be URIs or objects of type Condition')
-        if not isinstance(weight, int) or weight < 1:
-            raise ValueError('Invalid weight, not an integer: {}'.format(weight))
+        if not isinstance(weight, int) or weight == 0:
+            raise ValueError('Invalid weight: {}'.format(weight))
         self.subconditions.append(
             {
                 'type': CONDITION,
@@ -108,8 +108,8 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             subfulfillment = Fulfillment.from_uri(subfulfillment)
         elif not isinstance(subfulfillment, Fulfillment):
             raise TypeError('Subfulfillments must be URIs or objects of type Fulfillment')
-        if not isinstance(weight, int):
-            raise ValueError('Invalid weight, not an integer: {}'.format(weight))
+        if not isinstance(weight, int) or weight == 0:
+            raise ValueError('Invalid weight: {}'.format(weight))
         self.subconditions.append(
             {
                 'type': FULFILLMENT,
@@ -197,7 +197,8 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         for c in self.subconditions:
             # Serialize each subcondition with weight
             writer = Writer()
-            writer.write_var_uint(c['weight'])
+            write_weight(writer, c['weight'])
+            # writer.write_var_uint(c['weight'])
             writer.write(c['body'].condition_binary
                          if c['type'] == FULFILLMENT
                          else c['body'].serialize_binary())
@@ -239,7 +240,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
                 'size': fulfillment_len - condition_len
             })
 
-        subconditions.sort(key=lambda x: x['weight'])
+        subconditions.sort(key=lambda x: abs(x['weight']))
 
         worst_case_fulfillments_length = total_condition_len + \
             ThresholdSha256Fulfillment.calculate_worst_case_length(self.threshold, subconditions)
@@ -254,7 +255,8 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         for c in self.subconditions:
             predictor.write_uint8(None)                        # presence bitmask
             if not c['weight'] == 1:
-                predictor.write_var_uint(c['weight'])      # weight
+                write_weight(predictor, c['weight'])
+                # predictor.write_var_uint(c['weight'])      # weight
 
         # Represents the sum of CONDITION/FULFILLMENT values
         predictor.skip(worst_case_fulfillments_length)
@@ -315,7 +317,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             next_condition = subconditions[index]
             return max(
                 next_condition['size'] + ThresholdSha256Fulfillment.calculate_worst_case_length(
-                    threshold - next_condition['weight'], subconditions, index + 1),
+                    threshold - abs(next_condition['weight']), subconditions, index + 1),
                 ThresholdSha256Fulfillment.calculate_worst_case_length(threshold, subconditions, index + 1)
             )
         else:
@@ -336,7 +338,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
 
         condition_count = reader.read_var_uint()
         for i in range(condition_count):
-            weight = reader.read_var_uint()
+            reader, weight = read_weight(reader)
             fulfillment = reader.read_var_octet_string()
             condition = reader.read_var_octet_string()
 
@@ -403,7 +405,8 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         serialized_subconditions = []
         for c in optimized_subfulfillments:
             writer_ = Writer()
-            writer_.write_var_uint(c['weight'])
+            writer_ = write_weight(writer_, c['weight'])
+            # writer_.write_var_uint(c['weight'])
             writer_.write_var_octet_string(c['body'].serialize_binary() if c['type'] == FULFILLMENT else '')
             writer_.write_var_octet_string(c['body'].serialize_binary() if c['type'] == CONDITION else '')
             serialized_subconditions.append(writer_.buffer)
@@ -443,7 +446,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         elif state['index'] < len(fulfillments):
             next_fulfillment = fulfillments[state['index']]
             with_next = ThresholdSha256Fulfillment.calculate_smallest_valid_fulfillment_set(
-                threshold - next_fulfillment['weight'],
+                threshold - abs(next_fulfillment['weight']),
                 fulfillments,
                 {
                     'size': state['size'] + next_fulfillment['size'],
@@ -546,7 +549,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         min_weight = float('inf')
         total_weight = 0
         for fulfillment in fulfillments:
-            min_weight = min(min_weight, fulfillment['weight'])
+            min_weight = min(min_weight, abs(fulfillment['weight']))
             total_weight += min_weight
 
         # Total weight must meet the threshold
@@ -560,5 +563,27 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         #     # Fulfillment is not minimal
         #     return False
         # TODO: ILP specs see unfulfilled conditions as conditions and not fulfillments
-        valid_decisions = [valid for valid in [f['body'].validate(message) for f in fulfillments] if valid is True]
+        valid_decisions = []
+        for fulfillment in fulfillments:
+            if (fulfillment['weight'] > 0 and fulfillment['body'].validate(message)) or \
+                    (fulfillment['weight'] < 0 and not fulfillment['body'].validate(message)):
+                valid_decisions += [True] * abs(fulfillment['weight'])
         return len(valid_decisions) >= self.threshold
+
+
+def write_weight(writer, weight):
+    if weight > 0:
+        writer.write_var_uint(weight)
+    else:
+        writer.write_var_octet_string(str(weight))
+    return writer
+
+
+def read_weight(reader):
+    cursor = reader.cursor
+    try:
+        weight = int(reader.read_var_octet_string())
+    except ValueError:
+        reader.cursor = cursor
+        weight = reader.read_var_uint()
+    return reader, weight
