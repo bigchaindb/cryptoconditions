@@ -523,7 +523,7 @@ class TestTimeoutFulfillment:
 
         assert parsed_fulfillment.condition_uri == fulfillment.condition_uri
         assert parsed_fulfillment.serialize_uri() == fulfillment.serialize_uri()
-        assert parsed_fulfillment.validate(timestamp()) is False
+        assert parsed_fulfillment.validate(now=timestamp()) is False
 
         fulfillment = TimeoutFulfillment(expire_time=str(float(timestamp())+1000))
         fulfillment_json = json.loads(fulfillment.serialize_json())
@@ -531,7 +531,7 @@ class TestTimeoutFulfillment:
 
         assert parsed_fulfillment.condition_uri == fulfillment.condition_uri
         assert parsed_fulfillment.serialize_uri() == fulfillment.serialize_uri()
-        assert parsed_fulfillment.validate(timestamp()) is True
+        assert parsed_fulfillment.validate(now=timestamp()) is True
 
 
 class TestEscrow:
