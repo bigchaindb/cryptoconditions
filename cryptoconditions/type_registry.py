@@ -1,5 +1,5 @@
 # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
-# we don't use sys.maxint (= 2 ** 63 - 1) as this spec is inline with the ILP JavaScript reference implementation
+# we don't use sys.maxint (= 2 ** 63 - 1) as this spec is in line with the ILP JavaScript reference implementation
 # see https://interledger.org/
 MAX_SAFE_INTEGER_JS = 2 ** 53 - 1
 

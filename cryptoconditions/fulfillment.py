@@ -40,16 +40,16 @@ class Fulfillment(metaclass=ABCMeta):
 
         if not re.match(Fulfillment.REGEX, serialized_fulfillment):
             raise ValueError('Invalid fulfillment format')
-        try:
-            type_id = int(pieces[1], 16)
-            payload = base64.urlsafe_b64decode(base64_add_padding(pieces[2]))
+        # try:
+        type_id = int(pieces[1], 16)
+        payload = base64.urlsafe_b64decode(base64_add_padding(pieces[2]))
 
-            cls = TypeRegistry.get_class_from_type_id(type_id)
-            fulfillment = cls()
+        cls = TypeRegistry.get_class_from_type_id(type_id)
+        fulfillment = cls()
 
-            fulfillment.parse_payload(Reader.from_source(payload), len(payload))
-        except Exception as e:
-            raise ParsingError(str(e))
+        fulfillment.parse_payload(Reader.from_source(payload), len(payload))
+        # except Exception as e:
+        #     raise ParsingError(str(e))
 
         return fulfillment
 

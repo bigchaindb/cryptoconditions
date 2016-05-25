@@ -142,7 +142,7 @@ class Ed25519Fulfillment(Fulfillment):
         self.public_key = VerifyingKey(json_data['public_key'])
         self.signature = base58.b58decode(json_data['signature']) if json_data['signature'] else None
 
-    def validate(self, message=None):
+    def validate(self, message=None, **kwargs):
         """
         Verify the signature of this Ed25519 fulfillment.
 
