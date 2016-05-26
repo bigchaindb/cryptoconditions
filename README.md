@@ -122,7 +122,7 @@ FULFILLMENT =
 
 # Condition Types
 
-## SHA-256
+## Preimage-SHA-256
 
 ### Condition
 
@@ -315,53 +315,105 @@ threshold_fulfillment.threshold = 3 # AND gate
 
 print(threshold_fulfillment.serialize_uri())
 # prints 'cf:2:AQMBAwEBAwAAAAABAWMABGDsFyuTrV5WO_STLHDhJFA0w1Rn7y79TWTr-BloNGfiv7YikfrZQy-PKYucSkiV2-KT9v_aGmja3wzN719HoMchKl_qPNqXo_TAPqny6Kwc7IalHUUhJ6vboJ0bbzMcBwoAAQGBmgACgZYBAQECAQEAJwAEASAg7Bcrk61eVjv0kyxw4SRQNMNUZ-8u_U1k6_gZaDRn4r8BYAEBYwAEYOwXK5OtXlY79JMscOEkUDTDVGfvLv1NZOv4GWg0Z-K_tiKR-tlDL48pi5xKSJXb4pP2_9oaaNrfDM3vX0egxyEqX-o82pej9MA-qfLorBzshqUdRSEnq9ugnRtvMxwHCgAA'
-print(json.dumps(json.loads(threshold_fulfillment.serialize_json()), sort_keys=True, indent=2, separators=(',', ':')))
-#  {
-#   "bitmask":43,
-#   "subfulfillments":[
-#     {
-#       "bitmask":3,
-#       "preimage":"",
-#       "type":"fulfillment",
-#       "type_id":0,
-#       "weight":1
-#     },
-#     {
-#       "bitmask":32,
-#       "public_key":"Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU",
-#       "signature":"4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj",
-#       "type":"fulfillment",
-#       "type_id":4,
-#       "weight":1
-#     },
-#     {
-#       "bitmask":41,
-#       "subfulfillments":[
-#         {
-#           "bitmask":32,
-#           "public_key":"Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU",
-#           "signature":"4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj",
-#           "type":"fulfillment",
-#           "type_id":4,
-#           "weight":1
-#         },
-#         {
-#           "bitmask":32,
-#           "public_key":"Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU",
-#           "signature":"4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj",
-#           "type":"fulfillment",
-#           "type_id":4,
-#           "weight":1
-#         }
-#       ],
-#       "threshold":1,
-#       "type":"fulfillment",
-#       "type_id":2,
-#       "weight":1
-#     }
-#   ],
-#   "threshold":3,
-#   "type":"fulfillment",
-#   "type_id":2
-# }
+threshold_fulfillment.serialize_json()
+```
+
+```python
+  {
+   "bitmask":43,
+   "subfulfillments":[
+     {
+       "bitmask":3,
+       "preimage":"",
+       "type":"fulfillment",
+       "type_id":0,
+       "weight":1
+     },
+     {
+       "bitmask":32,
+       "public_key":"Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU",
+       "signature":"4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj",
+       "type":"fulfillment",
+       "type_id":4,
+       "weight":1
+     },
+     {
+       "bitmask":41,
+       "subfulfillments":[
+         {
+           "bitmask":32,
+           "public_key":"Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU",
+           "signature":"4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj",
+           "type":"fulfillment",
+           "type_id":4,
+           "weight":1
+         },
+         {
+           "bitmask":32,
+           "public_key":"Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU",
+           "signature":"4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj",
+           "type":"fulfillment",
+           "type_id":4,
+           "weight":1
+         }
+       ],
+       "threshold":1,
+       "type":"fulfillment",
+       "type_id":2,
+       "weight":1
+     }
+   ],
+   "threshold":3,
+   "type":"fulfillment",
+   "type_id":2
+ }
+```
+
+
+## (unofficial) Timeout-SHA-256
+
+Extends Preimage-SHA-256
+
+### Condition
+
+```
+HASH = SHA256(EXPIRE_TIME)
+```
+
+
+### Fulfillment
+
+```
+FULFILLMENT_PAYLOAD =
+  VARBYTES EXPIRE_TIME
+```
+
+### Usage
+
+```python
+from time import sleep
+
+import cryptoconditions as cc
+from cryptoconditions.types.timeout import timestamp
+
+time_expire = str(float(timestamp()) + 5)  # 5 secs from now
+timeout_fulfillment = cc.TimeoutFulfillment(expire_time=time_expire)
+
+# Small test to see the state change
+for i in range(8):
+    timeout_valid = timeout_fulfillment.validate(now=timestamp())
+    seconds_to_timeout = int(float(time_expire) - float(timestamp()))
+    print('timeout_fulfillment valid: {} ({}s to timeout)'.format(timeout_valid, seconds_to_timeout))
+    sleep(1)
+```
+
+```python
+timeout_fulfillment valid: True (3s to timeout)
+timeout_fulfillment valid: True (2s to timeout)
+timeout_fulfillment valid: True (1s to timeout)
+timeout_fulfillment valid: True (0s to timeout)
+timeout_fulfillment valid: False (0s to timeout)
+timeout_fulfillment valid: False (-1s to timeout)
+timeout_fulfillment valid: False (-2s to timeout)
+timeout_fulfillment valid: False (-3s to timeout)
 ```
