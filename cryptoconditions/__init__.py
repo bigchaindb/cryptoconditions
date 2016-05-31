@@ -1,6 +1,7 @@
 from cryptoconditions.type_registry import TypeRegistry
 from cryptoconditions.types.sha256 import PreimageSha256Fulfillment
 from cryptoconditions.types.threshold_sha256 import ThresholdSha256Fulfillment
+from cryptoconditions.types.inverted_threshold_sha256 import InvertedThresholdSha256Fulfillment
 from cryptoconditions.types.ed25519 import Ed25519Fulfillment
 from cryptoconditions.types.timeout import TimeoutFulfillment
 from cryptoconditions.fulfillment import Fulfillment
@@ -9,5 +10,6 @@ from cryptoconditions.condition import Condition
 
 TypeRegistry.register_type(PreimageSha256Fulfillment)
 TypeRegistry.register_type(ThresholdSha256Fulfillment)
+TypeRegistry.register_type(InvertedThresholdSha256Fulfillment)
 TypeRegistry.register_type(Ed25519Fulfillment)
 TypeRegistry.register_type(TimeoutFulfillment)

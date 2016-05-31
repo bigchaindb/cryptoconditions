@@ -1,9 +1,9 @@
 import json
 
 import copy
-from cryptoconditions.types.ed25519 import Ed25519Fulfillment
 from cryptoconditions.condition import Condition
 from cryptoconditions.fulfillment import Fulfillment
+from cryptoconditions.types.ed25519 import Ed25519Fulfillment
 from cryptoconditions.lib import Predictor, Reader, Writer
 from cryptoconditions.types.base_sha256 import BaseSha256Fulfillment
 
@@ -67,7 +67,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             subcondition = Condition.from_uri(subcondition)
         elif not isinstance(subcondition, Condition):
             raise TypeError('Subconditions must be URIs or objects of type Condition')
-        if not isinstance(weight, int) or weight == 0:
+        if not isinstance(weight, int) or weight < 1:
             raise ValueError('Invalid weight: {}'.format(weight))
         self.subconditions.append(
             {
@@ -108,7 +108,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             subfulfillment = Fulfillment.from_uri(subfulfillment)
         elif not isinstance(subfulfillment, Fulfillment):
             raise TypeError('Subfulfillments must be URIs or objects of type Fulfillment')
-        if not isinstance(weight, int) or weight == 0:
+        if not isinstance(weight, int) or weight < 1:
             raise ValueError('Invalid weight: {}'.format(weight))
         self.subconditions.append(
             {
@@ -197,8 +197,8 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         for c in self.subconditions:
             # Serialize each subcondition with weight
             writer = Writer()
-            write_weight(writer, c['weight'])
-            # writer.write_var_uint(c['weight'])
+            # write_weight(writer, c['weight'])
+            writer.write_var_uint(c['weight'])
             writer.write(c['body'].condition_binary
                          if c['type'] == FULFILLMENT
                          else c['body'].serialize_binary())
@@ -255,8 +255,8 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         for c in self.subconditions:
             predictor.write_uint8(None)                        # presence bitmask
             if not c['weight'] == 1:
-                write_weight(predictor, c['weight'])
-                # predictor.write_var_uint(c['weight'])      # weight
+                # write_weight(predictor, c['weight'])
+                predictor.write_var_uint(c['weight'])      # weight
 
         # Represents the sum of CONDITION/FULFILLMENT values
         predictor.skip(worst_case_fulfillments_length)
@@ -338,7 +338,8 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
 
         condition_count = reader.read_var_uint()
         for i in range(condition_count):
-            reader, weight = read_weight(reader)
+            weight = reader.read_var_uint()
+            # reader, weight = read_weight(reader)
             fulfillment = reader.read_var_octet_string()
             condition = reader.read_var_octet_string()
 
@@ -405,8 +406,8 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         serialized_subconditions = []
         for c in optimized_subfulfillments:
             writer_ = Writer()
-            writer_ = write_weight(writer_, c['weight'])
-            # writer_.write_var_uint(c['weight'])
+            # writer_ = write_weight(writer_, c['weight'])
+            writer_.write_var_uint(c['weight'])
             writer_.write_var_octet_string(c['body'].serialize_binary() if c['type'] == FULFILLMENT else '')
             writer_.write_var_octet_string(c['body'].serialize_binary() if c['type'] == CONDITION else '')
             serialized_subconditions.append(writer_.buffer)
@@ -500,7 +501,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         return json.dumps(
             {
                 'type': 'fulfillment',
-                'type_id': ThresholdSha256Fulfillment.TYPE_ID,
+                'type_id': self.TYPE_ID,
                 'bitmask': self.bitmask,
                 'threshold': self.threshold,
                 'subfulfillments': subfulfillments_json
@@ -565,25 +566,6 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         # TODO: ILP specs see unfulfilled conditions as conditions and not fulfillments
         valid_decisions = []
         for fulfillment in fulfillments:
-            if (fulfillment['weight'] > 0 and fulfillment['body'].validate(message, **kwargs)) or \
-                    (fulfillment['weight'] < 0 and not fulfillment['body'].validate(message, **kwargs)):
-                valid_decisions += [True] * abs(fulfillment['weight'])
+            if fulfillment['body'].validate(message, **kwargs):
+                valid_decisions += [True] * fulfillment['weight']
         return len(valid_decisions) >= self.threshold
-
-
-def write_weight(writer, weight):
-    if weight > 0:
-        writer.write_var_uint(weight)
-    else:
-        writer.write_var_octet_string(str(weight))
-    return writer
-
-
-def read_weight(reader):
-    cursor = reader.cursor
-    try:
-        weight = int(reader.read_var_octet_string())
-    except ValueError:
-        reader.cursor = cursor
-        weight = reader.read_var_uint()
-    return reader, weight
