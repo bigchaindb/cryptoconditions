@@ -122,7 +122,7 @@ class Ed25519Fulfillment(Fulfillment):
         return json.dumps(
             {
                 'type': 'fulfillment',
-                'type_id': Ed25519Fulfillment.TYPE_ID,
+                'type_id': self.TYPE_ID,
                 'bitmask': self.bitmask,
                 'public_key': self.public_key.to_ascii(encoding='base58').decode(),
                 'signature': base58.b58encode(self.signature) if self.signature else None

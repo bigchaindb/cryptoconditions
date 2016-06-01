@@ -12,6 +12,7 @@ from cryptoconditions import \
     PreimageSha256Fulfillment, \
     Ed25519Fulfillment, \
     ThresholdSha256Fulfillment, \
+    InvertedThresholdSha256Fulfillment, \
     TimeoutFulfillment
 from cryptoconditions.crypto import \
     Ed25519SigningKey as SigningKey, \
@@ -354,24 +355,8 @@ class TestThresholdSha256Fulfillment:
         assert parsed_fulfillment3.validate(MESSAGE) is True
 
         fulfillment4 = ThresholdSha256Fulfillment(threshold=2)
-        fulfillment4.add_subfulfillment(ilp_fulfillment, weight=-2)
-        fulfillment_json = json.loads(fulfillment4.serialize_json())
-        parsed_fulfillment4 = fulfillment4.from_json(fulfillment_json)
-
-        assert parsed_fulfillment4.condition.serialize_uri() == fulfillment4.condition.serialize_uri()
-        assert not (fulfillment4.condition.serialize_uri() == fulfillment1.condition.serialize_uri())
-        assert parsed_fulfillment4.validate(MESSAGE) is False
-
-        fulfillment5 = ThresholdSha256Fulfillment(threshold=1)
-        subfulfillment5 = ThresholdSha256Fulfillment(threshold=2)
-        subfulfillment5.add_subfulfillment(ilp_fulfillment, weight=-2)
-        fulfillment5.add_subfulfillment(subfulfillment5, weight=-1)
-        fulfillment_json = json.loads(fulfillment5.serialize_json())
-        parsed_fulfillment5 = fulfillment5.from_json(fulfillment_json)
-
-        assert parsed_fulfillment5.condition.serialize_uri() == fulfillment5.condition.serialize_uri()
-        assert not (fulfillment5.condition.serialize_uri() == fulfillment1.condition.serialize_uri())
-        assert parsed_fulfillment5.validate(MESSAGE) is True
+        with pytest.raises(ValueError):
+            fulfillment4.add_subfulfillment(ilp_fulfillment, weight=-2)
 
     def test_serialize_deserialize_fulfillment(self,
                                                fulfillment_ed25519):
@@ -513,6 +498,24 @@ class TestThresholdSha256Fulfillment:
         assert deserialized_condition.serialize_uri() == condition_uri
 
 
+class TestInvertedThresholdSha256Fulfillment:
+
+    def test_serialize_condition_and_validate_fulfillment(self,
+                                                          fulfillment_ed25519):
+        ilp_fulfillment_ed = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
+
+        fulfillment = InvertedThresholdSha256Fulfillment(threshold=1)
+        fulfillment.add_subfulfillment(ilp_fulfillment_ed)
+        fulfillment_json = json.loads(fulfillment.serialize_json())
+        parsed_fulfillment = fulfillment.from_json(fulfillment_json)
+
+        assert parsed_fulfillment.condition_uri == fulfillment.condition_uri
+        assert parsed_fulfillment.serialize_uri() == fulfillment.serialize_uri()
+        assert parsed_fulfillment.validate(MESSAGE) is False
+        assert parsed_fulfillment.validate() is True
+        assert isinstance(parsed_fulfillment, InvertedThresholdSha256Fulfillment)
+
+
 class TestTimeoutFulfillment:
 
     def test_serialize_condition_and_validate_fulfillment(self):
@@ -551,6 +554,8 @@ class TestEscrow:
 
         fulfillment_escrow = ThresholdSha256Fulfillment(threshold=1)
         fulfillment_timeout = TimeoutFulfillment(expire_time=str(float(timestamp()) + 1000))
+        fulfillment_timeout_inverted = InvertedThresholdSha256Fulfillment(threshold=1)
+        fulfillment_timeout_inverted.add_subfulfillment(fulfillment_timeout)
 
         fulfillment_and_execute = ThresholdSha256Fulfillment(threshold=2)
         fulfillment_and_execute.add_subfulfillment(ilp_fulfillment_ed)
@@ -560,7 +565,7 @@ class TestEscrow:
 
         fulfillment_and_abort = ThresholdSha256Fulfillment(threshold=2)
         fulfillment_and_abort.add_subfulfillment(ilp_fulfillment_sha)
-        fulfillment_and_abort.add_subfulfillment(fulfillment_timeout, weight=-1)
+        fulfillment_and_abort.add_subfulfillment(fulfillment_timeout_inverted)
 
         # timeout has not occured (over about 1000 seconds)
         assert fulfillment_and_abort.validate(MESSAGE, now=timestamp()) is False
@@ -584,6 +589,8 @@ class TestEscrow:
 
         fulfillment_escrow = ThresholdSha256Fulfillment(threshold=1)
         fulfillment_timeout = TimeoutFulfillment(expire_time=str(float(timestamp()) + time_sleep))
+        fulfillment_timeout_inverted = InvertedThresholdSha256Fulfillment(threshold=1)
+        fulfillment_timeout_inverted.add_subfulfillment(fulfillment_timeout)
 
         # fulfill execute branch
         fulfillment_and_execute = ThresholdSha256Fulfillment(threshold=2)
@@ -593,7 +600,7 @@ class TestEscrow:
         # do not fulfill abort branch
         fulfillment_and_abort = ThresholdSha256Fulfillment(threshold=2)
         fulfillment_and_abort.add_subcondition(ilp_fulfillment_sha.condition)
-        fulfillment_and_abort.add_subfulfillment(fulfillment_timeout, weight=-1)
+        fulfillment_and_abort.add_subfulfillment(fulfillment_timeout_inverted)
 
         fulfillment_escrow.add_subfulfillment(fulfillment_and_execute)
         fulfillment_escrow.add_subfulfillment(fulfillment_and_abort)
@@ -613,6 +620,8 @@ class TestEscrow:
 
         fulfillment_escrow = ThresholdSha256Fulfillment(threshold=1)
         fulfillment_timeout = TimeoutFulfillment(expire_time=str(float(timestamp()) + time_sleep))
+        fulfillment_timeout_inverted = InvertedThresholdSha256Fulfillment(threshold=1)
+        fulfillment_timeout_inverted.add_subfulfillment(fulfillment_timeout)
 
         # do not fulfill execute branch
         fulfillment_and_execute = ThresholdSha256Fulfillment(threshold=2)
@@ -621,7 +630,7 @@ class TestEscrow:
 
         fulfillment_and_abort = ThresholdSha256Fulfillment(threshold=2)
         fulfillment_and_abort.add_subfulfillment(ilp_fulfillment_sha)
-        fulfillment_and_abort.add_subfulfillment(fulfillment_timeout, weight=-1)
+        fulfillment_and_abort.add_subfulfillment(fulfillment_timeout_inverted)
 
         fulfillment_escrow.add_subfulfillment(fulfillment_and_execute)
         fulfillment_escrow.add_subfulfillment(fulfillment_and_abort)
@@ -637,6 +646,8 @@ class TestEscrow:
 
         fulfillment_escrow_execute = ThresholdSha256Fulfillment(threshold=1)
         fulfillment_timeout = TimeoutFulfillment(expire_time=str(float(timestamp()) + time_sleep))
+        fulfillment_timeout_inverted = InvertedThresholdSha256Fulfillment(threshold=1)
+        fulfillment_timeout_inverted.add_subfulfillment(fulfillment_timeout)
 
         # fulfill execute branch
         fulfillment_and_execute = ThresholdSha256Fulfillment(threshold=2)
@@ -646,7 +657,7 @@ class TestEscrow:
         # do not fulfill abort branch
         fulfillment_and_abort = ThresholdSha256Fulfillment(threshold=2)
         fulfillment_and_abort.add_subcondition(ilp_fulfillment_sha.condition)
-        fulfillment_and_abort.add_subfulfillment(fulfillment_timeout, weight=-1)
+        fulfillment_and_abort.add_subfulfillment(fulfillment_timeout_inverted)
 
         fulfillment_escrow_execute.add_subfulfillment(fulfillment_and_execute)
         fulfillment_escrow_execute.add_subfulfillment(fulfillment_and_abort)
@@ -668,7 +679,7 @@ class TestEscrow:
         # fulfill abort branch
         fulfillment_and_abort = ThresholdSha256Fulfillment(threshold=2)
         fulfillment_and_abort.add_subfulfillment(ilp_fulfillment_sha)
-        fulfillment_and_abort.add_subfulfillment(fulfillment_timeout, weight=-1)
+        fulfillment_and_abort.add_subfulfillment(fulfillment_timeout_inverted)
 
         fulfillment_escrow_abort.add_subfulfillment(fulfillment_and_execute)
         fulfillment_escrow_abort.add_subfulfillment(fulfillment_and_abort)

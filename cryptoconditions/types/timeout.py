@@ -41,7 +41,7 @@ class TimeoutFulfillment(PreimageSha256Fulfillment):
         return json.dumps(
             {
                 'type': 'fulfillment',
-                'type_id': TimeoutFulfillment.TYPE_ID,
+                'type_id': self.TYPE_ID,
                 'bitmask': self.bitmask,
                 'expire_time': self.expire_time.decode()
             }

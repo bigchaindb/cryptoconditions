@@ -102,7 +102,7 @@ class PreimageSha256Fulfillment(BaseSha256Fulfillment):
         return json.dumps(
             {
                 'type': 'fulfillment',
-                'type_id': PreimageSha256Fulfillment.TYPE_ID,
+                'type_id': self.TYPE_ID,
                 'bitmask': self.bitmask,
                 'preimage': self.preimage.decode()
             }
