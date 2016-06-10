@@ -107,6 +107,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         elif not isinstance(subfulfillment, Fulfillment):
             raise TypeError('Subfulfillments must be URIs or objects of type Fulfillment')
         if not isinstance(weight, int) or weight < 1:
+            # TODO: Add a more helpful error message.
             raise ValueError('Invalid weight: {}'.format(weight))
         self.subconditions.append(
             {
