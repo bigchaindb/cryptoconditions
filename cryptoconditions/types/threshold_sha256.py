@@ -511,7 +511,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         Generate fulfillment payload from a dict
 
         Args:
-            data: dict description of the fulfillment
+            data (dict): description of the fulfillment
 
         Returns:
             Fulfillment
