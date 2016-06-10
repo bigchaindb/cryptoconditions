@@ -1,5 +1,4 @@
 import binascii
-import json
 from time import sleep
 
 from math import ceil
@@ -45,20 +44,13 @@ class TestSha256Fulfillment:
         assert fulfillment.condition.serialize_uri() == fulfillment_sha256['condition_uri']
         assert fulfillment.validate()
 
-    def test_serialize_json(self, fulfillment_sha256):
+    def test_fulfillment_serialize_to_dict(self, fulfillment_sha256):
         fulfillment = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
-
-        assert json.loads(fulfillment.serialize_json()) == \
-            {'bitmask': 3, 'preimage': '', 'type': 'fulfillment', 'type_id': 0}
-
-    def test_deserialize_json(self, fulfillment_sha256):
-        fulfillment = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
-        fulfillment_json = json.loads(fulfillment.serialize_json())
-        parsed_fulfillment = fulfillment.from_json(fulfillment_json)
+        parsed_fulfillment = fulfillment.from_dict(fulfillment.to_dict())
 
         assert parsed_fulfillment.serialize_uri() == fulfillment.serialize_uri()
         assert parsed_fulfillment.condition.serialize_uri() == fulfillment.condition.serialize_uri()
-        assert parsed_fulfillment.serialize_json() == fulfillment.serialize_json()
+        assert parsed_fulfillment.to_dict() == fulfillment.to_dict()
 
     def test_deserialize_condition_and_validate_fulfillment(self, fulfillment_sha256):
         condition = Condition.from_uri(fulfillment_sha256['condition_uri'])
@@ -123,10 +115,10 @@ class TestEd25519Sha256Fulfillment:
         assert deserialized_condition.serialize_uri() == fulfillment_ed25519['condition_uri']
         assert binascii.hexlify(deserialized_condition.hash) == fulfillment_ed25519['condition_hash']
 
-    def test_serialize_json_signed(self, fulfillment_ed25519):
+    def test_serialize_signed_dict_to_fulfillment(self, fulfillment_ed25519):
         fulfillment = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
 
-        assert json.loads(fulfillment.serialize_json()) == \
+        assert fulfillment.to_dict()== \
             {'bitmask': 32,
              'public_key': 'Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU',
              'signature': '4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj',
@@ -135,10 +127,10 @@ class TestEd25519Sha256Fulfillment:
 
         assert fulfillment.validate(MESSAGE) == True
 
-    def test_serialize_json_unsigned(self, vk_ilp):
+    def test_serialize_unsigned_dict_to_fulfillment(self, vk_ilp):
         fulfillment = Ed25519Fulfillment(public_key=vk_ilp['b58'])
 
-        assert json.loads(fulfillment.serialize_json()) == \
+        assert fulfillment.to_dict() == \
             {'bitmask': 32,
              'public_key': 'Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU',
              'signature': None,
@@ -146,23 +138,20 @@ class TestEd25519Sha256Fulfillment:
              'type_id': 4}
         assert fulfillment.validate(MESSAGE) == False
 
-    def test_deserialize_json_signed(self, fulfillment_ed25519):
+    def test_deserialize_signed_dict_to_fulfillment(self, fulfillment_ed25519):
         fulfillment = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
-        fulfillment_json = json.loads(fulfillment.serialize_json())
-        parsed_fulfillment = fulfillment.from_json(fulfillment_json)
+        parsed_fulfillment = fulfillment.from_dict(fulfillment.to_dict())
 
         assert parsed_fulfillment.serialize_uri() == fulfillment_ed25519['fulfillment_uri']
         assert parsed_fulfillment.condition.serialize_uri() == fulfillment.condition.serialize_uri()
-        assert parsed_fulfillment.serialize_json() == fulfillment.serialize_json()
+        assert parsed_fulfillment.to_dict() == fulfillment.to_dict()
 
-    def test_deserialize_json_unsigned(self, vk_ilp):
+    def test_deserialize_unsigned_dict_to_fulfillment(self, vk_ilp):
         fulfillment = Ed25519Fulfillment(public_key=vk_ilp['b58'])
-
-        fulfillment_json = json.loads(fulfillment.serialize_json())
-        parsed_fulfillment = fulfillment.from_json(fulfillment_json)
+        parsed_fulfillment = fulfillment.from_dict(fulfillment.to_dict())
 
         assert parsed_fulfillment.condition.serialize_uri() == fulfillment.condition.serialize_uri()
-        assert parsed_fulfillment.serialize_json() == fulfillment.serialize_json()
+        assert parsed_fulfillment.to_dict() == fulfillment.to_dict()
 
     def test_serialize_deserialize_condition(self, vk_ilp):
         vk = VerifyingKey(vk_ilp['b58'])
@@ -262,10 +251,10 @@ class TestThresholdSha256Fulfillment:
         assert len(fulfillment.subconditions) == num_fulfillments
         assert fulfillment.validate(MESSAGE)
 
-    def test_serialize_json_signed(self, fulfillment_threshold):
+    def test_serialize_signed_dict_to_fulfillment(self, fulfillment_threshold):
         fulfillment = Fulfillment.from_uri(fulfillment_threshold['fulfillment_uri'])
 
-        assert json.loads(fulfillment.serialize_json()) == \
+        assert fulfillment.to_dict() == \
             {'bitmask': 43,
              'subfulfillments': [{'bitmask': 3,
                                   'preimage': '',
@@ -282,12 +271,12 @@ class TestThresholdSha256Fulfillment:
              'type': 'fulfillment',
              'type_id': 2}
 
-    def test_serialize_json_unsigned(self, vk_ilp):
+    def test_serialize_unsigned_dict_to_fulfillment(self, vk_ilp):
         fulfillment = ThresholdSha256Fulfillment(threshold=1)
         fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=VerifyingKey(vk_ilp['b58'])))
         fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=VerifyingKey(vk_ilp['b58'])))
 
-        assert json.loads(fulfillment.serialize_json()) == \
+        assert fulfillment.to_dict() == \
             {'bitmask': 41,
              'subfulfillments': [{'bitmask': 32,
                                   'public_key': 'Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU',
@@ -305,50 +294,45 @@ class TestThresholdSha256Fulfillment:
              'type': 'fulfillment',
              'type_id': 2}
 
-    def test_deserialize_json_signed(self, fulfillment_threshold):
+    def test_deserialize_signed_dict_to_fulfillment(self, fulfillment_threshold):
         fulfillment = Fulfillment.from_uri(fulfillment_threshold['fulfillment_uri'])
-        fulfillment_json = json.loads(fulfillment.serialize_json())
-        parsed_fulfillment = fulfillment.from_json(fulfillment_json)
+        parsed_fulfillment = fulfillment.from_dict(fulfillment.to_dict())
 
         assert parsed_fulfillment.serialize_uri() == fulfillment_threshold['fulfillment_uri']
         assert parsed_fulfillment.condition.serialize_uri() == fulfillment.condition.serialize_uri()
-        assert parsed_fulfillment.serialize_json() == fulfillment.serialize_json()
+        assert parsed_fulfillment.to_dict() == fulfillment.to_dict()
 
-    def test_deserialize_json_unsigned(self, vk_ilp):
+    def test_deserialize_unsigned_dict_to_fulfillment(self, vk_ilp):
         fulfillment = ThresholdSha256Fulfillment(threshold=1)
         fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=VerifyingKey(vk_ilp['b58'])))
         fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=VerifyingKey(vk_ilp['b58'])))
-        fulfillment_json = json.loads(fulfillment.serialize_json())
-        parsed_fulfillment = fulfillment.from_json(fulfillment_json)
+        parsed_fulfillment = fulfillment.from_dict(fulfillment.to_dict())
 
         assert parsed_fulfillment.condition.serialize_uri() == fulfillment.condition.serialize_uri()
-        assert parsed_fulfillment.serialize_json() == fulfillment.serialize_json()
+        assert parsed_fulfillment.to_dict() == fulfillment.to_dict()
 
     def test_weights(self, fulfillment_ed25519):
         ilp_fulfillment = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
 
         fulfillment1 = ThresholdSha256Fulfillment(threshold=2)
         fulfillment1.add_subfulfillment(ilp_fulfillment, weight=2)
-        fulfillment_json = json.loads(fulfillment1.serialize_json())
-        parsed_fulfillment1 = fulfillment1.from_json(fulfillment_json)
+        parsed_fulfillment1 = fulfillment1.from_dict(fulfillment1.to_dict())
 
         assert parsed_fulfillment1.condition.serialize_uri() == fulfillment1.condition.serialize_uri()
-        assert parsed_fulfillment1.serialize_json() == fulfillment1.serialize_json()
+        assert parsed_fulfillment1.to_dict() == fulfillment1.to_dict()
         assert parsed_fulfillment1.subconditions[0]['weight'] == 2
         assert parsed_fulfillment1.validate(MESSAGE) is True
 
         fulfillment2 = ThresholdSha256Fulfillment(threshold=3)
         fulfillment2.add_subfulfillment(ilp_fulfillment, weight=2)
-        fulfillment_json = json.loads(fulfillment2.serialize_json())
-        parsed_fulfillment2 = fulfillment1.from_json(fulfillment_json)
+        parsed_fulfillment2 = fulfillment1.from_dict(fulfillment2.to_dict())
 
         assert parsed_fulfillment2.subconditions[0]['weight'] == 2
         assert parsed_fulfillment2.validate(MESSAGE) is False
 
         fulfillment3 = ThresholdSha256Fulfillment(threshold=3)
         fulfillment3.add_subfulfillment(ilp_fulfillment, weight=3)
-        fulfillment_json = json.loads(fulfillment3.serialize_json())
-        parsed_fulfillment3 = fulfillment1.from_json(fulfillment_json)
+        parsed_fulfillment3 = fulfillment1.from_dict(fulfillment3.to_dict())
 
         assert parsed_fulfillment3.condition.serialize_uri() == fulfillment3.condition.serialize_uri()
         assert not (fulfillment3.condition.serialize_uri() == fulfillment1.condition.serialize_uri())
@@ -506,8 +490,7 @@ class TestInvertedThresholdSha256Fulfillment:
 
         fulfillment = InvertedThresholdSha256Fulfillment(threshold=1)
         fulfillment.add_subfulfillment(ilp_fulfillment_ed)
-        fulfillment_json = json.loads(fulfillment.serialize_json())
-        parsed_fulfillment = fulfillment.from_json(fulfillment_json)
+        parsed_fulfillment = fulfillment.from_dict(fulfillment.to_dict())
 
         assert parsed_fulfillment.condition_uri == fulfillment.condition_uri
         assert parsed_fulfillment.serialize_uri() == fulfillment.serialize_uri()
@@ -521,16 +504,14 @@ class TestTimeoutFulfillment:
     def test_serialize_condition_and_validate_fulfillment(self):
 
         fulfillment = TimeoutFulfillment(expire_time=timestamp())
-        fulfillment_json = json.loads(fulfillment.serialize_json())
-        parsed_fulfillment = fulfillment.from_json(fulfillment_json)
+        parsed_fulfillment = fulfillment.from_dict(fulfillment.to_dict())
 
         assert parsed_fulfillment.condition_uri == fulfillment.condition_uri
         assert parsed_fulfillment.serialize_uri() == fulfillment.serialize_uri()
         assert parsed_fulfillment.validate(now=timestamp()) is False
 
-        fulfillment = TimeoutFulfillment(expire_time=str(float(timestamp())+1000))
-        fulfillment_json = json.loads(fulfillment.serialize_json())
-        parsed_fulfillment = fulfillment.from_json(fulfillment_json)
+        fulfillment = TimeoutFulfillment(expire_time=str(float(timestamp()) + 1000))
+        parsed_fulfillment = fulfillment.from_dict(fulfillment.to_dict())
 
         assert parsed_fulfillment.condition_uri == fulfillment.condition_uri
         assert parsed_fulfillment.serialize_uri() == fulfillment.serialize_uri()
@@ -573,8 +554,7 @@ class TestEscrow:
         fulfillment_escrow.add_subfulfillment(fulfillment_and_execute)
         fulfillment_escrow.add_subfulfillment(fulfillment_and_abort)
 
-        fulfillment_json = json.loads(fulfillment_escrow.serialize_json())
-        parsed_fulfillment = fulfillment_escrow.from_json(fulfillment_json)
+        parsed_fulfillment = fulfillment_escrow.from_dict(fulfillment_escrow.to_dict())
 
         assert parsed_fulfillment.condition_uri == fulfillment_escrow.condition_uri
         assert parsed_fulfillment.serialize_uri() == fulfillment_escrow.serialize_uri()

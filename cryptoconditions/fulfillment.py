@@ -78,12 +78,12 @@ class Fulfillment(metaclass=ABCMeta):
         return fulfillment
 
     @staticmethod
-    def from_json(json_data):
-        cls_type = json_data['type_id']
+    def from_dict(data):
+        cls_type = data['type_id']
         cls = TypeRegistry.get_class_from_type_id(cls_type)
 
         fulfillment = cls()
-        fulfillment.parse_json(json_data)
+        fulfillment.parse_dict(data)
 
         return fulfillment
 
@@ -249,20 +249,20 @@ class Fulfillment(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def serialize_json(self):
+    def to_dict(self):
         """
-        Generate a JSON object of the fulfillment
+        Generate a dict of the fulfillment
 
         Returns:
         """
 
     @abstractmethod
-    def parse_json(self, json_data):
+    def parse_dict(self, data):
         """
-        Generate fulfillment payload from a json
+        Generate fulfillment payload from a dict
 
         Args:
-            json_data: json description of the fulfillment
+            data: dict description of the fulfillment
 
         Returns:
             Fulfillment
