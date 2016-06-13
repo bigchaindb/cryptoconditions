@@ -1,4 +1,3 @@
-import json
 import base58
 import base64
 import re
@@ -117,18 +116,18 @@ class Condition(metaclass=ABCMeta):
         return condition
 
     @staticmethod
-    def from_json(json_data):
+    def from_dict(data):
         """
-        Create a Condition object from a json dict.
+        Create a Condition object from a dict.
 
         Args:
-            json_data (dict): Dictionary containing the condition payload
+            data (dict): Dictionary containing the condition payload
 
         Returns:
             Condition: Resulting object
         """
         condition = Condition()
-        condition.parse_json(json_data)
+        condition.parse_dict(data)
 
         return condition
 
@@ -262,30 +261,34 @@ class Condition(metaclass=ABCMeta):
         self.hash = reader.read_var_octet_string()
         self.max_fulfillment_length = reader.read_var_uint()
 
-    def serialize_json(self):
-        return json.dumps(
-            {
-                'type': 'condition',
-                'type_id': self.type_id,
-                'bitmask': self.bitmask,
-                'hash': base58.b58encode(self.hash),
-                'max_fulfillment_length': self.max_fulfillment_length
-            }
-        )
+    def to_dict(self):
+        """
+        Generate a dict of the condition
 
-    def parse_json(self, json_data):
+        Returns:
+            dict: representing the condition
+        """
+        return {
+            'type': 'condition',
+            'type_id': self.type_id,
+            'bitmask': self.bitmask,
+            'hash': base58.b58encode(self.hash),
+            'max_fulfillment_length': self.max_fulfillment_length
+        }
+
+    def parse_dict(self, data):
         """
 
         Args:
-            json_data (dict):
+            data (dict):
         Returns:
             Condition with payload
         """
-        self.type_id = json_data['type_id']
-        self.bitmask = json_data['bitmask']
+        self.type_id = data['type_id']
+        self.bitmask = data['bitmask']
 
-        self.hash = base58.b58decode(json_data['hash'])
-        self.max_fulfillment_length = json_data['max_fulfillment_length']
+        self.hash = base58.b58decode(data['hash'])
+        self.max_fulfillment_length = data['max_fulfillment_length']
 
     def validate(self):
         """

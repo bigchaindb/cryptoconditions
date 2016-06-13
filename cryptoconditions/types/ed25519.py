@@ -1,5 +1,3 @@
-import json
-
 import base58
 
 from cryptoconditions.crypto import Ed25519VerifyingKey as VerifyingKey
@@ -113,34 +111,33 @@ class Ed25519Fulfillment(Fulfillment):
     def calculate_max_fulfillment_length(self):
         return Ed25519Fulfillment.FULFILLMENT_LENGTH
 
-    def serialize_json(self):
+    def to_dict(self):
         """
-        Generate a JSON object of the fulfillment
+        Generate a dict of the fulfillment
 
         Returns:
+            dict: representing the fulfillment
         """
-        return json.dumps(
-            {
-                'type': 'fulfillment',
-                'type_id': self.TYPE_ID,
-                'bitmask': self.bitmask,
-                'public_key': self.public_key.to_ascii(encoding='base58').decode(),
-                'signature': base58.b58encode(self.signature) if self.signature else None
-            }
-        )
+        return {
+            'type': 'fulfillment',
+            'type_id': self.TYPE_ID,
+            'bitmask': self.bitmask,
+            'public_key': self.public_key.to_ascii(encoding='base58').decode(),
+            'signature': base58.b58encode(self.signature) if self.signature else None
+        }
 
-    def parse_json(self, json_data):
+    def parse_dict(self, data):
         """
-        Generate fulfillment payload from a json
+        Generate fulfillment payload from a dict
 
         Args:
-            json_data: json description of the fulfillment
+            data (dict): description of the fulfillment
 
         Returns:
             Fulfillment
         """
-        self.public_key = VerifyingKey(json_data['public_key'])
-        self.signature = base58.b58decode(json_data['signature']) if json_data['signature'] else None
+        self.public_key = VerifyingKey(data['public_key'])
+        self.signature = base58.b58decode(data['signature']) if data['signature'] else None
 
     def validate(self, message=None, **kwargs):
         """

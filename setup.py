@@ -69,8 +69,7 @@ setup(
     tests_require=tests_require,
     extras_require={
         'test': tests_require,
-        'dev':  dev_require + tests_require + docs_require,
-        'docs':  docs_require,
+        'dev': dev_require + tests_require + docs_require,
+        'docs': docs_require,
     },
 )
-

@@ -1,4 +1,3 @@
-import json
 import re
 import time
 
@@ -32,32 +31,31 @@ class TimeoutFulfillment(PreimageSha256Fulfillment):
         """
         return self.preimage
 
-    def serialize_json(self):
+    def to_dict(self):
         """
-        Generate a JSON object of the fulfillment
+        Generate a dict of the fulfillment
 
         Returns:
+            dict: representing the fulfillment
         """
-        return json.dumps(
-            {
-                'type': 'fulfillment',
-                'type_id': self.TYPE_ID,
-                'bitmask': self.bitmask,
-                'expire_time': self.expire_time.decode()
-            }
-        )
+        return {
+            'type': 'fulfillment',
+            'type_id': self.TYPE_ID,
+            'bitmask': self.bitmask,
+            'expire_time': self.expire_time.decode()
+        }
 
-    def parse_json(self, json_data):
+    def parse_dict(self, data):
         """
-        Generate fulfillment payload from a json
+        Generate fulfillment payload from a dict
 
         Args:
-            json_data: json description of the fulfillment
+            data (dict): description of the fulfillment
 
         Returns:
             Fulfillment
         """
-        self.preimage = json_data['expire_time'].encode()
+        self.preimage = data['expire_time'].encode()
 
     def validate(self, message=None, now=None, **kwargs):
         """

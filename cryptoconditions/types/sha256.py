@@ -1,5 +1,3 @@
-import json
-
 from cryptoconditions.types.base_sha256 import BaseSha256Fulfillment
 from cryptoconditions.lib import Hasher, Reader, Writer, Predictor
 
@@ -93,32 +91,31 @@ class PreimageSha256Fulfillment(BaseSha256Fulfillment):
         writer.write(self.preimage)
         return writer
 
-    def serialize_json(self):
+    def to_dict(self):
         """
-        Generate a JSON object of the fulfillment
+        Generate a dict of the fulfillment
 
         Returns:
+            dict: representing the fulfillment
         """
-        return json.dumps(
-            {
-                'type': 'fulfillment',
-                'type_id': self.TYPE_ID,
-                'bitmask': self.bitmask,
-                'preimage': self.preimage.decode()
-            }
-        )
+        return {
+            'type': 'fulfillment',
+            'type_id': self.TYPE_ID,
+            'bitmask': self.bitmask,
+            'preimage': self.preimage.decode()
+        }
 
-    def parse_json(self, json_data):
+    def parse_dict(self, data):
         """
-        Generate fulfillment payload from a json
+        Generate fulfillment payload from a dict
 
         Args:
-            json_data: json description of the fulfillment
+            data (dict): description of the fulfillment
 
         Returns:
             Fulfillment
         """
-        self.preimage = json_data['preimage'].encode()
+        self.preimage = data['preimage'].encode()
 
     def validate(self, *args, **kwargs):
         """

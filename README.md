@@ -39,6 +39,7 @@ generic authenticated event handlers.
 ## Usage
 
 ```python
+import json
 import binascii
 import cryptoconditions as cc
 
@@ -64,7 +65,7 @@ parsed_fulfillment = cc.Fulfillment.from_uri(example_fulfillment_uri)
 print(isinstance(parsed_fulfillment, cc.PreimageSha256Fulfillment))
 # prints True
 
-# Retrieve the condition of the fulfillment 
+# Retrieve the condition of the fulfillment
 print(parsed_fulfillment.condition_uri)
 # prints 'cc:0:3:47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU:0'
 
@@ -72,14 +73,13 @@ print(parsed_fulfillment.condition_uri)
 parsed_fulfillment.validate()
 # prints True
 
-# Export to JSON
-json_data = parsed_fulfillment.serialize_json()
+# Serialize fulfillment to JSON
+json_data = json.dumps(parsed_fulfillment.to_dict())
 print(json_data)
 # prints '{"bitmask": 3, "type_id": 0, "type": "fulfillment", "preimage": ""}'
 
 # Parse fulfillment from JSON
-import json
-json_fulfillment = cc.Fulfillment.from_json(json.loads(json_data))
+json_fulfillment = cc.Fulfillment.from_dict(json.loads(json_data))
 print(json_fulfillment.serialize_uri())
 # prints 'cf:0:'
 ```
@@ -270,6 +270,7 @@ FULFILLMENT_PAYLOAD =
 ### Usage
 
 ```python
+import json
 import cryptoconditions as cc
 
 # Parse some fulfillments
@@ -315,7 +316,7 @@ threshold_fulfillment.threshold = 3 # AND gate
 
 print(threshold_fulfillment.serialize_uri())
 # prints 'cf:2:AQMBAwEBAwAAAAABAWMABGDsFyuTrV5WO_STLHDhJFA0w1Rn7y79TWTr-BloNGfiv7YikfrZQy-PKYucSkiV2-KT9v_aGmja3wzN719HoMchKl_qPNqXo_TAPqny6Kwc7IalHUUhJ6vboJ0bbzMcBwoAAQGBmgACgZYBAQECAQEAJwAEASAg7Bcrk61eVjv0kyxw4SRQNMNUZ-8u_U1k6_gZaDRn4r8BYAEBYwAEYOwXK5OtXlY79JMscOEkUDTDVGfvLv1NZOv4GWg0Z-K_tiKR-tlDL48pi5xKSJXb4pP2_9oaaNrfDM3vX0egxyEqX-o82pej9MA-qfLorBzshqUdRSEnq9ugnRtvMxwHCgAA'
-threshold_fulfillment.serialize_json()
+threshold_fulfillment.to_dict()
 ```
 
 ```python
