@@ -11,12 +11,13 @@ from cryptoconditions.crypto import \
 class TestBigchainCryptoED25519(object):
 
     def test_signing_key_encode(self, sk_ilp):
-        private_value_base58 = SigningKey.encode(base64_add_padding(sk_ilp['b64']))
+        sk = SigningKey(base64_add_padding(sk_ilp['b64']), encoding='base64')
+        private_value_base58 = sk.encode(encoding="base58")
         assert private_value_base58 == sk_ilp['b58']
 
     def test_signing_key_init(self, sk_ilp):
         sk = SigningKey(sk_ilp['b58'])
-        assert sk.to_ascii(encoding='base64') == sk_ilp['b64']
+        assert sk.encode(encoding='base64') == sk_ilp['b64']
         assert sk.to_seed() == sk_ilp['byt']
 
     def test_signing_key_decode(self, sk_ilp):
@@ -99,3 +100,20 @@ class TestBigchainCryptoED25519(object):
             VerifyingKey.encode(
                 base64_add_padding(vk_ilp[2]['b64'])))
         assert vk.verify(message, sk.sign(message)) is False
+
+    def test_weak_public_keys(self):
+        """reproduce the problem in https://github.com/bigchaindb/bigchaindb/issues/617
+
+        This problem is due to weak keys, specially in this case the key and signature 
+        when decoded from base58 correspond to a key and a signature that are zero.
+        In this case its possible to come up with messages that would verify.
+
+        Libraries like libsodium check for these weak keys and return a BadSignature error
+        if weak keys are being used.
+
+        More details here: https://github.com/jedisct1/libsodium/issues/112
+        """
+        vk_b58 = VerifyingKey('1' * 32)
+        message = 'age=33&name=luo&title=architecture'
+        signature = '1' * 64
+        assert vk_b58.verify(message, signature) == False

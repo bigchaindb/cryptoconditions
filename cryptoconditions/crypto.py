@@ -1,269 +1,116 @@
 # Separate all crypto code so that we can easily test several implementations
-from abc import ABCMeta, abstractmethod
 import base64
-
 import base58
-import ed25519
+import nacl.signing
+import nacl.encoding
+import nacl.exceptions
+
+from cryptoconditions import exceptions
 
 
-class SigningKey(metaclass=ABCMeta):
-    """
-    SigningKey instance
-    """
-
-    @abstractmethod
-    def sign(self, data):
-        """
-        Sign data with private key
-
-        Args:
-            data:
-        """
-
-    @abstractmethod
-    def get_verifying_key(self):
-        """
-        Get the associated verifying key
-
-        Returns:
-            A VerifyingKey object
-        """
-
-    @abstractmethod
-    def to_ascii(self, prefix, encoding):
-        """
-        Encode the external value
-
-        Args:
-            prefix:
-            encoding:
-        """
+class Base58Encoder(object):
 
     @staticmethod
-    @abstractmethod
-    def encode(private_value):
-        """
-        Encode the internal private_value to base58
-
-        Args:
-            private_value:
-        """
+    def encode(data):
+        return base58.b58encode(data)
 
     @staticmethod
-    @abstractmethod
-    def decode(private_base58):
-        """
-        Decode the base58 private value to internal value
-
-        Args:
-            private_base58 (base58):
-        """
-        raise NotImplementedError
+    def decode(data):
+        return base58.b58decode(data)
 
 
-class VerifyingKey(metaclass=ABCMeta):
-
-    @abstractmethod
-    def verify(self, data, signature):
-        """
-        Check the if the signature matches the data and this verifyingkey
-
-        Args:
-            data:
-            signature:
-
-        Returns:
-            boolean:
-        """
-
-    @abstractmethod
-    def to_ascii(self, prefix, encoding):
-        """
-        Encode the external value
-
-        Args:
-            prefix:
-            encoding:
-        """
-
-    @staticmethod
-    @abstractmethod
-    def encode(public_value):
-        """
-        Encode the public key to base58 represented by the internal values
-
-        Args:
-            public_value
-        """
-
-    @staticmethod
-    @abstractmethod
-    def decode(public_base58):
-        """
-        Decode the base58 public_value to internal value
-
-        Args:
-            public_base58 (base58):
-        """
+def _get_nacl_encoder(encoding):
+    if encoding == 'base58':
+        return Base58Encoder
+    elif encoding == 'base64':
+        return nacl.encoding.Base64Encoder
+    elif encoding == 'base32':
+        return nacl.encoding.Base32Encoder
+    elif encoding == 'base16':
+        return nacl.encoding.Base16Encoder
+    elif encoding == 'hex':
+        return nacl.encoding.HexEncoder
+    elif encoding is None:
+        return nacl.encoding.RawEncoder
+    else:
+        raise exceptions.UnknownEncodingError("Unknown or unsupported encoding")
 
 
-class Ed25519SigningKey(ed25519.SigningKey, SigningKey):
+class Ed25519SigningKey(nacl.signing.SigningKey):
     """
     PrivateKey instance
     """
 
-    def __init__(self, key):
+    def __init__(self, key, encoding='base58'):
         """
         Instantiate the private key with the private_value encoded in base58
 
         Args:
             key (base58): base58 encoded private key
         """
-        private_base64 = self.decode(key)
-        super().__init__(private_base64, encoding='base64')
+        super().__init__(key, encoder=_get_nacl_encoder(encoding))
 
     def get_verifying_key(self):
         """
         Get the corresponding VerifyingKey
 
         Returns:
-            VerifyingKey
+            Ed25519VerifyingKey
         """
-        vk = super().get_verifying_key()
-        return Ed25519VerifyingKey(base58.b58encode(vk.to_bytes()))
+        return Ed25519VerifyingKey(self.verify_key.encode(encoder=Base58Encoder))
 
-    def to_ascii(self, prefix="", encoding='base58'):
-        """
-        convert external value to ascii with specified encoding
-
-        Args:
-            prefix (str):
-            encoding (str): {'base58'|'base64'|'base32'|'base16'|'hex'}
-
-        Returns:
-            bytes: encoded string
-        """
-        if encoding == 'base58':
-            return base58.b58encode(self.to_seed()).encode('ascii').decode('ascii').rstrip("=").encode('ascii')
-        else:
-            return super().to_ascii(prefix=prefix, encoding=encoding)
-
-    def sign(self, data, prefix="", encoding="base58"):
+    def sign(self, data, encoding="base58"):
         """
         Sign data with private key
 
         Args:
             data (str, bytes): data to sign
-            prefix:
             encoding (str): base64, hex
         """
-        if not isinstance(data, bytes):
-            data = data.encode('ascii')
-        if encoding == 'base58':
-            signature = super().sign(data, prefix="", encoding='base64')
-            return base58.b58encode(base64.b64decode(base64_add_padding(signature)))
-        else:
-            return super().sign(data, prefix="", encoding=encoding)
+        return super().sign(encoder=_get_nacl_encoder(encoding))
 
-    @staticmethod
-    def encode(private_base64):
-        """
-        Encode the base64 number private_base64 to base58
-
-        Args:
-            private_base64:
-        """
-        return base58.b58encode(base64.b64decode(private_base64)).encode('ascii')
-
-    @staticmethod
-    def decode(key):
-        """
-        Decode the base58 private_value to base64
-
-        Args:
-            key:
-        """
-        return base64.b64encode(base58.b58decode(key))
+    def encode(self, encoding='base58'):
+        return super().encode(encoder=_get_nacl_encoder(encoding))
 
 
-class Ed25519VerifyingKey(ed25519.VerifyingKey, VerifyingKey):
+class Ed25519VerifyingKey(nacl.signing.VerifyKey):
 
     def __init__(self, key):
         """
         Instantiate the public key with the compressed public value encoded in base58
         """
-        public_base64 = self.decode(key)
-        super().__init__(public_base64, encoding='base64')
+        super().__init__(key, encoder=Base58Encoder)
 
-    def verify(self, data, signature, prefix="", encoding='base58'):
+    def verify(self, data, signature, encoding='base58'):
         """
         Verify if the signature signs the data with this verifying key
 
         Args:
-             data (bytes|str): data to be signed
+             data (bytes|str): data verify
              signature (bytes|str): {base64|base32|base16|hex|bytes} signature to be verified
-             prefix: see super
              encoding: {base64|base32|base16|hex|bytes} encoding of the signature
         """
         try:
-            if not isinstance(data, bytes):
-                data = data.encode('ascii')
-            if encoding == 'base58':
-                super().verify(base58.b58decode(signature), data, prefix=prefix)
-            else:
-                super().verify(signature, data, prefix=prefix, encoding=encoding)
-        except ed25519.BadSignatureError:
+            super().verify(data, signature, encoder=_get_nacl_encoder(encoding))
+        except nacl.exceptions.BadSignatureError:
             return False
 
         return True
 
-    def to_ascii(self, prefix="", encoding='base58'):
-        """
-        convert external value to ascii with specified encoding
-
-        Args:
-            prefix (str):
-            encoding (str): {'base58'|'base64'|'base32'|'base16'|'hex'}
-
-        Returns:
-            bytes: encoded string
-        """
-        if encoding == 'base58':
-            return base58.b58encode(self.vk_s).encode('ascii').decode('ascii').rstrip("=").encode()
-        else:
-            return super().to_ascii(prefix=prefix, encoding=encoding)
-
-    @staticmethod
-    def encode(public_base64):
-        """
-        Encode the public key represented by base64 to base58
-
-        Args:
-            public_base64
-        """
-        return Ed25519SigningKey.encode(public_base64)
-
-    @staticmethod
-    def decode(public_base58):
-        """
-        Decode the base58 public_value to base64
-
-        Args:
-            public_base58
-        """
-        return Ed25519SigningKey.decode(public_base58)
+    def encode(self, encoding='base58'):
+        return super().encode(encoder=_get_nacl_encoder(encoding))
 
 
 def ed25519_generate_key_pair():
     """
     Generate a new key pair and return the pair encoded in base58
     """
-    sk, vk = ed25519.create_keypair()
+    sk = nacl.signing.SigningKey.generate()
     # Private key
-    private_value_base58 = Ed25519SigningKey(base58.b58encode(sk.to_bytes())).to_ascii()
+    private_value_base58 = sk.encode(encoder=Base58Encoder)
 
     # Public key
-    public_value_compressed_base58 = Ed25519VerifyingKey(base58.b58encode(vk.to_bytes())).to_ascii()
+    public_value_compressed_base58 = sk.verify_key.encode(encoder=Base58Encoder)
 
     return private_value_base58, public_value_compressed_base58
 
