@@ -101,7 +101,7 @@ class TestEd25519Sha256Fulfillment:
         assert binascii.hexlify(fulfillment.condition.hash) == fulfillment_ed25519['condition_hash']
 
         # ED25519-SHA256 condition not fulfilled
-        assert fulfillment.validate() == False
+        assert fulfillment.validate() is False
 
         # Fulfill an ED25519-SHA256 condition
         fulfillment.sign(MESSAGE, sk)
@@ -125,7 +125,7 @@ class TestEd25519Sha256Fulfillment:
              'type': 'fulfillment',
              'type_id': 4}
 
-        assert fulfillment.validate(MESSAGE) == True
+        assert fulfillment.validate(MESSAGE) is True
 
     def test_serialize_unsigned_dict_to_fulfillment(self, vk_ilp):
         fulfillment = Ed25519Fulfillment(public_key=vk_ilp['b58'])
@@ -136,7 +136,7 @@ class TestEd25519Sha256Fulfillment:
              'signature': None,
              'type': 'fulfillment',
              'type_id': 4}
-        assert fulfillment.validate(MESSAGE) == False
+        assert fulfillment.validate(MESSAGE) is False
 
     def test_deserialize_signed_dict_to_fulfillment(self, fulfillment_ed25519):
         fulfillment = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
@@ -221,8 +221,8 @@ class TestThresholdSha256Fulfillment:
         ilp_fulfillment_ed25519 = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
         ilp_fulfillment_sha = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
 
-        assert ilp_fulfillment_ed25519.validate(MESSAGE) == True
-        assert ilp_fulfillment_sha.validate(MESSAGE) == True
+        assert ilp_fulfillment_ed25519.validate(MESSAGE) is True
+        assert ilp_fulfillment_sha.validate(MESSAGE) is True
 
         threshold = 1
 
@@ -396,7 +396,7 @@ class TestThresholdSha256Fulfillment:
 
         fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=VerifyingKey(vk_ilp['b58'])))
 
-        assert fulfillment.validate(MESSAGE) == True
+        assert fulfillment.validate(MESSAGE) is True
 
     def test_fulfillment_nested_and_or(self,
                                        fulfillment_sha256,
