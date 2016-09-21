@@ -15,7 +15,8 @@ from cryptoconditions import \
     TimeoutFulfillment
 from cryptoconditions.crypto import \
     Ed25519SigningKey as SigningKey, \
-    Ed25519VerifyingKey as VerifyingKey
+    Ed25519VerifyingKey as VerifyingKey, \
+    ed25519_generate_key_pair
 from cryptoconditions.types.timeout import timestamp
 
 MESSAGE = 'Hello World! Conditions are here!'
@@ -212,6 +213,23 @@ class TestThresholdSha256Fulfillment:
         fulfillment = Ed25519Fulfillment(public_key=vk)
         fulfillment.sign(MESSAGE, sk)
         return fulfillment
+
+    def test_partially_sign_threshold_sha256_fulfillment(self):
+        sk1, vk1 = ed25519_generate_key_pair()
+        sk2, vk2 = ed25519_generate_key_pair()
+
+        ed25519_ffill = Ed25519Fulfillment(public_key=vk1)
+        ed25519_ffill_2 = Ed25519Fulfillment(public_key=vk2)
+
+        fulfillment = ThresholdSha256Fulfillment(threshold=1)
+        fulfillment.add_subfulfillment(ed25519_ffill)
+        fulfillment.add_subfulfillment(ed25519_ffill_2)
+
+        signing_keys = [SigningKey(sk1), SigningKey(sk2)]
+        message = 'a message to be signed'
+        fulfillment.sign(message, [signing_keys[0]])
+        assert fulfillment.validate(message) is True
+        # TODO: Signing further will crash the sign method
 
     def test_serialize_condition_and_validate_fulfillment(self,
                                                           fulfillment_sha256,
