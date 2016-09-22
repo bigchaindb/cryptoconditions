@@ -15,7 +15,8 @@ from cryptoconditions import \
     TimeoutFulfillment
 from cryptoconditions.crypto import \
     Ed25519SigningKey as SigningKey, \
-    Ed25519VerifyingKey as VerifyingKey
+    Ed25519VerifyingKey as VerifyingKey, \
+    ed25519_generate_key_pair
 from cryptoconditions.types.timeout import timestamp
 
 MESSAGE = 'Hello World! Conditions are here!'
@@ -101,7 +102,7 @@ class TestEd25519Sha256Fulfillment:
         assert binascii.hexlify(fulfillment.condition.hash) == fulfillment_ed25519['condition_hash']
 
         # ED25519-SHA256 condition not fulfilled
-        assert fulfillment.validate() == False
+        assert fulfillment.validate() is False
 
         # Fulfill an ED25519-SHA256 condition
         fulfillment.sign(MESSAGE, sk)
@@ -125,7 +126,7 @@ class TestEd25519Sha256Fulfillment:
              'type': 'fulfillment',
              'type_id': 4}
 
-        assert fulfillment.validate(MESSAGE) == True
+        assert fulfillment.validate(MESSAGE) is True
 
     def test_serialize_unsigned_dict_to_fulfillment(self, vk_ilp):
         fulfillment = Ed25519Fulfillment(public_key=vk_ilp['b58'])
@@ -136,7 +137,7 @@ class TestEd25519Sha256Fulfillment:
              'signature': None,
              'type': 'fulfillment',
              'type_id': 4}
-        assert fulfillment.validate(MESSAGE) == False
+        assert fulfillment.validate(MESSAGE) is False
 
     def test_deserialize_signed_dict_to_fulfillment(self, fulfillment_ed25519):
         fulfillment = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
@@ -213,6 +214,93 @@ class TestThresholdSha256Fulfillment:
         fulfillment.sign(MESSAGE, sk)
         return fulfillment
 
+    def test_partially_sign_threshold_sha256_fulfillment(self):
+        sk1, vk1 = ed25519_generate_key_pair()
+        sk2, vk2 = ed25519_generate_key_pair()
+        sk3, vk3 = ed25519_generate_key_pair()
+
+        ed25519_ffill = Ed25519Fulfillment(public_key=vk1)
+        ed25519_ffill_2 = Ed25519Fulfillment(public_key=vk2)
+        ed25519_ffill_3 = Ed25519Fulfillment(public_key=vk3)
+
+        fulfillment = ThresholdSha256Fulfillment(threshold=2)
+        fulfillment.add_subfulfillment(ed25519_ffill)
+        fulfillment.add_subfulfillment(ed25519_ffill_2)
+        fulfillment.add_subfulfillment(ed25519_ffill_3)
+
+        signing_keys = [SigningKey(sk1), SigningKey(sk2), SigningKey(sk3)]
+        message = 'a message to be signed'
+        fulfillment.sign(message, [signing_keys[0]])
+        assert fulfillment.validate(message) is False
+
+        # NOTE: Threshold is not fulfilled yet, so signing must still work
+        fulfillment.sign(message, [signing_keys[1]])
+        assert fulfillment.validate(message) is True
+
+    def test_sign_threshold_sha256_fulfillment_too_often(self):
+        sk1, vk1 = ed25519_generate_key_pair()
+        sk2, vk2 = ed25519_generate_key_pair()
+
+        ed25519_ffill = Ed25519Fulfillment(public_key=vk1)
+        ed25519_ffill_2 = Ed25519Fulfillment(public_key=vk2)
+
+        fulfillment = ThresholdSha256Fulfillment(threshold=1)
+        fulfillment.add_subfulfillment(ed25519_ffill)
+        fulfillment.add_subfulfillment(ed25519_ffill_2)
+
+        message = 'a message to be signed'
+        fulfillment.sign(message, [SigningKey(sk1)])
+        assert fulfillment.validate(message) is True
+
+        with pytest.raises(ValueError):
+            fulfillment.sign(message, [SigningKey(sk2)])
+
+    def test_sign_threshold_sha256_with_sha256_preimage_fulfillment(self):
+        sk1, vk1 = ed25519_generate_key_pair()
+
+        ed25519_ffill = Ed25519Fulfillment(public_key=vk1)
+        sha256_fulfillment = PreimageSha256Fulfillment()
+        sha256_fulfillment.preimage = ''
+
+        fulfillment = ThresholdSha256Fulfillment(threshold=1)
+        fulfillment.add_subfulfillment(ed25519_ffill)
+        fulfillment.add_subfulfillment(sha256_fulfillment)
+
+        message = 'a message to be signed'
+        with pytest.raises(NotImplementedError):
+            fulfillment.sign(message, [SigningKey(sk1)])
+
+    def test_partially_sign_nested_threshold_sha256_fulfillment(self):
+        sk1, vk1 = ed25519_generate_key_pair()
+        sk2, vk2 = ed25519_generate_key_pair()
+        sk3, vk3 = ed25519_generate_key_pair()
+        sk4, vk4 = ed25519_generate_key_pair()
+
+        ed25519_ffill_1 = Ed25519Fulfillment(public_key=vk1)
+        ed25519_ffill_2 = Ed25519Fulfillment(public_key=vk2)
+        ed25519_ffill_3 = Ed25519Fulfillment(public_key=vk3)
+        ed25519_ffill_4 = Ed25519Fulfillment(public_key=vk4)
+
+        threshold = ThresholdSha256Fulfillment(threshold=3)
+
+        inner_threshold = ThresholdSha256Fulfillment(threshold=1)
+        inner_threshold.add_subfulfillment(ed25519_ffill_3)
+        inner_threshold.add_subfulfillment(ed25519_ffill_4)
+
+        threshold.add_subfulfillment(inner_threshold)
+        threshold.add_subfulfillment(ed25519_ffill_2)
+        threshold.add_subfulfillment(ed25519_ffill_1)
+
+        signing_keys = [SigningKey(sk1), SigningKey(sk2), SigningKey(sk3),
+                        SigningKey(sk4)]
+        message = 'a message to be signed'
+        threshold.sign(message, signing_keys[:2])
+        assert threshold.validate(message) is False
+
+        # NOTE: Threshold is not fulfilled yet, so signing must still work
+        threshold.sign(message, [signing_keys[3]])
+        assert threshold.validate(message) is True
+
     def test_serialize_condition_and_validate_fulfillment(self,
                                                           fulfillment_sha256,
                                                           fulfillment_ed25519,
@@ -221,8 +309,8 @@ class TestThresholdSha256Fulfillment:
         ilp_fulfillment_ed25519 = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
         ilp_fulfillment_sha = Fulfillment.from_uri(fulfillment_sha256['fulfillment_uri'])
 
-        assert ilp_fulfillment_ed25519.validate(MESSAGE) == True
-        assert ilp_fulfillment_sha.validate(MESSAGE) == True
+        assert ilp_fulfillment_ed25519.validate(MESSAGE) is True
+        assert ilp_fulfillment_sha.validate(MESSAGE) is True
 
         threshold = 1
 
@@ -396,7 +484,7 @@ class TestThresholdSha256Fulfillment:
 
         fulfillment.add_subfulfillment(Ed25519Fulfillment(public_key=VerifyingKey(vk_ilp['b58'])))
 
-        assert fulfillment.validate(MESSAGE) == True
+        assert fulfillment.validate(MESSAGE) is True
 
     def test_fulfillment_nested_and_or(self,
                                        fulfillment_sha256,

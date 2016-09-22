@@ -1,4 +1,6 @@
 import copy
+from functools import reduce
+
 from cryptoconditions.condition import Condition
 from cryptoconditions.fulfillment import Fulfillment
 from cryptoconditions.types.ed25519 import Ed25519Fulfillment
@@ -33,7 +35,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
 
         One way to formally interpret threshold conditions is as a boolean weighted
         threshold gate. A tree of threshold conditions forms a boolean weighted
-        threhsold circuit.
+        threshold circuit.
 
         THRESHOLD-SHA-256 is assigned the type ID 2. It relies on the SHA-256 and
         THRESHOLD feature suites which corresponds to a feature bitmask of 0x09.
@@ -49,6 +51,79 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             raise ValueError('Threshold must be a integer greater than zero, was: {}'.format(threshold))
         self.threshold = threshold
         self.subconditions = []
+
+    def sign(self, message, private_keys):
+        """Signs a message
+
+        This method will take the currently configured values for the message
+        prefix and suffix and create a signature using the provided
+        ThresholdSha256 private keys.
+
+        Args:
+            message (str): message to be signed
+            # TODO: Pretty sure that also other keys than Ed25519 keys can be
+                    used to sign, as a ThresholdSha256Fulfillment can not only
+                    consist of them but also other fulfillments.
+            private_keys (list(SigningKey)) Ed25519 private key
+
+        """
+        def to_pub(private_key):
+            """Returns a base58 public key
+            """
+            return private_key.get_verifying_key().to_ascii().decode()
+
+        key_pairs = {to_pub(private_key): private_key for private_key
+                     in private_keys}
+
+        for subcond in self.subconditions:
+            parsed_subcond = subcond['body']
+
+            if isinstance(parsed_subcond, Ed25519Fulfillment):
+                subcond_pub_key = parsed_subcond.public_key
+                subcond_pub_key = subcond_pub_key.to_ascii(encoding='base58')
+                subcond_pub_key = subcond_pub_key.decode()
+                try:
+                    subcond_priv_key = key_pairs[subcond_pub_key]
+                except KeyError:
+                    # NOTE: The key not being present in `key_pairs` is OK
+                    #       as this just might not be the matching condition.
+                    pass
+                else:
+                    parsed_subcond.sign(message, subcond_priv_key)
+
+            elif isinstance(parsed_subcond, ThresholdSha256Fulfillment):
+                # NOTE: We're recursively calling this sign method again.
+                parsed_subcond.sign(message, private_keys)
+
+            # TODO: Optimally this case is recognized by calling
+            #       `self.validate`, however since `PreimageSha256.validate`
+            #       currently unconditionally returns `True`, this is is not
+            #       possible.
+            elif isinstance(parsed_subcond, Condition):
+                raise ValueError('Threshold was already met, no more '
+                                 'signatures required')
+
+            else:
+                # TODO: Implement partial signing for other types.
+                raise NotImplementedError('Partial signing is only '
+                                          'supported for '
+                                          'Ed25519Fulfillments and '
+                                          'ThresholdSha256Fulfillments.')
+
+        # NOTE: If `self.validate` yields true, this means the threshold has
+        #       been reached.
+        if self.validate(message):
+            unsigned_subconds = list(filter(lambda c: not c['body'].validate(message),
+                                     self.subconditions))
+            # NOTE: We replace all unsigned sub conditions, with filler
+            #       conditions to allow for the serialization of the
+            #       ThresholdSha256Fulfillment.
+            for unsigned_subcond in unsigned_subconds:
+                self.add_subcondition(unsigned_subcond['body'].condition)
+                # NOTE: This might looks strange, but `add_subcondition`
+                #       does some magic, so replacing the index at
+                #       `self.subconditions` wouldn't work.
+                self.subconditions.remove(unsigned_subcond)
 
     def add_subcondition(self, subcondition, weight=1):
         """
@@ -562,8 +637,8 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         #     # Fulfillment is not minimal
         #     return False
         # TODO: ILP specs see unfulfilled conditions as conditions and not fulfillments
-        valid_decisions = []
+        valid_decisions = 0
         for fulfillment in fulfillments:
             if fulfillment['body'].validate(message, **kwargs):
-                valid_decisions += [True] * fulfillment['weight']
-        return len(valid_decisions) >= self.threshold
+                valid_decisions += fulfillment['weight']
+        return valid_decisions >= self.threshold

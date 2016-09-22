@@ -50,11 +50,12 @@ class Ed25519Fulfillment(Fulfillment):
         Sign the message.
 
         This method will take the currently configured values for the message
-        prefix and suffix and create a signature using the provided Ed25519 private key.
+        prefix and suffix and create a signature using the provided
+        Ed25519 private key.
 
         Args:
             message (string): message to be signed
-            private_key (string) Ed25519 private key
+            private_key (SigningKey) Ed25519 private key
         """
         sk = private_key
         vk = VerifyingKey(base58.b58encode(sk.get_verifying_key().to_bytes()))
