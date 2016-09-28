@@ -164,7 +164,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
 
         conditions = []
         for c in self.subconditions:
-            if isinstance(c['body'], Ed25519Fulfillment) and c['body'].public_key.to_ascii(encoding='base58') == vk:
+            if isinstance(c['body'], Ed25519Fulfillment) and c['body'].public_key.encode(encoding='base58') == vk:
                 conditions.append(c['body'])
             elif isinstance(c['body'], ThresholdSha256Fulfillment):
                 result = c['body'].get_subcondition_from_vk(vk)
