@@ -43,10 +43,12 @@ class Ed25519SigningKey(nacl.signing.SigningKey):
 
     def __init__(self, key, encoding='base58'):
         """
-        Instantiate the private key with the private_value encoded in base58
+        Instantiate the private key with the private value.
 
         Args:
-            key (base58): base58 encoded private key
+            key (str): encoded private value.
+            encoding(str): {'bytes'|'hex'|'base16'|'base32'|'base58'|'base64'}. Encoding of the private
+                           value. Defaults to 'base58'.
         """
         super().__init__(key, encoder=_get_nacl_encoder(encoding))
 
@@ -59,18 +61,32 @@ class Ed25519SigningKey(nacl.signing.SigningKey):
         """
         return Ed25519VerifyingKey(self.verify_key.encode(encoder=Base58Encoder))
 
-    def sign(self, data, encoding="base58"):
+    def sign(self, data, encoding='base58'):
         """
         Sign data with private key
 
         Args:
-            data (str, bytes): data to sign
-            encoding (str): base64, hex
+            data (bytes): data to sign.
+            encoding(str): {'bytes'|'hex'|'base16'|'base32'|'base58'|'base64'}. Encoding in which to return the 
+                           signature. Defaults to 'base58'.
+
+            Returns:
+                The signature encoded in `encoding`.
         """
         raw_signature = super().sign(data).signature
         return _get_nacl_encoder(encoding).encode(raw_signature)
 
     def encode(self, encoding='base58'):
+        """
+        Encode the private key
+
+        Args:
+            encoding(str): {'bytes'|'hex'|'base16'|'base32'|'base58'|'base64'}. Encoding in which the private
+                           key should be returned. Defaults to 'base58'.
+
+        Returns:
+            The private key encoded with `encoding`.
+        """
         return super().encode(encoder=_get_nacl_encoder(encoding))
 
 
@@ -78,7 +94,12 @@ class Ed25519VerifyingKey(nacl.signing.VerifyKey):
 
     def __init__(self, key, encoding='base58'):
         """
-        Instantiate the public key with the compressed public value encoded in base58
+        Instantiate the public key with the public value.
+
+        Args:
+            key (str): encoded compressed value.
+            encoding(str): {'bytes'|'hex'|'base16'|'base32'|'base58'|'base64'}. Encoding of the public key. 
+                           Defaults to 'base58'.
         """
         super().__init__(key, encoder=_get_nacl_encoder(encoding))
 
@@ -87,15 +108,17 @@ class Ed25519VerifyingKey(nacl.signing.VerifyKey):
         Verify if the signature signs the data with this verifying key
 
         Args:
-             data (bytes|str): data verify
-             signature (bytes|str): {base64|base32|base16|hex|bytes} signature to be verified
-             encoding: {base64|base32|base16|hex|bytes} encoding of the signature
+            data (bytes): data to verify.
+            signature (bytes): {base64|base32|base16|hex|bytes} signature to be verified
+            encoding(str): {'bytes'|'hex'|'base16'|'base32'|'base58'|'base64'}. Encoding of the signature. 
+                           Defaults to 'base58'.
         """
+
+        # The reason for using raw_signatures here is because the verify method of pynacl expects the message
+        # and the signature to have the same encoding. Basically pynacl does:
+        #   encoder.decode(signature + message)
+        raw_signature = _get_nacl_encoder(encoding).decode(signature)
         try:
-            # The reason for using raw_signatures here is because the verify method of pynacl expects the message
-            # and the signature to have the same encoding. Basically pynacl does:
-            #   encoder.decode(signature + message)
-            raw_signature = _get_nacl_encoder(encoding).decode(signature)
             super().verify(data, raw_signature)
         except nacl.exceptions.BadSignatureError:
             return False
@@ -103,12 +126,25 @@ class Ed25519VerifyingKey(nacl.signing.VerifyKey):
         return True
 
     def encode(self, encoding='base58'):
+        """
+        Encode the public key
+
+        Args:
+            encoding(str): {'bytes'|'hex'|'base16'|'base32'|'base58'|'base64'}. Encoding in which the public
+                           key should be returned. Defaults to 'base58'.
+
+        Returns:
+            The public key encoded with `encoding`.
+        """
         return super().encode(encoder=_get_nacl_encoder(encoding))
 
 
 def ed25519_generate_key_pair():
     """
-    Generate a new key pair and return the pair encoded in base58
+    Generate a new key pair.
+
+    Returns:
+        A tuple of (private_key, public_key) encoded in base58.
     """
     sk = nacl.signing.SigningKey.generate()
     # Private key
