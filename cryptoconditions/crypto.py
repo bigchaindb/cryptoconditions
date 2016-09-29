@@ -89,6 +89,10 @@ class Ed25519SigningKey(nacl.signing.SigningKey):
         """
         return super().encode(encoder=_get_nacl_encoder(encoding))
 
+    @classmethod
+    def generate(cls):
+        return cls(nacl.signing.SigningKey.generate().encode(encoder=Base58Encoder))
+
 
 class Ed25519VerifyingKey(nacl.signing.VerifyKey):
 
@@ -146,12 +150,12 @@ def ed25519_generate_key_pair():
     Returns:
         A tuple of (private_key, public_key) encoded in base58.
     """
-    sk = nacl.signing.SigningKey.generate()
+    sk = Ed25519SigningKey.generate()
     # Private key
-    private_value_base58 = sk.encode(encoder=Base58Encoder)
+    private_value_base58 = sk.encode(encoding='base58')
 
     # Public key
-    public_value_compressed_base58 = sk.verify_key.encode(encoder=Base58Encoder)
+    public_value_compressed_base58 = sk.get_verifying_key().encode(encoding='base58')
 
     return private_value_base58, public_value_compressed_base58
 
