@@ -53,11 +53,11 @@ class Ed25519Fulfillment(Fulfillment):
         prefix and suffix and create a signature using the provided Ed25519 private key.
 
         Args:
-            message (string): message to be signed
-            private_key (string) Ed25519 private key
+            message (bytes): message to be signed
+            private_key (:obj:`Ed25519SigningKey`) Ed25519 private key
         """
         sk = private_key
-        vk = VerifyingKey(base58.b58encode(sk.get_verifying_key().encode(encoding='bytes')))
+        vk = sk.get_verifying_key()
 
         self.public_key = vk
 
