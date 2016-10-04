@@ -53,11 +53,11 @@ class Ed25519Fulfillment(Fulfillment):
         prefix and suffix and create a signature using the provided Ed25519 private key.
 
         Args:
-            message (string): message to be signed
-            private_key (string) Ed25519 private key
+            message (bytes): message to be signed
+            private_key (:obj:`Ed25519SigningKey`) Ed25519 private key
         """
         sk = private_key
-        vk = VerifyingKey(base58.b58encode(sk.get_verifying_key().to_bytes()))
+        vk = sk.get_verifying_key()
 
         self.public_key = vk
 
@@ -66,7 +66,7 @@ class Ed25519Fulfillment(Fulfillment):
         #   .update(Buffer.concat([this.messagePrefix, this.message]))
         #   .digest()
 
-        self.signature = sk.sign(message, encoding=None)
+        self.signature = sk.sign(message, encoding='bytes')
 
     def generate_hash(self):
         """
@@ -77,7 +77,7 @@ class Ed25519Fulfillment(Fulfillment):
         """
         if not self.public_key:
             raise ValueError('Requires a public publicKey')
-        return self.public_key.to_bytes()
+        return self.public_key.encode(encoding='bytes')
 
     def parse_payload(self, reader, *args):
         """
@@ -104,7 +104,7 @@ class Ed25519Fulfillment(Fulfillment):
         Args:
             writer (Writer): Subject for writing the fulfillment payload.
         """
-        writer.write_octet_string(self.public_key.to_bytes(), Ed25519Fulfillment.PUBKEY_LENGTH)
+        writer.write_octet_string(self.public_key.encode(encoding='bytes'), Ed25519Fulfillment.PUBKEY_LENGTH)
         writer.write_octet_string(self.signature, Ed25519Fulfillment.SIGNATURE_LENGTH)
         return writer
 
@@ -122,7 +122,7 @@ class Ed25519Fulfillment(Fulfillment):
             'type': 'fulfillment',
             'type_id': self.TYPE_ID,
             'bitmask': self.bitmask,
-            'public_key': self.public_key.to_ascii(encoding='base58').decode(),
+            'public_key': self.public_key.encode(encoding='base58').decode(),
             'signature': base58.b58encode(self.signature) if self.signature else None
         }
 
@@ -154,4 +154,4 @@ class Ed25519Fulfillment(Fulfillment):
         if not (message and self.signature):
             return False
 
-        return self.public_key.verify(message, self.signature, encoding=None)
+        return self.public_key.verify(message, self.signature, encoding='bytes')

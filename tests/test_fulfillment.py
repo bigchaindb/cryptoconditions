@@ -18,7 +18,7 @@ from cryptoconditions.crypto import \
     Ed25519VerifyingKey as VerifyingKey
 from cryptoconditions.types.timeout import timestamp
 
-MESSAGE = 'Hello World! Conditions are here!'
+MESSAGE = b'Hello World! Conditions are here!'
 
 
 class TestSha256Condition:
@@ -79,12 +79,12 @@ class TestSha256Fulfillment:
 class TestEd25519Sha256Fulfillment:
     def test_ilp_keys(self, sk_ilp, vk_ilp):
         sk = SigningKey(sk_ilp['b58'])
-        assert sk.to_ascii(encoding='base64') == sk_ilp['b64']
-        assert binascii.hexlify(sk.to_bytes()[:32]) == sk_ilp['hex']
+        assert sk.encode(encoding='base64') == sk_ilp['b64']
+        assert binascii.hexlify(sk.encode(encoding='bytes')[:32]) == sk_ilp['hex']
 
         vk = VerifyingKey(vk_ilp['b58'])
-        assert vk.to_ascii(encoding='base64') == vk_ilp['b64']
-        assert binascii.hexlify(vk.to_bytes()) == vk_ilp['hex']
+        assert vk.encode(encoding='base64') == vk_ilp['b64']
+        assert binascii.hexlify(vk.encode(encoding='bytes')) == vk_ilp['hex']
 
     def test_create(self, vk_ilp):
         fulfillment1 = Ed25519Fulfillment(public_key=vk_ilp['b58'])
@@ -173,7 +173,7 @@ class TestEd25519Sha256Fulfillment:
         assert fulfillment.serialize_uri() == fulfillment_ed25519['fulfillment_uri']
         assert fulfillment.condition.serialize_uri() == fulfillment_ed25519['condition_uri']
         assert binascii.hexlify(fulfillment.condition.hash) == fulfillment_ed25519['condition_hash']
-        assert fulfillment.public_key.to_ascii(encoding='hex') == vk_ilp['hex']
+        assert fulfillment.public_key.encode(encoding='hex') == vk_ilp['hex']
         assert fulfillment.validate(MESSAGE)
 
     def test_deserialize_fulfillment_2(self, vk_ilp, fulfillment_ed25519_2):
@@ -183,7 +183,7 @@ class TestEd25519Sha256Fulfillment:
         assert fulfillment.serialize_uri() == fulfillment_ed25519_2['fulfillment_uri']
         assert fulfillment.condition.serialize_uri() == fulfillment_ed25519_2['condition_uri']
         assert binascii.hexlify(fulfillment.condition.hash) == fulfillment_ed25519_2['condition_hash']
-        assert fulfillment.public_key.to_ascii(encoding='hex') == vk_ilp[2]['hex']
+        assert fulfillment.public_key.encode(encoding='hex') == vk_ilp[2]['hex']
         assert fulfillment.validate(MESSAGE)
 
     def test_serialize_deserialize_fulfillment(self, sk_ilp, vk_ilp):
@@ -199,7 +199,8 @@ class TestEd25519Sha256Fulfillment:
         assert isinstance(deserialized_fulfillment, Ed25519Fulfillment)
         assert deserialized_fulfillment.serialize_uri() == fulfillment.serialize_uri()
         assert deserialized_fulfillment.condition.serialize_uri() == fulfillment.condition.serialize_uri()
-        assert deserialized_fulfillment.public_key.to_bytes() == fulfillment.public_key.to_bytes()
+        assert deserialized_fulfillment.public_key.encode(encoding='bytes') == \
+                fulfillment.public_key.encode(encoding='bytes')
         assert deserialized_fulfillment.validate(MESSAGE)
 
 
@@ -438,7 +439,7 @@ class TestThresholdSha256Fulfillment:
         assert deserialized_fulfillment.serialize_uri() == fulfillment_uri
         assert deserialized_fulfillment.validate(MESSAGE)
         assert deserialized_condition.serialize_uri() == condition_uri
-        vk = ilp_fulfillment_ed.public_key.to_ascii(encoding='base58')
+        vk = ilp_fulfillment_ed.public_key.encode(encoding='base58')
         assert len(fulfillment.get_subcondition_from_vk(vk)) == 2
         assert len(deserialized_fulfillment.get_subcondition_from_vk(vk)) == 1
 
