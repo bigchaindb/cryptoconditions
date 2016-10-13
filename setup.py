@@ -32,7 +32,7 @@ docs_require = [
 
 setup(
     name='cryptoconditions',
-    version='0.4.1',
+    version='0.5.0',
     description='Multi-algorithm, multi-level, multi-signature format for '
                 'expressing conditions and fulfillments according to the Interledger Protocol (ILP).',
     long_description=__doc__,
