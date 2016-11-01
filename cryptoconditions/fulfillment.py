@@ -11,7 +11,18 @@ FULFILLMENT_REGEX = r'^cf:([1-9a-f][0-9a-f]{0,3}|0):[a-zA-Z0-9_-]*$'
 
 
 class Fulfillment(metaclass=ABCMeta):
+    """
+    From the specs (https://tools.ietf.org/html/draft-thomas-crypto-conditions-01):
 
+        The term "fulfillment" refers to a description of a signed message
+        and a signed message that matches the description.
+
+        The description can be hashed and compared to a condition.  If the
+        message matches the description and the hash of the description
+        matches the condition, we say that the fulfillment fulfills the
+        condition.
+
+    """
     TYPE_ID = None
     REGEX = FULFILLMENT_REGEX
     FEATURE_BITMASK = None
