@@ -5,6 +5,7 @@ MAX_SAFE_INTEGER_JS = 2 ** 53 - 1
 
 
 class TypeRegistry:
+    """ """
     registered_types = []
 
     @staticmethod
