@@ -23,8 +23,15 @@ $ py.test -v
 
 # Crypto Conditions
 
-This spec is a python port from the [**Interledger Protocol (ILP)**]
-(https://interledger.org/five-bells-condition/spec.html)
+Python implementation of **Crypto-Conditions**. See draft of specification at
+[draft-thomas-crypto-conditions-01](https://tools.ietf.org/html/draft-thomas-crypto-conditions-01).
+
+The RFC is also on github under
+[interledger/rfcs/0002-crypto-conditions/](https://github.com/interledger/rfcs/tree/master/0002-crypto-conditions).
+
+The Crypto-Conditions specification is part of the
+ [**Interledger Protocol (ILP)**](https://interledger.org/rfcs/0003-interledger-protocol/).
+
 
 ## Motivation
 
