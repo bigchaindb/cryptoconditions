@@ -17,11 +17,11 @@ class Hasher(Writer):
     def write(self, in_bytes):
         """
         Adds bytes to the hash input.
-        
+
         The hasher will pass these bytes into the hashing function. By overriding
         the Writer class and implementing this method, the Hasher supports any of
         the datatypes that a Writer can write.
-        
+
         Args:
             in_bytes (Buffer): Bytes to add to the hash.
         """
