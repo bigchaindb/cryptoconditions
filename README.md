@@ -188,7 +188,7 @@ print(sha256fulfillment.validate() and \
 ## RSA-SHA-256
 
 **Warning:** not (yet) implemented in `cryptoconditions`, for info see the
-[**ILP specification**](https://interledger.org/five-bells-condition/spec.html)
+[**ILP specification**](https://tools.ietf.org/html/draft-thomas-crypto-conditions-01).
 
 ## ED25519
 
