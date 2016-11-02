@@ -300,12 +300,14 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         Args:
             threshold (int): Threshold that the remaining subconditions have to meet.
             subconditions ([Condition]): Set of subconditions.
-                                         subconditions[].weight Weight of the subcondition
-                                         subconditions[].size Maximum number of bytes added to the
-                                                              size if the fulfillment is included.
-                                         subconditions[].omitSize Maximum number of bytes added to
-                                                                  the size if the fulfillment is omitted
-                                                                  (and the condition is added instead.)
+
+                * subconditions[].weight Weight of the subcondition
+                * subconditions[].size Maximum number of bytes added to the
+                  size if the fulfillment is included.
+                * subconditions[].omitSize Maximum number of bytes added to
+                  the size if the fulfillment is omitted (and the
+                  condition is added instead.)
+
             index (int): Current index in the subconditions array (used by the recursive calls.)
 
         Returns:
