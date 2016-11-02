@@ -179,13 +179,15 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
 
         This function is called internally by the `getCondition` method.
 
-        HASH = SHA256(
-            VARUINT TYPE_BIT
-            VARUINT THRESHOLD
-            VARARRAY
-                VARUINT WEIGHT
-                CONDITION
-        )
+        .. code-block:: none
+
+            HASH = SHA256(
+                VARUINT TYPE_BIT
+                VARUINT THRESHOLD
+                VARARRAY
+                    VARUINT WEIGHT
+                    CONDITION
+            )
 
         Args:
             hasher (Hasher): Hash generator
@@ -360,14 +362,16 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
 
         This writes the fulfillment payload to a Writer.
 
-        FULFILLMENT_PAYLOAD =
-            VARUINT THRESHOLD
-            VARARRAY
-                VARUINT WEIGHT
-                FULFILLMENT
-            VARARRAY
-                VARUINT WEIGHT
-                CONDITION
+        .. code-block:: none
+
+            FULFILLMENT_PAYLOAD =
+                VARUINT THRESHOLD
+                VARARRAY
+                    VARUINT WEIGHT
+                    FULFILLMENT
+                VARARRAY
+                    VARUINT WEIGHT
+                    CONDITION
 
         Args:
             writer (Writer): Subject for writing the fulfillment payload.
