@@ -5,6 +5,7 @@ from cryptoconditions.lib.writer import Writer
 
 
 class Hasher(Writer):
+    """ """
 
     def __init__(self, algorithm):
         if algorithm == 'sha256':
