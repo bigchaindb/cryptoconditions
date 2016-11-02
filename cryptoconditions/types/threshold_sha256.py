@@ -177,7 +177,8 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
         """
         Produce the contents of the condition hash.
 
-        This function is called internally by the `getCondition` method.
+        This function is called internally by the
+        :meth:`~cryptoconditions.fulfillment.Fulfillment.condition` property.
 
         .. code-block:: none
 
