@@ -9,6 +9,7 @@ TIMESTAMP_REGEX = r'^\d{10}(\.\d+)?$'
 
 
 class TimeoutFulfillment(PreimageSha256Fulfillment):
+    """ """
     TYPE_ID = 99
     FEATURE_BITMASK = 0x09
     REGEX = TIMESTAMP_REGEX

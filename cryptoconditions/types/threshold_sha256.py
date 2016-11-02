@@ -10,6 +10,7 @@ FULFILLMENT = 'fulfillment'
 
 
 class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
+    """ """
     TYPE_ID = 2
     FEATURE_BITMASK = 0x09
 
