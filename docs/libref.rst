@@ -26,6 +26,7 @@ Base Modules
 ``crypto``
 ----------
 .. automodule:: cryptoconditions.crypto
+    :special-members: __init__
 
 
 ``exceptions``
