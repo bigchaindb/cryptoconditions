@@ -299,7 +299,7 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
 
         Args:
             threshold (int): Threshold that the remaining subconditions have to meet.
-            subconditions ([Condition]): Set of subconditions.
+            subconditions (:obj:`list` of :class:`~cryptoconditions.condition.Condition`): Set of subconditions.
 
                 * subconditions[].weight Weight of the subcondition
                 * subconditions[].size Maximum number of bytes added to the
