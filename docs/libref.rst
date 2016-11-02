@@ -66,3 +66,27 @@ Types Modules
 ``timeout``
 -----------
 .. automodule:: cryptoconditions.types.timeout
+
+
+Lib Modules
+===========
+
+``hasher``
+----------
+.. automodule:: cryptoconditions.lib.hasher
+    :special-members: __init__
+
+``predictor``
+-------------
+.. automodule:: cryptoconditions.lib.predictor
+    :special-members: __init__
+
+``reader``
+----------
+.. automodule:: cryptoconditions.lib.reader
+    :special-members: __init__
+
+``writer``
+----------
+.. automodule:: cryptoconditions.lib.writer
+    :special-members: __init__
