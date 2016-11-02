@@ -1,8 +1,12 @@
+*****************
 Library Reference
-=================
+*****************
 
 .. automodule:: cryptoconditions
 
+
+Base Modules
+============
 
 ``condition``
 -------------
