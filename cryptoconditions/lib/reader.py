@@ -1,6 +1,7 @@
 
 
 class Reader:
+    """ """
 
     # Most significant bit in a byte
     HIGH_BIT = 0x80

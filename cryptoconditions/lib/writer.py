@@ -4,6 +4,7 @@ from math import ceil
 
 
 class Writer:
+    """ """
     def __init__(self):
         self.components = []
 
