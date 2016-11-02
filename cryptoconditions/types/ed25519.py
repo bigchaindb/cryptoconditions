@@ -5,6 +5,7 @@ from cryptoconditions.fulfillment import Fulfillment
 
 
 class Ed25519Fulfillment(Fulfillment):
+    """ """
 
     TYPE_ID = 4
     FEATURE_BITMASK = 0x20

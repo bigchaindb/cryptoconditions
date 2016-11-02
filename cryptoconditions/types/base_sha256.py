@@ -5,6 +5,7 @@ from cryptoconditions.lib.hasher import Hasher
 
 
 class BaseSha256Fulfillment(Fulfillment):
+    """ """
 
     def generate_hash(self):
         """

@@ -3,6 +3,7 @@ from cryptoconditions.lib import Hasher, Reader, Writer, Predictor
 
 
 class PreimageSha256Fulfillment(BaseSha256Fulfillment):
+    """ """
 
     TYPE_ID = 0
     FEATURE_BITMASK = 0x03

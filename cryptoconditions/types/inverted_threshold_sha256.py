@@ -5,6 +5,7 @@ FULFILLMENT = 'fulfillment'
 
 
 class InvertedThresholdSha256Fulfillment(ThresholdSha256Fulfillment):
+    """ """
     TYPE_ID = 98
     FEATURE_BITMASK = 0x09
 
