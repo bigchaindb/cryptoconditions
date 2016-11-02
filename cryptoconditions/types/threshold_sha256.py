@@ -301,10 +301,10 @@ class ThresholdSha256Fulfillment(BaseSha256Fulfillment):
             threshold (int): Threshold that the remaining subconditions have to meet.
             subconditions (:obj:`list` of :class:`~cryptoconditions.condition.Condition`): Set of subconditions.
 
-                * subconditions[].weight Weight of the subcondition
-                * subconditions[].size Maximum number of bytes added to the
+                * ``subconditions[].weight`` Weight of the subcondition
+                * ``subconditions[].size`` Maximum number of bytes added to the
                   size if the fulfillment is included.
-                * subconditions[].omitSize Maximum number of bytes added to
+                * ``subconditions[].omitSize`` Maximum number of bytes added to
                   the size if the fulfillment is omitted (and the
                   condition is added instead.)
 
