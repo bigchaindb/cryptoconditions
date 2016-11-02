@@ -51,4 +51,4 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {'https://docs.python.org/3/': None}
