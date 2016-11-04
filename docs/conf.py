@@ -1,5 +1,11 @@
 import sphinx_rtd_theme
 
+
+_version = {}
+with open('../cryptoconditions/version.py') as fp:
+    exec(fp.read(), _version)
+
+
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
@@ -22,8 +28,8 @@ master_doc = 'index'
 project = 'cryptoconditions'
 copyright = '2016, Cryptoconditions Contributors'
 author = 'Cryptoconditions Contributors'
-version = '0.5.0'
-release = '0.5.0'
+version = _version['__short_version__']
+release = _version['__version__']
 language = None
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 pygments_style = 'sphinx'
