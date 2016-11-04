@@ -7,6 +7,12 @@ it matches the description.
 
 from setuptools import setup, find_packages
 
+
+version = {}
+with open('cryptoconditions/version.py') as fp:
+    exec(fp.read(), version)
+
+
 tests_require = [
     'pytest',
     'coverage',
@@ -32,7 +38,7 @@ docs_require = [
 
 setup(
     name='cryptoconditions',
-    version='0.5.0',
+    version=version['__version__'],
     description='Multi-algorithm, multi-level, multi-signature format for '
                 'expressing conditions and fulfillments according to the Interledger Protocol (ILP).',
     long_description=__doc__,
