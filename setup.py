@@ -69,7 +69,7 @@ setup(
 
     install_requires=[
         'base58~=0.2.2',
-        'PyNaCl~=1.0.1',
+        'PyNaCl~=1.1.0',
     ],
     setup_requires=['pytest-runner'],
     tests_require=tests_require,
