@@ -10,13 +10,10 @@ from cryptoconditions import \
     Fulfillment, \
     PreimageSha256Fulfillment, \
     Ed25519Fulfillment, \
-    ThresholdSha256Fulfillment, \
-    InvertedThresholdSha256Fulfillment, \
-    TimeoutFulfillment
+    ThresholdSha256Fulfillment
 from cryptoconditions.crypto import \
     Ed25519SigningKey as SigningKey, \
     Ed25519VerifyingKey as VerifyingKey
-from cryptoconditions.types.timeout import timestamp
 
 MESSAGE = b'Hello World! Conditions are here!'
 
@@ -483,6 +480,10 @@ class TestThresholdSha256Fulfillment:
         assert deserialized_condition.serialize_uri() == condition_uri
 
 
+@pytest.mark.skip(reason=(
+    'Moving out of implementation as inverted threshold conditions are not '
+    'part of the crypto-conditions specification: '
+    'https://tools.ietf.org/html/draft-thomas-crypto-conditions-02'))
 class TestInvertedThresholdSha256Fulfillment:
 
     def test_serialize_condition_and_validate_fulfillment(self,
@@ -500,6 +501,10 @@ class TestInvertedThresholdSha256Fulfillment:
         assert isinstance(parsed_fulfillment, InvertedThresholdSha256Fulfillment)
 
 
+@pytest.mark.skip(reason=(
+    'Moving out of implementation as Timeout conditions are not part of the '
+    'crypto-conditions specification: '
+    'https://tools.ietf.org/html/draft-thomas-crypto-conditions-02'))
 class TestTimeoutFulfillment:
 
     def test_serialize_condition_and_validate_fulfillment(self):
@@ -519,6 +524,10 @@ class TestTimeoutFulfillment:
         assert parsed_fulfillment.validate(now=timestamp()) is True
 
 
+@pytest.mark.skip(reason=(
+    'Needs to be re-worked or moved out since timeout & inverted threshold '
+    'conditions are not part of the crypto-conditions specification: '
+    'https://tools.ietf.org/html/draft-thomas-crypto-conditions-02'))
 class TestEscrow:
     def create_fulfillment_ed25519sha256(self, sk_ilp, vk_ilp):
         sk = SigningKey(sk_ilp['b58'])
