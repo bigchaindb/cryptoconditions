@@ -58,7 +58,6 @@ setup(
         'Natural Language :: English',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX :: Linux',
