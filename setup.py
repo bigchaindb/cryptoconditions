@@ -14,7 +14,6 @@ with open('cryptoconditions/version.py') as fp:
 
 
 tests_require = [
-    'pytest',
     'coverage',
     'pep8',
     'pyflakes',
