@@ -8,7 +8,7 @@ message = 'Hello World! Conditions are here!'
 sk_b58 = base58.b58encode(binascii.unhexlify('833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42'))
 sk = SigningKey(sk_b58)
 
-ed25519_fulfillment = cc.Ed25519Fulfillment()
+ed25519_fulfillment = cc.Ed25519Sha256()
 ed25519_fulfillment.sign(message, sk)
 
 print(ed25519_fulfillment.condition_uri)
@@ -31,7 +31,7 @@ sk_b58 = base58.b58encode(binascii.unhexlify('1a3ab1a87f000348f391613930cc495296
 sk = SigningKey(sk_b58)
 vk = sk.get_verifying_key()
 
-ed25519_fulfillment = cc.Ed25519Fulfillment(public_key=vk)
+ed25519_fulfillment = cc.Ed25519Sha256(public_key=vk)
 ed25519_fulfillment.sign(message, sk)
 
 print(ed25519_fulfillment.condition_uri)

@@ -1,19 +1,32 @@
 import base58
+from base64 import urlsafe_b64decode, urlsafe_b64encode
 
-from cryptoconditions.crypto import Ed25519VerifyingKey as VerifyingKey
-from cryptoconditions.fulfillment import Fulfillment
+from nacl.signing import VerifyKey, SigningKey
+from nacl.exceptions import BadSignatureError
+from pyasn1.codec.der.encoder import encode as der_encode
+from pyasn1.codec.native.decoder import decode as nat_decode
+
+from cryptoconditions.crypto import base64_add_padding, base64_remove_padding
+from cryptoconditions.types.base_sha256 import BaseSha256
+from cryptoconditions.schemas.fingerprint import Ed25519FingerprintContents
 
 
-class Ed25519Fulfillment(Fulfillment):
+class Ed25519Sha256(BaseSha256):
     """ """
 
     TYPE_ID = 4
-    FEATURE_BITMASK = 0x20
-    PUBKEY_LENGTH = 32
-    SIGNATURE_LENGTH = 64
-    FULFILLMENT_LENGTH = PUBKEY_LENGTH + SIGNATURE_LENGTH
+    TYPE_NAME = 'ed25519-sha-256'
+    TYPE_ASN1 = 'ed25519Sha256'
+    TYPE_ASN1_CONDITION = 'ed25519Sha256Condition'
+    TYPE_ASN1_FULFILLMENT = 'ed25519Sha256Fulfillment'
+    TYPE_CATEGORY = 'simple'
 
-    def __init__(self, public_key=None):
+    CONSTANT_COST = 131072
+    PUBLIC_KEY_LENGTH = 32
+    SIGNATURE_LENGTH = 64
+
+    # TODO docstrings
+    def __init__(self, *, public_key=None, signature=None):
         """
         ED25519: Ed25519 signature condition.
 
@@ -23,29 +36,70 @@ class Ed25519Fulfillment(Fulfillment):
         which corresponds to a bitmask of 0x20.
 
         Args:
-            public_key (VerifyingKey): Ed25519 publicKey
+            public_key (bytes): Ed25519 public key.
+            signature (bytes): Signature.
+
         """
-        if public_key and isinstance(public_key, (str, bytes)):
-            public_key = VerifyingKey(public_key)
-        if public_key and not isinstance(public_key, VerifyingKey):
-            raise TypeError
-        self.public_key = public_key
-        self.signature = None
+        if public_key is not None:
+            self._validate_public_key(public_key)
+        self._public_key = public_key
+        if signature is not None:
+            self._validate_signature(signature)
+        self._signature = signature
 
-    def write_common_header(self, writer):
-        """
-        Write static header fields.
+    # TODO check type or use static typing (mypy)
+    def _validate_public_key(self, public_key):
+        if not isinstance(public_key, bytes):
+            raise TypeError('public_key must be bytes')
+        if len(public_key) != self.PUBLIC_KEY_LENGTH:
+            raise ValueError(
+                'Public key must be {} bytes, was: {}'.format(
+                    self.PUBLIC_KEY_LENGTH, len(public_key)))
+        # TODO More validation? Ask ILP folks.
+        return public_key
 
-        Some fields are common between the hash and the fulfillment payload. This
-        method writes those field to anything implementing the Writer interface.
-        It is used internally when generating the hash of the condition, when
-        generating the fulfillment payload and when calculating the maximum fulfillment size.
+    @property
+    def public_key(self):
+        return self._public_key
 
-        Args:
-            writer (Writer, Hasher, Predictor): Target for outputting the header.
-        """
-        writer.write_var_octet_string(self.public_key)
+    @public_key.setter
+    # TODO check type or use static typing (mypy)
+    def public_key(self, public_key):
+        self._public_key = self._validate_public_key(public_key)
 
+    # TODO check type or use static typing (mypy)
+    def _validate_signature(self, signature):
+        if not isinstance(signature, bytes):
+            raise TypeError('signature must be bytes')
+        if len(signature) != self.SIGNATURE_LENGTH:
+            raise Exception(
+                'Signature must be {} bytes, was: {}'.format(
+                    self.SIGNATURE_LENGTH, len(signature)))
+        return signature
+
+    @property
+    def signature(self):
+        return self._signature
+
+    @signature.setter
+    # TODO check type or use static typing (mypy)
+    # def signature(self, signature: bytes) -> None:
+    def signature(self, signature):
+        self._signature = self._validate_signature(signature)
+
+    @property
+    def asn1_dict_payload(self):
+        return {'publicKey': self.public_key, 'signature': self.signature}
+
+    @property
+    def fingerprint_contents(self):
+        asn1_fingerprint_obj = nat_decode(
+            {'publicKey': self.public_key},
+            asn1Spec=Ed25519FingerprintContents(),
+        )
+        return der_encode(asn1_fingerprint_obj)
+
+    # TODO check types or use static typing (mypy)
     def sign(self, message, private_key):
         """
         Sign the message.
@@ -55,63 +109,22 @@ class Ed25519Fulfillment(Fulfillment):
 
         Args:
             message (bytes): message to be signed
-            private_key (:obj:`Ed25519SigningKey`) Ed25519 private key
+            private_key (bytes) Ed25519 private key
+
         """
-        sk = private_key
-        vk = sk.get_verifying_key()
+        sk = SigningKey(private_key)
+        self.public_key = sk.verify_key.encode()
+        self.signature = sk.sign(message).signature
+        return self.signature
 
-        self.public_key = vk
+    def calculate_cost(self):
+        return Ed25519Sha256.CONSTANT_COST
 
-        # This would be the Ed25519ph version (JavaScript ES7):
-        # const message = crypto.createHash('sha512')
-        #   .update(Buffer.concat([this.messagePrefix, this.message]))
-        #   .digest()
+    def to_asn1_dict(self):
+        return {self.TYPE_ASN1: self.asn1_dict_payload}
 
-        self.signature = sk.sign(message, encoding='bytes')
-
-    def generate_hash(self):
-        """
-        Generate the condition hash.
-
-        Since the public key is the same size as the hash we'd be putting out here,
-        we just return the public key.
-        """
-        if not self.public_key:
-            raise ValueError('Requires a public publicKey')
-        return self.public_key.encode(encoding='bytes')
-
-    def parse_payload(self, reader, *args):
-        """
-        Parse the payload of an Ed25519 fulfillment.
-
-        Read a fulfillment payload from a Reader and populate this object with that fulfillment.
-
-        Args:
-            reader (Reader): Source to read the fulfillment payload from.
-        """
-        self.public_key = VerifyingKey(base58.b58encode(reader.read_octet_string(Ed25519Fulfillment.PUBKEY_LENGTH)))
-        self.signature = reader.read_octet_string(Ed25519Fulfillment.SIGNATURE_LENGTH)
-
-    def write_payload(self, writer):
-        """
-        Generate the fulfillment payload.
-
-        This writes the fulfillment payload to a Writer.
-
-        FULFILLMENT_PAYLOAD =
-            VARBYTES PUBLIC_KEY
-            VARBYTES SIGNATURE
-
-        Args:
-            writer (Writer): Subject for writing the fulfillment payload.
-        """
-        writer.write_octet_string(self.public_key.encode(encoding='bytes'), Ed25519Fulfillment.PUBKEY_LENGTH)
-        writer.write_octet_string(self.signature, Ed25519Fulfillment.SIGNATURE_LENGTH)
-        return writer
-
-    def calculate_max_fulfillment_length(self):
-        return Ed25519Fulfillment.FULFILLMENT_LENGTH
-
+    # TODO Adapt according to outcomes of
+    # https://github.com/rfcs/crypto-conditions/issues/16
     def to_dict(self):
         """
         Generate a dict of the fulfillment
@@ -120,13 +133,30 @@ class Ed25519Fulfillment(Fulfillment):
             dict: representing the fulfillment
         """
         return {
-            'type': 'fulfillment',
-            'type_id': self.TYPE_ID,
-            'bitmask': self.bitmask,
-            'public_key': self.public_key.encode(encoding='base58').decode(),
+            'type': Ed25519Sha256.TYPE_NAME,
+            'public_key': base58.b58encode(self.public_key),
             'signature': base58.b58encode(self.signature) if self.signature else None
         }
 
+    # TODO Adapt according to outcomes of
+    # https://github.com/rfcs/crypto-conditions/issues/16
+    def to_json(self):
+        """
+        Generate a dict of the fulfillment
+
+        Returns:
+            dict: representing the fulfillment
+        """
+        return {
+            'type': Ed25519Sha256.TYPE_NAME,
+            'public_key': base64_remove_padding(
+                urlsafe_b64encode(self.public_key)),
+            'signature': base64_remove_padding(
+                urlsafe_b64encode(self.signature)) if self.signature else None
+        }
+
+    # TODO Adapt according to outcomes of
+    # https://github.com/rfcs/crypto-conditions/issues/16
     def parse_dict(self, data):
         """
         Generate fulfillment payload from a dict
@@ -137,14 +167,37 @@ class Ed25519Fulfillment(Fulfillment):
         Returns:
             Fulfillment
         """
-        self.public_key = VerifyingKey(data['public_key'])
-        self.signature = base58.b58decode(data['signature']) if data['signature'] else None
+        self.public_key = base58.b58decode(data['public_key'])
+        if data['signature']:
+            self.signature = base58.b58decode(data['signature'])
 
-    def validate(self, message=None, **kwargs):
+    # TODO Adapt according to outcomes of
+    # https://github.com/rfcs/crypto-conditions/issues/16
+    def parse_json(self, data):
+        """
+        Generate fulfillment payload from a dict
+
+        Args:
+            data (dict): description of the fulfillment
+
+        Returns:
+            Fulfillment
+        """
+        self.public_key = urlsafe_b64decode(base64_add_padding(
+            data['publicKey']))
+        self.signature = urlsafe_b64decode(base64_add_padding(
+            data['signature']))
+
+    def parse_asn1_dict_payload(self, data):
+        self.public_key = data['publicKey']
+        self.signature = data['signature']
+
+    def validate(self, *, message):
         """
         Verify the signature of this Ed25519 fulfillment.
 
-        The signature of this Ed25519 fulfillment is verified against the provided message and public key.
+        The signature of this Ed25519 fulfillment is verified against
+        the provided message and public key.
 
         Args:
             message (str): Message to validate against.
@@ -152,7 +205,10 @@ class Ed25519Fulfillment(Fulfillment):
         Return:
             boolean: Whether this fulfillment is valid.
         """
-        if not (message and self.signature):
+        try:
+            returned_message = VerifyKey(self.public_key).verify(
+                message, signature=self.signature)
+        except BadSignatureError:
             return False
-
-        return self.public_key.verify(message, self.signature, encoding='bytes')
+        # TODO Check returned message against given message
+        return True

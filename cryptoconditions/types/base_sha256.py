@@ -1,26 +1,19 @@
-from abc import abstractmethod
+import hashlib
 
 from cryptoconditions.fulfillment import Fulfillment
-from cryptoconditions.lib.hasher import Hasher
 
 
-class BaseSha256Fulfillment(Fulfillment):
+class BaseSha256(Fulfillment):
     """ """
 
     def generate_hash(self):
         """
         Calculate condition hash.
 
-        This method is called internally by `condition`. It calculates the
-        condition hash by hashing the hash payload.
+        This method is called internally by ``Condition``. It calculates the
+        condition hash by hashing the fingerprint contents.
 
         Return:
-            Buffer: Result from hashing the hash payload.
+            bytes: Result from hashing the fingerprint contents.
         """
-        hasher = Hasher('sha256')
-        self.write_hash_payload(hasher)
-        return hasher.digest()  # remove padding
-
-    @abstractmethod
-    def write_hash_payload(self, hasher):
-        raise NotImplementedError
+        return hashlib.sha256(self.fingerprint_contents).digest()
