@@ -1,0 +1,28 @@
+version: '2'
+
+services:
+  cryptoconditions:
+    build:
+      context: .
+    volumes:
+      - ./docs:/usr/src/app/docs
+      - ./tests:/usr/src/app/tests
+      - ./cryptoconditions:/usr/src/app/cryptoconditions
+      - ./examples:/usr/src/app/examples
+      - ./setup.py:/usr/src/app/setup.py
+      - ./.coveragerc:/usr/src/app/.coveragerc
+    command: pytest -v
+
+  bdocs:
+    build:
+      context: .
+    volumes:
+      - .:/usr/src/app/
+    command: make -C docs html
+  
+  vdocs:
+    image: nginx
+    ports:
+      - '80'
+    volumes:
+      - ./docs/_build/html:/usr/share/nginx/html
