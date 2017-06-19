@@ -1,38 +1,29 @@
 import base64
-import re
 from abc import ABCMeta, abstractmethod
+
+from pyasn1.codec.der.encoder import encode as der_encode
+from pyasn1.codec.der.decoder import decode as der_decode
+from pyasn1.codec.native.decoder import decode as nat_decode
+from pyasn1.codec.native.encoder import encode as nat_encode
+from pyasn1.error import PyAsn1Error, SubstrateUnderrunError
+
 from cryptoconditions import TypeRegistry
 from cryptoconditions.condition import Condition
-from cryptoconditions.crypto import base64_remove_padding, base64_add_padding
-from cryptoconditions.exceptions import ParsingError
-from cryptoconditions.lib import Writer, Reader, Predictor
-
-FULFILLMENT_REGEX = r'^cf:([1-9a-f][0-9a-f]{0,3}|0):[a-zA-Z0-9_-]*$'
+from cryptoconditions.crypto import base64_add_padding, base64_remove_padding
+from cryptoconditions.exceptions import ASN1DecodeError, ASN1EncodeError
+from cryptoconditions.schemas.fulfillment import Fulfillment as Asn1Fulfillment
 
 
 class Fulfillment(metaclass=ABCMeta):
-    """
-    From the specs (https://tools.ietf.org/html/draft-thomas-crypto-conditions-01):
-
-        The term "fulfillment" refers to a description of a signed message
-        and a signed message that matches the description.
-
-        The description can be hashed and compared to a condition.  If the
-        message matches the description and the hash of the description
-        matches the condition, we say that the fulfillment fulfills the
-        condition.
-
-    """
-    TYPE_ID = None
-    REGEX = FULFILLMENT_REGEX
-    FEATURE_BITMASK = None
+    """Base class for fulfillment types."""
 
     @staticmethod
     def from_uri(serialized_fulfillment):
         """
         Create a Fulfillment object from a URI.
 
-        This method will parse a fulfillment URI and construct a corresponding Fulfillment object.
+        This method will parse a fulfillment URI and construct a
+        corresponding Fulfillment object.
 
         Args:
             serialized_fulfillment (str): URI representing the fulfillment
@@ -40,62 +31,51 @@ class Fulfillment(metaclass=ABCMeta):
         Return:
             Fulfillment: Resulting object
         """
-        if isinstance(serialized_fulfillment, Fulfillment):
-            return serialized_fulfillment
-        elif not isinstance(serialized_fulfillment, str):
+        if not isinstance(serialized_fulfillment, str):
             raise TypeError('Serialized fulfillment must be a string')
-
-        pieces = serialized_fulfillment.split(':')
-        if not pieces[0] == 'cf':
-            raise ValueError('Serialized fulfillment must start with "cf:"')
-
-        if not re.match(Fulfillment.REGEX, serialized_fulfillment):
-            raise ValueError('Invalid fulfillment format')
-        # try:
-        type_id = int(pieces[1], 16)
-        payload = base64.urlsafe_b64decode(base64_add_padding(pieces[2]))
-
-        cls = TypeRegistry.get_class_from_type_id(type_id)
-        fulfillment = cls()
-
-        fulfillment.parse_payload(Reader.from_source(payload), len(payload))
-        # except Exception as e:
-        #     raise ParsingError(str(e))
-
-        return fulfillment
+        uri_bytes = base64.urlsafe_b64decode(
+            base64_add_padding(serialized_fulfillment))
+        return Fulfillment.from_binary(uri_bytes)
 
     @staticmethod
-    def from_binary(reader):
+    def from_binary(data):
         """
-        Create a Fulfillment object from a binary blob.
-
-        This method will parse a stream of binary data and construct a
-        corresponding Fulfillment object.
+        Create a Fulfillment object from a DER encoded binary
+        representation of a fulfillment.
 
         Args:
-            reader (Reader): Binary stream implementing the Reader interface
+            data (bytes): DER encoded fulfillment in bytes.
         Returns:
-            Fulfillment: Resulting object
+            Fulfillment: :class:`~.Fulfillment` instance.
+
         """
-        reader = Reader.from_source(reader)
+        try:
+            asn1_obj, _ = der_decode(data, asn1Spec=Asn1Fulfillment())
+        except (SubstrateUnderrunError, PyAsn1Error) as exc:
+            raise ASN1DecodeError('Failed to decode fulfillment.') from exc
+        asn1_dict = nat_encode(asn1_obj)
+        return Fulfillment.from_asn1_dict(asn1_dict)
 
-        cls_type = reader.read_uint16()
-        cls = TypeRegistry.get_class_from_type_id(cls_type)
-
-        fulfillment = cls()
-        payload_length = reader.read_length_prefix()
-        fulfillment.parse_payload(reader, payload_length)
-
-        return fulfillment
+    @staticmethod
+    def from_asn1_dict(asn1_dict):
+        asn1_type, value = asn1_dict.popitem()
+        instance = TypeRegistry.find_by_asn1_type(asn1_type)['class']()
+        instance.parse_asn1_dict_payload(value)
+        instance.asn1_dict = {asn1_type: value}
+        return instance
 
     @staticmethod
     def from_dict(data):
-        cls_type = data['type_id']
-        cls = TypeRegistry.get_class_from_type_id(cls_type)
-
-        fulfillment = cls()
+        type_ = TypeRegistry.find_by_name(data['type'])
+        fulfillment = type_['class']()
         fulfillment.parse_dict(data)
+        return fulfillment
 
+    @staticmethod
+    def from_json(data):
+        type_ = TypeRegistry.find_by_name(data['type'])
+        fulfillment = type_['class']()
+        fulfillment.parse_json(data)
         return fulfillment
 
     @property
@@ -109,18 +89,12 @@ class Fulfillment(metaclass=ABCMeta):
         return self.TYPE_ID
 
     @property
-    def bitmask(self):
-        """
-        Return the bitmask of this fulfillment.
+    def type_name(self):
+        return self.TYPE_NAME
 
-        For simple fulfillment types this is simply the bit representing this type.
-
-        For meta-fulfillments, these are the bits representing the types of the subconditions.
-
-        Returns:
-            int: Bitmask corresponding to this fulfillment.
-        """
-        return self.FEATURE_BITMASK
+    @property
+    def subtypes(self):
+        return set()
 
     @property
     def condition(self):
@@ -138,9 +112,9 @@ class Fulfillment(metaclass=ABCMeta):
         """
         condition = Condition()
         condition.type_id = self.type_id
-        condition.bitmask = self.bitmask
         condition.hash = self.generate_hash()
-        condition.max_fulfillment_length = self.calculate_max_fulfillment_length()
+        condition.cost = self.calculate_cost()
+        condition.subtypes = self.subtypes
         return condition
 
     @property
@@ -174,92 +148,53 @@ class Fulfillment(metaclass=ABCMeta):
             bytes: Fingerprint of the condition.
         """
 
-    def calculate_max_fulfillment_length(self):
-        """
-        Calculate the maximum length of the fulfillment payload.
+    @abstractmethod
+    def calculate_cost(self):
+        """Calculate the cost of the fulfillment payload.
 
-        This implementation works by measuring the length of the fulfillment.
-        Condition types that do not have a constant length will override this
-        method with one that calculates the maximum possible length.
+        Each condition type has a standard deterministic formula for
+        estimating the cost of validating the fulfillment. This is an
+        abstract method which will be overridden by each of the types
+        with the actual formula.
 
-        Return:
-            {Number} Maximum fulfillment length
+        Returns:
+            int: The cost of the fulfillment payload.
+
         """
-        predictor = Predictor()
-        self.write_payload(predictor)
-        return predictor.size
 
     def serialize_uri(self):
         """
         Generate the URI form encoding of this fulfillment.
 
-        Turns the fulfillment into a URI containing only URL-safe characters. This
-        format is convenient for passing around fulfillments in URLs, JSON and
-        other text-based formats.
-
-        "cf:" BASE16(TYPE_BIT) ":" BASE64URL(FULFILLMENT_PAYLOAD)
+        Turns the fulfillment into a URI containing only URL-safe
+        characters. This format is convenient for passing around
+        fulfillments in URLs, JSON and other text-based formats.
 
         Return:
-             string: Fulfillment as a URI
+             str: Fulfillment as a URI
         """
-        return 'cf:{:x}:{}'.format(
-            self.type_id,
-            base64_remove_padding(base64.urlsafe_b64encode(self.serialize_payload())).decode('utf-8'))
+        return base64_remove_padding(
+            base64.urlsafe_b64encode(self.serialize_binary())).decode()
 
     def serialize_binary(self):
         """
-        Serialize fulfillment to a buffer.
+        Serialize fulfillment to bytes.
 
-        Encodes the fulfillment as a string of bytes. This is used internally for
-        encoding subfulfillments, but can also be used to passing around
-        fulfillments in a binary protocol for instance.
+        Encodes the fulfillment as a string of bytes. This is used
+        internally for encoding subfulfillments, but can also be used to
+        passing around fulfillments in a binary protocol for instance.
 
-        FULFILLMENT =
-            VARUINT TYPE_BIT
-            FULFILLMENT_PAYLOAD
-
-        Return:
-            Serialized fulfillment
+        Returns:
+            bytes: Serialized fulfillment (DER encoded).
         """
-        writer = Writer()
-        writer.write_uint16(self.type_id)
-        writer.write_var_octet_string(self.serialize_payload())
-        return writer.buffer
+        asn1_dict = {self.TYPE_ASN1: self.asn1_dict_payload}
+        asn1 = nat_decode(asn1_dict, asn1Spec=Asn1Fulfillment())
+        try:
+            bin_obj = der_encode(asn1)
+        except PyAsn1Error as exc:
+            raise ASN1EncodeError('Failed to encode fulfillment.') from exc
+        return bin_obj
 
-    def serialize_payload(self):
-        """
-        Return the fulfillment payload as a buffer.
-
-        Note that the fulfillment payload is not the standard format for passing
-        fulfillments in binary protocols. Use `serializeBinary` for that. The
-        fulfillment payload is purely the type-specific data and does not include the bitmask.
-
-        Return:
-            Buffer: Fulfillment payload
-        """
-        writer = Writer()
-        self.write_payload(writer)
-        return writer.buffer
-
-    @abstractmethod
-    def write_payload(self, writer):
-        """
-        Generate the fulfillment payload.
-
-        Args:
-            writer (Writer, Predictor): Subject for writing the fulfillment payload.
-        """
-
-    @abstractmethod
-    def parse_payload(self, reader, *args):
-        """
-        Parse the payload of the fulfillment.
-
-        Args:
-            reader (Reader): Source to read the fulfillment payload from.
-        """
-
-    @abstractmethod
     def to_dict(self):
         """
         Generate a dict of the fulfillment
@@ -267,7 +202,15 @@ class Fulfillment(metaclass=ABCMeta):
         Returns:
         """
 
-    @abstractmethod
+    @property
+    def asn1_dict(self):
+        """Dictionary representation of asn1 object."""
+        return self._asn1_dict
+
+    @asn1_dict.setter
+    def asn1_dict(self, value):
+        self._asn1_dict = value
+
     def parse_dict(self, data):
         """
         Generate fulfillment payload from a dict
@@ -277,6 +220,13 @@ class Fulfillment(metaclass=ABCMeta):
 
         Returns:
             Fulfillment
+        """
+
+    @abstractmethod
+    def parse_asn1_dict_payload(self, data):
+        """
+        .. todo:: write docs
+
         """
 
     @abstractmethod

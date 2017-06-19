@@ -1,12 +1,19 @@
-from cryptoconditions.types.base_sha256 import BaseSha256Fulfillment
-from cryptoconditions.lib import Hasher, Reader, Writer, Predictor
+from base64 import b64decode, urlsafe_b64decode
+
+from cryptoconditions.crypto import base64_add_padding
+from cryptoconditions.types.base_sha256 import BaseSha256
+from cryptoconditions.exceptions import MissingDataError
 
 
-class PreimageSha256Fulfillment(BaseSha256Fulfillment):
+class PreimageSha256(BaseSha256):
     """ """
 
     TYPE_ID = 0
-    FEATURE_BITMASK = 0x03
+    TYPE_NAME = 'preimage-sha-256'
+    TYPE_ASN1 = 'preimageSha256'
+    TYPE_ASN1_CONDITION = 'preimageSha256Condition'
+    TYPE_ASN1_FULFILLMENT = 'preimageSha256Fulfillment'
+    TYPE_CATEGORY = 'simple'
 
     def __init__(self, preimage=None):
         """
@@ -37,61 +44,6 @@ class PreimageSha256Fulfillment(BaseSha256Fulfillment):
             raise TypeError('Preimage must be bytes, was: {}'.format(preimage))
         self.preimage = preimage
 
-    @property
-    def bitmask(self):
-        return self.FEATURE_BITMASK
-
-    def write_hash_payload(self, hasher):
-        """
-        Generate the contents of the condition hash.
-
-        Writes the contents of the condition hash to a Hasher. Used internally by `getCondition`.
-
-        HASH = SHA256(PREIMAGE)
-
-        Args:
-             hasher (Hasher): Destination where the hash payload will be written.
-        """
-        if not isinstance(hasher, Hasher):
-            raise TypeError('hasher must be a Hasher instance')
-        if self.preimage is None:
-            raise ValueError('Could not calculate hash, no preimage provided')
-        hasher.write(self.preimage)
-
-    def parse_payload(self, reader, payload_size):
-        """
-        Parse the payload of a SHA256 hashlock fulfillment.
-
-        Read a fulfillment payload from a Reader and populate this object with that fulfillment.
-
-        FULFILLMENT_PAYLOAD =
-            VARBYTES PREIMAGE
-
-        Args:
-            reader (Reader): Source to read the fulfillment payload from.
-            payload_size (int): Total size of the fulfillment payload.
-        """
-        if not isinstance(reader, Reader):
-            raise TypeError('reader must be a Reader instance')
-        self.preimage = reader.read(payload_size)
-
-    def write_payload(self, writer):
-        """
-        Generate the fulfillment payload.
-
-        This writes the fulfillment payload to a Writer.
-
-        Args:
-            writer (Writer): Subject for writing the fulfillment payload.
-        """
-        if not isinstance(writer, (Writer, Predictor)):
-            raise TypeError('writer must be a Writer instance')
-        if self.preimage is None:
-            raise ValueError('Preimage must be specified')
-
-        writer.write(self.preimage)
-        return writer
-
     def to_dict(self):
         """
         Generate a dict of the fulfillment
@@ -102,10 +54,35 @@ class PreimageSha256Fulfillment(BaseSha256Fulfillment):
         return {
             'type': 'fulfillment',
             'type_id': self.TYPE_ID,
-            'bitmask': self.bitmask,
             'preimage': self.preimage.decode()
         }
 
+    @property
+    def asn1_dict_payload(self):
+        return {'preimage': self.preimage}
+
+    def to_asn1_dict(self):
+        return {PreimageSha256.TYPE_ASN1: self.asn1_dict_payload}
+
+    @property
+    def fingerprint_contents(self):
+        if self.preimage is None:
+            raise MissingDataError(
+                'Could not calculate hash, no preimage provided')
+        return self.preimage
+
+    def parse_json(self, data):
+        """
+        Generate fulfillment payload from a dict
+
+        Args:
+            data (dict): description of the fulfillmjson
+        Returns:
+            Fulfillment
+        """
+        self.preimage = urlsafe_b64decode(base64_add_padding(data['preimage']))
+
+    # TODO remove
     def parse_dict(self, data):
         """
         Generate fulfillment payload from a dict
@@ -116,7 +93,15 @@ class PreimageSha256Fulfillment(BaseSha256Fulfillment):
         Returns:
             Fulfillment
         """
-        self.preimage = data['preimage'].encode()
+        self.preimage = b64decode(data['preimage'])
+
+    def parse_asn1_dict_payload(self, data):
+        self.preimage = data['preimage']
+
+    def calculate_cost(self):
+        if self.preimage is None:
+            raise MissingDataError('Preimage must be specified')
+        return len(self.preimage)
 
     def validate(self, *args, **kwargs):
         """
