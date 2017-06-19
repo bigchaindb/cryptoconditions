@@ -67,7 +67,7 @@ class Ed25519SigningKey(nacl.signing.SigningKey):
 
         Args:
             data (bytes): data to sign.
-            encoding(str): {'bytes'|'hex'|'base16'|'base32'|'base58'|'base64'}. Encoding in which to return the 
+            encoding(str): {'bytes'|'hex'|'base16'|'base32'|'base58'|'base64'}. Encoding in which to return the
                            signature. Defaults to 'base58'.
 
             Returns:
@@ -102,7 +102,7 @@ class Ed25519VerifyingKey(nacl.signing.VerifyKey):
 
         Args:
             key (str): encoded compressed value.
-            encoding(str): {'bytes'|'hex'|'base16'|'base32'|'base58'|'base64'}. Encoding of the public key. 
+            encoding(str): {'bytes'|'hex'|'base16'|'base32'|'base58'|'base64'}. Encoding of the public key.
                            Defaults to 'base58'.
         """
         super().__init__(key, encoder=_get_nacl_encoder(encoding))
@@ -114,7 +114,7 @@ class Ed25519VerifyingKey(nacl.signing.VerifyKey):
         Args:
             data (bytes): data to verify.
             signature (bytes): {base64|base32|base16|hex|bytes} signature to be verified
-            encoding(str): {'bytes'|'hex'|'base16'|'base32'|'base58'|'base64'}. Encoding of the signature. 
+            encoding(str): {'bytes'|'hex'|'base16'|'base32'|'base58'|'base64'}. Encoding of the signature.
                            Defaults to 'base58'.
         """
 
