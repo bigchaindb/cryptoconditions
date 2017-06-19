@@ -34,6 +34,14 @@ Base Modules
 .. automodule:: cryptoconditions.exceptions
 
 
+Schemas Modules
+===============
+
+``condition``
+-------------
+.. automodule:: cryptoconditions.schemas.condition
+
+
 Types Modules
 =============
 
@@ -42,51 +50,27 @@ Types Modules
 .. automodule:: cryptoconditions.types.base_sha256
 
 
+``preimage``
+------------
+.. automodule:: cryptoconditions.types.preimage
+
+
+``prefix``
+------------
+.. automodule:: cryptoconditions.types.prefix
+
+
+``threshold``
+-------------
+.. automodule:: cryptoconditions.types.threshold
+
+
+``rsa``
+-------------
+.. automodule:: cryptoconditions.types.rsa
+
+
 ``ed25519``
 -----------
 .. automodule:: cryptoconditions.types.ed25519
-    :special-members: __init__
-
-``inverted_threshold_sha256``
------------------------------
-.. automodule:: cryptoconditions.types.inverted_threshold_sha256
-    :special-members: __init__
-
-
-``sha256``
-----------
-.. automodule:: cryptoconditions.types.sha256
-
-
-``threshold_sha256``
---------------------
-.. automodule:: cryptoconditions.types.threshold_sha256
-
-
-``timeout``
------------
-.. automodule:: cryptoconditions.types.timeout
-
-
-Lib Modules
-===========
-
-``hasher``
-----------
-.. automodule:: cryptoconditions.lib.hasher
-    :special-members: __init__
-
-``predictor``
--------------
-.. automodule:: cryptoconditions.lib.predictor
-    :special-members: __init__
-
-``reader``
-----------
-.. automodule:: cryptoconditions.lib.reader
-    :special-members: __init__
-
-``writer``
-----------
-.. automodule:: cryptoconditions.lib.writer
     :special-members: __init__
