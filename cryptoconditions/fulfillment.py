@@ -32,7 +32,6 @@ class Fulfillment(metaclass=ABCMeta):
             Fulfillment: Resulting object
         """
         if not isinstance(serialized_fulfillment, str):
-            import ipdb; ipdb.set_trace()
             raise TypeError('Serialized fulfillment must be a string')
         uri_bytes = base64.urlsafe_b64decode(
             base64_add_padding(serialized_fulfillment))

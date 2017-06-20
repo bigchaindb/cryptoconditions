@@ -36,7 +36,7 @@ def validate_fulfillment(serialized_fulfillment,
 
 def fulfillment_to_condition(serialized_fulfillment):
     fulfillment = Fulfillment.from_uri(serialized_fulfillment)
-    return fulfillment.condition_uri()
+    return fulfillment.condition_uri
 
 
 def from_dict(data):
