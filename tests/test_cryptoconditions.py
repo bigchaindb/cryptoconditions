@@ -18,8 +18,9 @@ def test_validate_fulfillment(minimal_ed25519):
 def test_validate_fulfillment_condition_mismatch(minimal_ed25519,
                                                  minimal_preimage):
     from cryptoconditions import validate_fulfillment
+    from cryptoconditions.exceptions import ValidationError
 
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         validate_fulfillment(minimal_ed25519.fulfillment,
                              minimal_preimage.condition_uri)
 
