@@ -6,6 +6,7 @@ from cryptoconditions.types.threshold import ThresholdSha256
 from cryptoconditions.types.ed25519 import Ed25519Sha256
 from cryptoconditions.fulfillment import Fulfillment    # noqa: W0611
 from cryptoconditions.condition import Condition        # noqa: W0611
+from cryptoconditions.exceptions import ValidationError
 
 
 TypeRegistry.register_type(PreimageSha256)
@@ -27,7 +28,7 @@ def validate_fulfillment(serialized_fulfillment,
     fulfillment = Fulfillment.from_uri(serialized_fulfillment)
     condition_uri = fulfillment.condition_uri
     if condition_uri != serialized_condition:
-        raise Exception(
+        raise ValidationError(
             'Fulfillment does not match condition (expected: {}, actual: {})'
             .format(serialized_condition, condition_uri)
         )
