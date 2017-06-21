@@ -226,7 +226,7 @@ class Condition(metaclass=ABCMeta):
         """
         # TODO Use more precise Exception class
         if len(value) != 32:
-            raise Exception(
+            raise ValueError(
                 'Hash is of invalid length {}, should be 32'.format(len(value))
             )
         self._hash = value
