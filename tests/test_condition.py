@@ -113,7 +113,7 @@ def test_condition_hash():
     condition = Condition()
 
     # raises an exception if hash is not 32 bytes long
-    with raises(Exception):
+    with raises(ValueError):
         condition.hash = 'a'
 
     # raises a ValueError if the hash is not set
