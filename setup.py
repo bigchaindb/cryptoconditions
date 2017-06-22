@@ -73,8 +73,8 @@ setup(
     install_requires=[
         'base58~=0.2.2',
         'PyNaCl~=1.1.0',
-        'pyasn1',
-        'cryptography',
+        'pyasn1~=0.2.3',
+        'cryptography~=1.9',
     ],
     setup_requires=['pytest-runner'],
     tests_require=tests_require,
