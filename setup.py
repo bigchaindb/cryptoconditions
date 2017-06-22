@@ -12,6 +12,9 @@ version = {}
 with open('cryptoconditions/version.py') as fp:
     exec(fp.read(), version)
 
+with open('README.rst') as readme_file:
+    readme = readme_file.read()
+
 
 tests_require = [
     'coverage',
@@ -42,7 +45,7 @@ setup(
     version=version['__version__'],
     description='Multi-algorithm, multi-level, multi-signature format for '
                 'expressing conditions and fulfillments according to the Interledger Protocol (ILP).',
-    long_description=__doc__,
+    long_description=readme,
     summary="Cryptoconditions as specified by the interledger protocol",
     keywords="cryptoconditions, interledger, merkle tree, ed25519, threshold signatures, hash lock",
     url='https://github.com/bigchaindb/cryptoconditions/',
