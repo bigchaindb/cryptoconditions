@@ -1,4 +1,5 @@
 import base64
+import base58
 import re
 from functools import total_ordering
 from itertools import compress
