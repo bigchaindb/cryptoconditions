@@ -20,7 +20,7 @@ class TestFulfillment:
         assert exc.value.args == ('Serialized fulfillment must be a string',)
 
     @pytest.mark.parametrize('fulfillment,error', (
-        (123, PyAsn1Error),
+        (123, TypeError),
         (b'', SubstrateUnderrunError),
     ))
     def test_from_binary_with_invalid_value(self, fulfillment, error):
