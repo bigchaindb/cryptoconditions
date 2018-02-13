@@ -1,6 +1,7 @@
 from urllib.parse import parse_qs, urlparse
+
 from hypothesis import given
-from hypothesis_regex import regex
+from hypothesis.strategies import from_regex
 from pytest import raises
 
 from cryptoconditions.condition import CONDITION_REGEX
@@ -18,7 +19,7 @@ SUPPORTED_TYPES = (
 )
 
 
-@given(regex(r'^(?!ni$).*:///sha-256;47DEQpj?fpt=preimage-sha-256&cost=0$'))
+@given(from_regex(r'^(?!ni$).*:///sha-256;47DEQpj?fpt=preimage-sha-256&cost=0$'))
 def test_from_uri_prefix_error(uri):
     from cryptoconditions.condition import Condition, CONDITION_URI_SCHEME
     from cryptoconditions.exceptions import PrefixError
@@ -29,7 +30,7 @@ def test_from_uri_prefix_error(uri):
         .format(CONDITION_URI_SCHEME),)
 
 
-@given(regex(CONDITION_REGEX))
+@given(from_regex(CONDITION_REGEX))
 def test_from_uri_parse_error_missing_fpt(uri):
     from cryptoconditions.condition import Condition
     from cryptoconditions.exceptions import ParsingError
@@ -39,7 +40,7 @@ def test_from_uri_parse_error_missing_fpt(uri):
         'Invalid condition format: "fpt" parameter or value missing.',)
 
 
-@given(regex(
+@given(from_regex(
     r'^ni:\/\/\/sha-256;([a-zA-Z0-9_-]{0,86})\?fpt=preimage-sha-256&(.+)$'))
 def test_from_uri_parse_error_missing_cost(uri):
     from cryptoconditions.condition import Condition
@@ -50,7 +51,7 @@ def test_from_uri_parse_error_missing_cost(uri):
         'Invalid condition format: "cost" parameter or value missing.',)
 
 
-@given(regex(
+@given(from_regex(
     r'^ni:\/\/\/sha-256;([a-zA-Z0-9_-]{0,86})'
     r'\?fpt=preimage-sha-256&cost=[a-z]+$'))
 def test_from_uri_parse_error_invalid_cost(uri):
@@ -61,7 +62,7 @@ def test_from_uri_parse_error_invalid_cost(uri):
     assert exc_info.value.args == ('No or invalid cost provided',)
 
 
-@given(regex(
+@given(from_regex(
     r'^ni:\/\/\/sha-256;([a-zA-Z0-9_-]{{0,86}})\?fpt=(?!{})[a-z0-9-]+$'.format(
         '$|'.join(t for t in SUPPORTED_TYPES))))
 def test_from_uri_with_unsupported_type(uri):
@@ -74,7 +75,7 @@ def test_from_uri_with_unsupported_type(uri):
         'Type {} is not supported'.format(condition_type),)
 
 
-@given(regex(r'^ni:\/\/\/sha-265;([a-zA-Z0-9_-]{0,86})\?(.+)$'))
+@given(from_regex(r'^ni:\/\/\/sha-265;([a-zA-Z0-9_-]{0,86})\?(.+)$'))
 def test_from_uri_malformed_uri(uri):
     from cryptoconditions.condition import Condition
     from cryptoconditions.exceptions import ParsingError
