@@ -188,7 +188,13 @@ class Fulfillment(metaclass=ABCMeta):
             bytes: Serialized fulfillment (DER encoded).
         """
         asn1_dict = {self.TYPE_ASN1: self.asn1_dict_payload}
-        asn1 = nat_decode(asn1_dict, asn1Spec=Asn1Fulfillment())
+        try:
+            asn1 = nat_decode(asn1_dict, asn1Spec=Asn1Fulfillment())
+        except TypeError as exc:
+            raise ASN1DecodeError(
+                'Internal error! Failed to transform dict "{}" '
+                'into pyasn1 schema object.'.format(asn1_dict)
+            ) from exc
         try:
             bin_obj = der_encode(asn1)
         except PyAsn1Error as exc:

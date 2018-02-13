@@ -44,14 +44,18 @@ class TestFulfillment:
     @pytest.mark.parametrize('simple_cryptocondition_type', (
         'PreimageSha256', 'RsaSha256', 'Ed25519Sha256',
     ))
-    def test_serialize_binary_error(self, simple_cryptocondition_type):
+    def test_serialize_binary_raises_with_non_initialize_simple_types(
+            self, simple_cryptocondition_type):
         import cryptoconditions
-        from cryptoconditions.exceptions import ASN1EncodeError
+        from cryptoconditions.exceptions import ASN1DecodeError
         fulfillment = getattr(cryptoconditions, simple_cryptocondition_type)()
-        with pytest.raises(ASN1EncodeError) as exc:
+        with pytest.raises(ASN1DecodeError) as exc:
             fulfillment.serialize_binary()
-        assert isinstance(exc.value.__cause__, PyAsn1Error)
-        assert exc.value.args == ('Failed to encode fulfillment.',)
+        assert isinstance(exc.value.__cause__, TypeError)
+        err_msg = ('Internal error! Failed to transform dict "{}" '
+                   'into pyasn1 schema object.').format(
+                        {fulfillment.TYPE_ASN1: fulfillment.asn1_dict_payload})
+        assert exc.value.args == (err_msg,)
 
 
 class TestPreimageSha256:
