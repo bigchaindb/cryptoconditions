@@ -19,7 +19,6 @@ with open('README.rst') as readme_file:
 tests_require = [
     'coverage',
     'hypothesis',
-    'hypothesis-regex',
     'pep8',
     'pyflakes',
     'pylint',
