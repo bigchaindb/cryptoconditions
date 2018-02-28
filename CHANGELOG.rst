@@ -3,6 +3,13 @@ Changelog
 
 0.6.0.dev1 (2017-07-06)
 -----------------------
+Changed
+^^^^^^^
+* Upgrade to ``pyasn1~=0.4``.
+
+
+0.6.0.dev1 (2017-07-06)
+-----------------------
 Fixed
 ^^^^^
 * Add missing import for ``base58``.
