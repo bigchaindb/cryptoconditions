@@ -37,7 +37,7 @@ Installation
 To install latest release that is on PyPI:
 
 ```bash
-$ pip install cryptocondtions
+$ pip install cryptoconditions
 ```
 
 Or install from source:
