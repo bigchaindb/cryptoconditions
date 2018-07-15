@@ -9,7 +9,7 @@ sk_b58 = base58.b58encode(binascii.unhexlify('833fe62409237b9d62ec77587520911e9a
 sk = SigningKey(sk_b58)
 
 ed25519_fulfillment = cc.Ed25519Sha256()
-ed25519_fulfillment.sign(message, sk)
+ed25519_fulfillment.sign(message.encode(), base58.b58decode(sk.encode()))
 
 print(ed25519_fulfillment.condition_uri)
 # prints 'cc:4:20:7Bcrk61eVjv0kyxw4SRQNMNUZ-8u_U1k6_gZaDRn4r8:96'
@@ -31,8 +31,8 @@ sk_b58 = base58.b58encode(binascii.unhexlify('1a3ab1a87f000348f391613930cc495296
 sk = SigningKey(sk_b58)
 vk = sk.get_verifying_key()
 
-ed25519_fulfillment = cc.Ed25519Sha256(public_key=vk)
-ed25519_fulfillment.sign(message, sk)
+ed25519_fulfillment = cc.Ed25519Sha256(public_key=base58.b58decode(vk.encode())
+ed25519_fulfillment.sign(message.encode(),base58.b58decode(sk.encode()))
 
 print(ed25519_fulfillment.condition_uri)
 # prints 'cc:4:20:phTWOii-Po5F6pljjSKrwEMOQRKiiz9gGmF_nH9EUCE:96'
