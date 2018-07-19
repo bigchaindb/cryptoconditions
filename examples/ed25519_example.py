@@ -1,3 +1,7 @@
+########################################
+# Code upgrade done by Via Science Inc.#
+########################################
+
 import binascii
 import base58
 
