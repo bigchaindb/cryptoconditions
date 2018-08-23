@@ -71,7 +71,7 @@ setup(
     packages=find_packages(exclude=['tests*', 'examples']),
 
     install_requires=[
-        'base58~=0.2.2',
+        'base58~=1.0.0',
         'PyNaCl~=1.1.0',
         'pyasn1~=0.4',
         'cryptography~=1.9',
