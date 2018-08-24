@@ -12,7 +12,7 @@ class Base58Encoder(object):
 
     @staticmethod
     def encode(data):
-        return base58.b58encode(data).encode()
+        return base58.b58encode(data)
 
     @staticmethod
     def decode(data):
