@@ -1,8 +1,28 @@
 Changelog
 =========
 
-0.6.0.dev1 (2017-07-06)
------------------------
+0.7.1 (2018-08-28)
+------------------
+
+Changed
+^^^^^^^
+* Update setup.py to use ``cryptography~=2.3.1``
+* Update setup.py to use ``base58~=1.0.0``, also update code using ``base58``
+* Licensing info
+* README.rst content
+
+Fixed
+^^^^^
+* Example code in ``examples/ed25519_example.py``: thanks to @Chuseuiti
+
+0.7.0 (2018-02-28)
+------------------
+
+Note: The above heading used to say "0.6.0.dev1 (2017-07-06)"
+but that was a mistake, because it was added
+in commit 9ca4648ef47cc99305d753a337c8ff9db9d80a5a
+which contained the message "Update changelog for 0.7.0 release".
+
 Changed
 ^^^^^^^
 * Upgrade to ``pyasn1~=0.4``.
