@@ -142,14 +142,14 @@ class RsaSha256(BaseSha256):
                 (m_int.bit_length() + 7) // 8, 'big')
             self._set_public_modulus(m_bytes)
 
-        signer = private_key_obj.signer(
+        signer = private_key_obj.sign(
+            message,
             padding.PSS(
                 mgf=padding.MGF1(hashes.SHA256()),
                 salt_length=SALT_LENGTH,
             ),
             hashes.SHA256(),
         )
-        signer.update(message)
         self.signature = signer.finalize()
 
     def calculate_cost(self):
@@ -198,7 +198,8 @@ class RsaSha256(BaseSha256):
             int.from_bytes(self.modulus, byteorder='big'),
         )
         public_key = public_numbers.public_key(default_backend())
-        verifier = public_key.verifier(
+        verifier = public_key.verify(
+            message,
             self.signature,
             padding.PSS(
                 mgf=padding.MGF1(hashes.SHA256()),
@@ -206,7 +207,6 @@ class RsaSha256(BaseSha256):
             ),
             hashes.SHA256()
         )
-        verifier.update(message)
         try:
             verifier.verify()
         except InvalidSignature as exc:
