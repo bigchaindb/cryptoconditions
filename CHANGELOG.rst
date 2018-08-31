@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.7.2 (2018-08-31)
+------------------
+
+Changed
+^^^^^^^
+* Use `sign` and `verify` instead of deprecated `signer` and `verifier`
+for one-shot sign/verify operation using cryptography.
+
 0.7.1 (2018-08-28)
 ------------------
 
