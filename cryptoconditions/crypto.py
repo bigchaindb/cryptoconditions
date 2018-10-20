@@ -92,6 +92,10 @@ class Ed25519SigningKey(nacl.signing.SigningKey):
     @classmethod
     def generate(cls):
         return cls(nacl.signing.SigningKey.generate().encode(encoder=Base58Encoder))
+    
+    @classmethod
+    def generate_with_seed(cls, seed):
+        return cls(nacl.signing.SigningKey(seed).encode(encoder=Base58Encoder))
 
 
 class Ed25519VerifyingKey(nacl.signing.VerifyKey):
@@ -143,14 +147,19 @@ class Ed25519VerifyingKey(nacl.signing.VerifyKey):
         return super().encode(encoder=_get_nacl_encoder(encoding))
 
 
-def ed25519_generate_key_pair():
+def ed25519_generate_key_pair(seed=None):
     """
     Generate a new key pair.
 
+    Args:
+        seed (bytes): 32-byte seed for deterministic generation.
     Returns:
         A tuple of (private_key, public_key) encoded in base58.
     """
-    sk = Ed25519SigningKey.generate()
+    if seed:
+        sk = Ed25519SigningKey.generate_with_seed(seed)
+    else:
+        sk = Ed25519SigningKey.generate()
     # Private key
     private_value_base58 = sk.encode(encoding='base58')
 
