@@ -1,12 +1,25 @@
 Changelog
 =========
 
+0.8.0 (2018-10-20)
+------------------
+
+Changed
+^^^^^^^
+
+* ``crypto.ed25519_generate_key_pair()`` now supports an optional keyword argument ``seed`` to support deterministic generation
+  of a keypair from a seed.
+  Example use: ``crypto.ed25519_generate_key_pair(seed=seed_value)``
+  Note that the value of ``seed`` must be a 32-byte bytes object.
+  Thanks to external contributor @excerebrose for adding this functionality in pull request #487.
+* Changed setup.py to use ``PyNaCl~=1.1.0`` again, because 1.2.1 was breaking software that uses the cryptoconditions package.
+
 0.7.3 (2018-09-04)
 ------------------
 
 Changed
 ^^^^^^^
-* Update setup.py to use  ``PyNaCl~=1.2.1``
+* Update setup.py to use ``PyNaCl~=1.2.1``
 
 0.7.2 (2018-08-31)
 ------------------
