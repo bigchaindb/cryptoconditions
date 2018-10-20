@@ -152,7 +152,7 @@ def ed25519_generate_key_pair(seed=None):
     Generate a new key pair.
 
     Args:
-        seed (str) : seed for deterministic generation.
+        seed (bytes): 32-byte seed for deterministic generation.
     Returns:
         A tuple of (private_key, public_key) encoded in base58.
     """
