@@ -1,5 +1,5 @@
 import sphinx_rtd_theme
-
+import datetime
 
 _version = {}
 with open('../cryptoconditions/version.py') as fp:
@@ -26,7 +26,8 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
 project = 'cryptoconditions'
-copyright = '2016, Cryptoconditions Contributors'
+now = datetime.datetime.now()
+copyright = str(now.year) + ', Cryptoconditions Contributors'
 author = 'Cryptoconditions Contributors'
 version = _version['__short_version__']
 release = _version['__version__']
@@ -44,17 +45,6 @@ latex_elements = {}
 latex_documents = [
     (master_doc, 'cryptoconditions.tex', 'cryptoconditions Documentation',
      'Cryptoconditions Contributors', 'manual'),
-]
-
-man_pages = [
-    (master_doc, 'cryptoconditions', 'cryptoconditions Documentation',
-     [author], 1)
-]
-
-texinfo_documents = [
-    (master_doc, 'cryptoconditions', 'cryptoconditions Documentation',
-     author, 'cryptoconditions', 'One line description of project.',
-     'Miscellaneous'),
 ]
 
 intersphinx_mapping = {'https://docs.python.org/3/': None}
