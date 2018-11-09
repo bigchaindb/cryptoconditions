@@ -95,7 +95,7 @@ class Ed25519SigningKey(nacl.signing.SigningKey):
     
     @classmethod
     def generate_with_seed(cls, seed):
-        return cls(nacl.signing.SigningKey(seed, 'bytes').encode(encoder=Base58Encoder))
+        return cls(nacl.signing.SigningKey(seed, _get_nacl_encoder('bytes')).encode(encoder=Base58Encoder))
 
 
 class Ed25519VerifyingKey(nacl.signing.VerifyKey):
