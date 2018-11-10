@@ -85,6 +85,21 @@ class TestBigchainCryptoED25519(object):
         assert SigningKey(sk_b58).encode() == sk_b58
         assert VerifyingKey(vk_b58).encode() == vk_b58
 
+    def test_deteministic_key_pair_is_same(self):
+        seed = b'm\xea#\xbb\xady\xea\xf5Y\x1fz\xe5\xd0\x9d\x0f&\xee\xfb=$u\x08\x80\x04\xcf\xf1\x14*\xc9\x0e<g'
+        sk_b58, vk_b58 = ed25519_generate_key_pair(seed)
+        sk_2_b58, vk_2_b58 = ed25519_generate_key_pair(seed)
+        assert len(base58.b58decode(sk_b58)) == 32
+        assert len(base58.b58decode(vk_b58)) == 32
+        assert SigningKey(sk_b58).encode() == sk_b58
+        assert VerifyingKey(vk_b58).encode() == vk_b58
+        assert len(base58.b58decode(sk_2_b58)) == 32
+        assert len(base58.b58decode(vk_2_b58)) == 32
+        assert SigningKey(sk_2_b58).encode() == sk_2_b58
+        assert VerifyingKey(vk_2_b58).encode() == vk_2_b58
+        assert sk_b58 == sk_2_b58
+        assert vk_b58 == vk_2_b58
+
     def test_generate_sign_verify(self, vk_ilp):
         sk_b58, vk_b58 = ed25519_generate_key_pair()
         sk = SigningKey(sk_b58)
