@@ -28,4 +28,4 @@ To install latest release from PyPI:
 Documentation
 -------------
 
-http://py-cryptoconditions.readthedocs.io/
+See `https://cryptoconditions.readthedocs.io/en/latest/ <https://cryptoconditions.readthedocs.io/en/latest/>`_.
