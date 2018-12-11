@@ -2,7 +2,7 @@
         :target: https://pypi.python.org/pypi/cryptoconditions
 
 .. image:: https://img.shields.io/travis/bigchaindb/cryptoconditions/master.svg
-        :target: https://travis-ci.org/bigchaindb/cryptoconditions
+        :target: https://travis-ci.com/bigchaindb/cryptoconditions
 
 .. image:: https://img.shields.io/codecov/c/github/bigchaindb/cryptoconditions/master.svg
     :target: https://codecov.io/github/bigchaindb/cryptoconditions?branch=master
