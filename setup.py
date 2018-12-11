@@ -49,7 +49,7 @@ setup(
     keywords="cryptoconditions, interledger, merkle tree, ed25519, threshold signatures, hash lock",
     url='https://github.com/bigchaindb/cryptoconditions/',
     author='Cryptoconditions Contributors',
-    author_email='dev@bigchaindb.com',
+    author_email='devs@bigchaindb.com',
     license='MIT',
     zip_safe=True,
 
