@@ -30,7 +30,7 @@ def _get_nacl_encoder(encoding):
         return nacl.encoding.Base16Encoder
     elif encoding == 'hex':
         return nacl.encoding.HexEncoder
-    elif encoding is 'bytes':
+    elif encoding == 'bytes':
         return nacl.encoding.RawEncoder
     else:
         raise exceptions.UnknownEncodingError("Unknown or unsupported encoding")
