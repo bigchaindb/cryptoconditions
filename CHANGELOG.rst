@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.8.1 (2021-06-07)
+------------------
+
+Changed
+^^^^^^^
+
+* Maintenance release.  Updating package dependencies.
+
 0.8.0 (2018-10-20)
 ------------------
 
