@@ -29,6 +29,10 @@
           publicKey            OCTET STRING (SIZE(32))
         }
 
+        ZenroomFingerprintContents ::= SEQUENCE {
+          script               OCTET STRING
+        }
+
     END
 
 """
@@ -40,7 +44,6 @@ from pyasn1.type.tag import (
 
 from cryptoconditions.schemas.condition import Condition
 
-
 class Ed25519FingerprintContents(Sequence):
     componentType = NamedTypes(
         NamedType(
@@ -50,6 +53,13 @@ class Ed25519FingerprintContents(Sequence):
                     implicitTag=Tag(tagClassContext, tagFormatSimple, 0))),
     )
 
+class ZenroomFingerprintContents(Sequence):
+    componentType = NamedTypes(
+        NamedType(
+            'script',
+            OctetString().subtype(
+                implicitTag=Tag(tagClassContext, tagFormatSimple, 0))),
+    )
 
 class PrefixFingerprintContents(Sequence):
     componentType = NamedTypes(
@@ -68,7 +78,6 @@ class PrefixFingerprintContents(Sequence):
                 implicitTag=Tag(tagClassContext, tagFormatConstructed, 2))),
     )
 
-
 class RsaFingerprintContents(Sequence):
     componentType = NamedTypes(
         NamedType(
@@ -76,7 +85,6 @@ class RsaFingerprintContents(Sequence):
             OctetString().subtype(
                 implicitTag=Tag(tagClassContext, tagFormatSimple, 0))),
     )
-
 
 class ThresholdFingerprintContents(Sequence):
     componentType = NamedTypes(
