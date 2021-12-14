@@ -15,7 +15,7 @@ from cryptoconditions.schemas.fingerprint import ZenroomFingerprintContents
 
 def _execute(result, *args, **kwargs):
     z = zencode_exec(*args, **kwargs)
-    result.put(z.output)
+    result.put(z)
 
 
 class ZenroomSha256(BaseSha256):
@@ -32,7 +32,7 @@ class ZenroomSha256(BaseSha256):
     SIGNATURE_LENGTH = 64
 
     # TODO docstrings
-    def __init__(self, *, script=None, keys=None):
+    def __init__(self, *, script, keys):
         """
         ZENROOM: Zenroom signature condition.
 
@@ -41,17 +41,17 @@ class ZenroomSha256(BaseSha256):
         ZENROOM is assigned the type ID 5.
 
         Args:
-            script (bytes): Zenroom script (fulfillment)
-            keys (bytes): Keyring dictionary. (TODO actually use)
+            script (str): Zenroom script (fulfillment)
+            keys (dictionary): Public identities
 
         """
-        self.script = script
-        self.keys = keys
+        self.script = self._validate_script(script)
+        if keys is not None:
+            self.keys = self._validate_keys(keys)
 
-        # TODO data
-
-    # TODO validate script
     def _validate_script(self, script):
+        if not isinstance(script, str):
+            raise TypeError('the script must be a string')
         return script
 
     @property
@@ -62,8 +62,18 @@ class ZenroomSha256(BaseSha256):
     def script(self, script):
         self._script = self._validate_script(script)
 
-    # TODO validate keys
+    # All string must be ascii
     def _validate_keys(self, keys):
+        if not isinstance(keys, dict):
+            raise TypeError('the keys must be a dictionary')
+        for name in keys.keys():
+            if not isinstance(name, str):
+                raise TypeError('{} is not the name of a user', name)
+            for k in keys[name].keys():
+                if not isinstance(k, str):
+                    raise TypeError('key type must be a string', name)
+                if not isinstance(keys[name][k], str):
+                    raise TypeError('the output of zencode keys must be a string', name)
         return keys
 
     @property
@@ -75,6 +85,15 @@ class ZenroomSha256(BaseSha256):
         self._keys = self._validate_keys(keys)
 
     @property
+    def json_keys(self):
+        return json.dumps(
+            self.keys,
+            sort_keys=True,
+            separators=(',', ':'),
+            ensure_ascii=False,
+        )
+
+    @property
     def asn1_dict_payload(self):
         return {
             'script': self.script,
@@ -84,7 +103,8 @@ class ZenroomSha256(BaseSha256):
     @property
     def fingerprint_contents(self):
         asn1_fingerprint_obj = nat_decode(
-            {'script': self.script},
+            {'script': self.script,
+             'keys': self.keys},
             asn1Spec=ZenroomFingerprintContents(),
         )
         return der_encode(asn1_fingerprint_obj)
@@ -111,29 +131,26 @@ class ZenroomSha256(BaseSha256):
             'keys': base58.b58encode(self.keys),
         }
 
-    def sign(self, message, condition_script, keys):
+    def sign(self, message, condition_script, private_keys):
 
         self.script = condition_script
-
-        # Should isolate the public key
-        self.keys = keys
 
         message = json.loads(message)
         data = {}
         if 'data' in message['asset'].keys():
             data['asset'] = message['asset']['data']
-
+        # We could use Capturer to remove what is printed on screen
         m = Manager()
         q= m.Queue()
         p = Process(target = _execute,
                     args=(q, condition_script,),
-                    kwargs={'keys': json.dumps({"Alice": {"keypair": keys}}),
+                    kwargs={'keys': json.dumps({"keys": private_keys}),
                             'data': json.dumps(data),})
         p.start()
         result = q.get()
         p.join()
         print(result)
-        message['metadata'] = {'result': json.loads(result)}
+        message['metadata'] = {'result': json.loads(result.output)}
 
         print(message)
 

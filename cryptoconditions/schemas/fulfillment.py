@@ -42,9 +42,7 @@
 
         ZenroomSha512Fulfillment ::= SEQUENCE {
           script               OCTET STRING,
-          data                 OCTET STRING,
           keys                 OCTET STRING,
-          # conf                 OCTET STRING,
         }
 
     END
