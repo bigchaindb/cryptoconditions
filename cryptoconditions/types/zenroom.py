@@ -32,7 +32,7 @@ class ZenroomSha256(BaseSha256):
     SIGNATURE_LENGTH = 64
 
     # TODO docstrings
-    def __init__(self, *, script, keys):
+    def __init__(self, *, script, data, keys):
         """
         ZENROOM: Zenroom signature condition.
 
@@ -42,14 +42,24 @@ class ZenroomSha256(BaseSha256):
 
         Args:
             script (str): Zenroom script (fulfillment)
+                          This script will be used inside the verification, it takes as
+                          input data from: the asset, the output and the metadata
             keys (dictionary): Public identities
+            data (dictionary): data fixed in the output of the transaction
 
         """
-        self.script = self._validate_script(script)
+        self._script = self._validate_script(script)
         if keys is not None:
-            self.keys = self._validate_keys(keys)
+            self._validate_keys(keys)
+        self._keys = keys
+        if data is not None:
+            self._validate_data(data)
+        self._data = data
 
     def _validate_script(self, script):
+        # Any string could be a script, the only way to verify if it is valid
+        # is to execute it, but I cannot because I don't have the data in the
+        # asset and in the metadata
         if not isinstance(script, str):
             raise TypeError('the script must be a string')
         return script
@@ -84,6 +94,22 @@ class ZenroomSha256(BaseSha256):
     def keys(self, keys):
         self._keys = self._validate_keys(keys)
 
+    def _validate_data(self, data):
+        # Any dictionary (that can be serialized in json) could be valid data
+        if not isinstance(data, dict):
+            raise TypeError('the keys must be a dictionary')
+        # If data is not serializable this will throw an exception
+        json.dumps(data)
+        return data
+
+    @property
+    def data(self):
+        return self._data or b''
+
+    @data.setter
+    def data(self, keys):
+        self._data = self._validate_data(data)
+
     @property
     def json_keys(self):
         return json.dumps(
@@ -97,14 +123,16 @@ class ZenroomSha256(BaseSha256):
     def asn1_dict_payload(self):
         return {
             'script': self.script,
-            'keys': self.keys,
+            'data': json.dumps(self.data),
+            'keys': json.dumps(self.keys),
         }
 
     @property
     def fingerprint_contents(self):
         asn1_fingerprint_obj = nat_decode(
             {'script': self.script,
-             'keys': self.keys},
+             'data': json.dumps(self.data),
+             'keys': json.dumps(self.keys)},
             asn1Spec=ZenroomFingerprintContents(),
         )
         return der_encode(asn1_fingerprint_obj)
@@ -127,32 +155,52 @@ class ZenroomSha256(BaseSha256):
         """
         return {
             'type': ZenroomSha256.TYPE_NAME,
-            'script': base58.b58encode(self.script),
-            'keys': base58.b58encode(self.keys),
+            'script': base58.b58encode(json.dumps(self.script)),
+            'keys': base58.b58encode(json.dumps(self.keys)),
         }
 
-    def sign(self, message, condition_script, private_keys):
-
-        self.script = condition_script
-
-        message = json.loads(message)
-        data = {}
-        if 'data' in message['asset'].keys():
-            data['asset'] = message['asset']['data']
+    # Create a new process and run a zenroom instance in it
+    @staticmethod
+    def run_zenroom(script, keys, data):
         # We could use Capturer to remove what is printed on screen
         m = Manager()
         q= m.Queue()
         p = Process(target = _execute,
-                    args=(q, condition_script,),
-                    kwargs={'keys': json.dumps({"keys": private_keys}),
+                    args=(q, script,),
+                    kwargs={'keys': json.dumps(keys),
                             'data': json.dumps(data),})
         p.start()
         result = q.get()
         p.join()
-        print(result)
-        message['metadata'] = {'result': json.loads(result.output)}
+
+        return result
+
+    # This function is not always necessary, sometime the initial message (transaction)
+    # is not ready to be validated, we need a zenroom script which produces some
+    # intermediate data that will be verified by the validate method
+
+    # A common example is a signature (the name comes from this), with the private key
+    # we produce the signature (we can do this in zenroom) and the we will verify it
+
+    # Anyway we cannot fix the condition script in the code, because ECDH is not the
+    # only time we need this (e.g. we could produce a bitcoin signed transaction and
+    # the code would be different)
+    def sign(self, message, condition_script, private_keys):
+        message = json.loads(message)
+        data = {}
+        if 'data' in message['asset'].keys():
+            data['asset'] = message['asset']['data']
+        if self.data is not None:
+            data['output'] = self.data
+        
+        result = ZenroomSha256.run_zenroom(condition_script,
+                                           {"keys": private_keys},
+                                           data)
+        message['metadata'] = {'data': json.loads(result.output),
+                               'result': 'ok'}
 
         print(message)
+        return json.dumps(message)
 
     # TODO Adapt according to outcomes of
     # https://github.com/rfcs/crypto-conditions/issues/16
@@ -224,19 +272,32 @@ class ZenroomSha256(BaseSha256):
         Return:
             boolean: Whether this fulfillment is valid.
         """
-        #zenroom = Zenroom(read_zencode)
-        #zenroom = ""
-        #script = self.script.decode('utf-8')
-        #message = urlsafe_b64encode(message)[0:-1].decode('utf-8')
-        #signature = self.data.decode('utf-8')
+        message = json.loads(message)
+        data = {}
+        if 'data' in message['asset'].keys():
+            data['asset'] = message['asset']['data']
+        if self.data is not None:
+            data['output'] = self.data
+
+        # There could also be some data in the metadata,
+        # this is an output of the condition script which
+        # become an input for the fulfillment script
+        if message['metadata'] and 'data' in message['metadata']:
+            data['result'] = message['metadata']['data']
+
+        # We can put pulic keys either in the keys or the data of zenroom
+        data.update(self.keys)
+
+        result = ZenroomSha256.run_zenroom(self.script,
+                                           {},
+                                           data)
 
         try:
-            #zenroom.load(script)
-            # TODO make configurable with json / dict merging instead of lua table interpolating
-            #zenroom.load_data("{ message = '%s', signature = '%s' }" %(message, signature))
-            #zenroom.eval()
-            True
+            result = json.loads(result.output)
+            # "Then print the string 'ok'" in zenroom produces a
+            # dictionary of array with the string 'ok'
+            # this is stored in result and compared against the content of
+            # the metadata
+            return result["output"][0] == message['metadata']['result']
         except:
             return False
-
-        return True

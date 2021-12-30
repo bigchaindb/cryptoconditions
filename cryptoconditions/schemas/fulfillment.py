@@ -90,11 +90,11 @@ ZenroomSha512Fulfillment.componentType = NamedTypes(
         OctetString().subtype(
             implicitTag=Tag(tagClassContext, tagFormatSimple, 0)),
     ),
-    # NamedType(
-    #     'data',
-    #     OctetString().subtype(
-    #         implicitTag=Tag(tagClassContext, tagFormatSimple, 1)),
-    # ),
+    NamedType(
+        'data',
+        OctetString().subtype(
+            implicitTag=Tag(tagClassContext, tagFormatSimple, 1)),
+    ),
     NamedType(
         'keys',
         OctetString().subtype(
