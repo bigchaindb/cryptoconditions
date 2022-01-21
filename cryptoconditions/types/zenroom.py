@@ -9,7 +9,7 @@ from pyasn1.codec.native.decoder import decode as nat_decode
 from cryptoconditions.crypto import base64_add_padding, base64_remove_padding
 from cryptoconditions.types.base_sha256 import BaseSha256
 from cryptoconditions.schemas.fingerprint import ZenroomFingerprintContents
-
+from capturer import CaptureOutput
 # from cryptoconditions.zencode import read_zencode
 # from zenroom_minimal import Zenroom
 
@@ -17,6 +17,8 @@ def _execute(result, *args, **kwargs):
     z = zencode_exec(*args, **kwargs)
     result.put(z)
 
+class ZenroomException(Exception):
+    pass
 
 class ZenroomSha256(BaseSha256):
 
@@ -164,16 +166,19 @@ class ZenroomSha256(BaseSha256):
     def run_zenroom(script, keys=None, data=None):
         keys = keys or {}
         data = data or {}
-        # We could use Capturer to remove what is printed on screen
         m = Manager()
         q= m.Queue()
-        p = Process(target = _execute,
-                    args=(q, script,),
-                    kwargs={'keys': json.dumps(keys),
-                            'data': json.dumps(data),})
-        p.start()
+        with CaptureOutput() as capturer:
+            p = Process(target = _execute,
+                        args=(q, script,),
+                        kwargs={'keys': json.dumps(keys),
+                                'data': json.dumps(data),})
+            p.start()
+            p.join()
+
+        if q.empty():
+            raise ZenroomException(capturer.get_text())
         result = q.get()
-        p.join()
 
         return result
 

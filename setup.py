@@ -73,6 +73,7 @@ setup(
 
     install_requires=[
         # 'zenroom==2.0.0',
+        'capturer==3.0',
         'base58==2.1.0',
         'PyNaCl==1.4.0',
         'pyasn1==0.4.8',
