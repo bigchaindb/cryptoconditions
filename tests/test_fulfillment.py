@@ -1,5 +1,5 @@
 import pytest
-from pyasn1.error import PyAsn1Error, SubstrateUnderrunError
+from pyasn1.error import SubstrateUnderrunError
 
 from cryptoconditions import \
     Condition, \
@@ -76,14 +76,14 @@ class TestEd25519Sha256Fulfillment:
     def test_serialize_signed_dict_to_fulfillment(self, fulfillment_ed25519):
         fulfillment = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
 
-        assert fulfillment.to_dict()== \
+        assert fulfillment.to_dict() == \
             {'bitmask': 32,
              'public_key': 'Gtbi6WQDB6wUePiZm8aYs5XZ5pUqx9jMMLvRVHPESTjU',
              'signature': '4eCt6SFPCzLQSAoQGW7CTu3MHdLj6FezSpjktE7tHsYGJ4pNSUnpHtV9XgdHF2XYd62M9fTJ4WYdhTVck27qNoHj',
              'type': 'fulfillment',
              'type_id': 4}
 
-        assert fulfillment.validate(MESSAGE) == True
+        assert fulfillment.validate(MESSAGE) is True
 
     def test_serialize_unsigned_dict_to_fulfillment(self, vk_ilp):
         fulfillment = Ed25519Sha256(public_key=vk_ilp['b58'])
@@ -94,7 +94,7 @@ class TestEd25519Sha256Fulfillment:
              'signature': None,
              'type': 'fulfillment',
              'type_id': 4}
-        assert fulfillment.validate(MESSAGE) == False
+        assert fulfillment.validate(MESSAGE) is False
 
     def test_deserialize_signed_dict_to_fulfillment(self, fulfillment_ed25519):
         fulfillment = Fulfillment.from_uri(fulfillment_ed25519['fulfillment_uri'])
@@ -206,7 +206,7 @@ class TestThresholdSha256Fulfillment:
 
         fulfillment.add_subfulfillment(Ed25519Sha256(public_key=VerifyingKey(vk_ilp['b58'])))
 
-        assert fulfillment.validate(MESSAGE) == True
+        assert fulfillment.validate(MESSAGE) is True
 
     def test_fulfillment_nested_and_or(self,
                                        fulfillment_sha256,

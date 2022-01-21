@@ -164,11 +164,11 @@ class ZenroomSha256(BaseSha256):
     def run_zenroom(script, keys, data):
         # We could use Capturer to remove what is printed on screen
         m = Manager()
-        q= m.Queue()
-        p = Process(target = _execute,
+        q = m.Queue()
+        p = Process(target=_execute,
                     args=(q, script,),
                     kwargs={'keys': json.dumps(keys),
-                            'data': json.dumps(data),})
+                            'data': json.dumps(data), })
         p.start()
         result = q.get()
         p.join()
@@ -192,7 +192,7 @@ class ZenroomSha256(BaseSha256):
             data['asset'] = message['asset']['data']
         if self.data is not None:
             data['output'] = self.data
-        
+
         result = ZenroomSha256.run_zenroom(condition_script,
                                            {"keys": private_keys},
                                            data)

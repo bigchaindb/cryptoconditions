@@ -206,7 +206,7 @@ class Ed25519Sha256(BaseSha256):
             boolean: Whether this fulfillment is valid.
         """
         try:
-            returned_message = VerifyKey(self.public_key).verify(
+            VerifyKey(self.public_key).verify(
                 message, signature=self.signature)
         except BadSignatureError:
             return False

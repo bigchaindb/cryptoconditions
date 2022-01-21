@@ -1,5 +1,4 @@
 # Separate all crypto code so that we can easily test several implementations
-import base64
 import base58
 import nacl.signing
 import nacl.encoding
@@ -30,7 +29,7 @@ def _get_nacl_encoder(encoding):
         return nacl.encoding.Base16Encoder
     elif encoding == 'hex':
         return nacl.encoding.HexEncoder
-    elif encoding is 'bytes':
+    elif encoding == 'bytes':
         return nacl.encoding.RawEncoder
     else:
         raise exceptions.UnknownEncodingError("Unknown or unsupported encoding")
@@ -92,7 +91,7 @@ class Ed25519SigningKey(nacl.signing.SigningKey):
     @classmethod
     def generate(cls):
         return cls(nacl.signing.SigningKey.generate().encode(encoder=Base58Encoder))
-    
+
     @classmethod
     def generate_with_seed(cls, seed):
         return cls(nacl.signing.SigningKey(seed, _get_nacl_encoder('bytes')).encode(encoder=Base58Encoder))
