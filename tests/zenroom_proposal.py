@@ -16,14 +16,11 @@ import hashlib
 from cryptoconditions import ZenroomSha256
 
 from zenroom import zencode_exec
-import rapidjson
 
 # from bigchaindb_driver import BigchainDB
 # # bdb_root_url = 'https://ipdb3.riddleandcode.com'
 # bdb_root_url = 'http://localhost:9984/'
 # bdb = BigchainDB(bdb_root_url)
-
-
 
 # The procedure to generate the keyring cannot be
 # fixed in the code base, it depends on the particular
@@ -38,7 +35,7 @@ When I create the testnet key
 Then print data"""
 
 def genkey():
-    return rapidjson.loads(zencode_exec(GENERATE_KEYPAIR).output)['keys']
+    return json.loads(ZenroomSha256.run_zenroom(GENERATE_KEYPAIR).output)['keys']
 
 # There is not a unique way of generating the public
 # key, for example, for the testnet I don't want the
@@ -60,8 +57,8 @@ Then print my 'ecdh public key'
 Then print my 'testnet address'"""
 
 def sk2pk(name, keys):
-    return rapidjson.loads(zencode_exec(SK_TO_PK.format(name),
-                                        keys=json.dumps({'keys': keys})).output)
+    return json.loads(ZenroomSha256.run_zenroom(SK_TO_PK.format(name),
+                                                keys={'keys': keys}).output)
 # Alice assert the composition of the houses
 
 # zen_public_keys is an identity dictionary

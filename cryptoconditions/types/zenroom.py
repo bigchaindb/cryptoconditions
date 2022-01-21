@@ -107,7 +107,7 @@ class ZenroomSha256(BaseSha256):
         return self._data or b''
 
     @data.setter
-    def data(self, keys):
+    def data(self, data):
         self._data = self._validate_data(data)
 
     @property
@@ -161,7 +161,9 @@ class ZenroomSha256(BaseSha256):
 
     # Create a new process and run a zenroom instance in it
     @staticmethod
-    def run_zenroom(script, keys, data):
+    def run_zenroom(script, keys=None, data=None):
+        keys = keys or {}
+        data = data or {}
         # We could use Capturer to remove what is printed on screen
         m = Manager()
         q= m.Queue()
@@ -272,19 +274,27 @@ class ZenroomSha256(BaseSha256):
         Return:
             boolean: Whether this fulfillment is valid.
         """
-        message = json.loads(message)
+        try:
+            message = json.loads(message)
+        except:
+            return False
         data = {}
-        if 'data' in message['asset'].keys():
-            data['asset'] = message['asset']['data']
+        try:
+            if message['asset']['data']:
+                data['asset'] = message['asset']['data']
+        except:
+            pass
         if self.data is not None:
             data['output'] = self.data
 
         # There could also be some data in the metadata,
         # this is an output of the condition script which
         # become an input for the fulfillment script
-        if message['metadata'] and 'data' in message['metadata']:
-            data['result'] = message['metadata']['data']
-
+        try:
+            if message['metadata'] and message['metadata']['data']:
+                data['result'] = message['metadata']['data']
+        except:
+            pass
         # We can put pulic keys either in the keys or the data of zenroom
         data.update(self.keys)
 
