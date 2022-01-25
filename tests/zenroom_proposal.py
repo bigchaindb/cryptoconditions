@@ -167,7 +167,11 @@ Then print the 'data.signature'
 """
 
 # THIS FILLS THE METADATA WITH THE RESULT
-assert(not zenSha.validate(message=message))
+try:
+    assert(not zenSha.validate(message=message))
+except:
+    pass
+
 message = zenSha.sign(message, condition_script, alice)
 assert(zenSha.validate(message=message))
 # now metadata looks like

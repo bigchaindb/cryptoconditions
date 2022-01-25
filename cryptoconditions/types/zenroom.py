@@ -20,6 +20,13 @@ def _execute(result, *args, **kwargs):
 class ZenroomException(Exception):
     pass
 
+class MalformedMessageException(Exception):
+    def __init__(self, *args, **kwargs):
+        return super().__init__(
+            "The message has to include the" \
+            " result of the zenroom execution",*args, **kwargs)
+
+
 class ZenroomSha256(BaseSha256):
 
     TYPE_ID = 5
@@ -306,6 +313,10 @@ class ZenroomSha256(BaseSha256):
         result = ZenroomSha256.run_zenroom(self.script,
                                            {},
                                            data)
+        try:
+            message['metadata']['result']
+        except:
+            raise MalformedMessageException()
 
         try:
             result = json.loads(result.output)
