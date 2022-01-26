@@ -3,6 +3,7 @@ python:
   - 3.6
   - 3.7
   - 3.8
+  - 3.9
 
 install:
   - pip install -e .[test]
@@ -12,3 +13,10 @@ script: py.test -v --cov=cryptoconditions
 
 after_success: codecov
 
+addons:
+  apt:
+    packages:
+    - build-essential
+    - gcc
+    - make
+    - zsh
