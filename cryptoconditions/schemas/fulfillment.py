@@ -12,6 +12,7 @@
           thresholdSha256  [2] ThresholdFulfillment,
           rsaSha256        [3] RsaSha256Fulfillment,
           ed25519Sha256    [4] Ed25519Sha512Fulfillment
+          zenroomSha256    [5] ZenroomSha512Fulfillment
         }
 
         PreimageFulfillment ::= SEQUENCE {
@@ -39,6 +40,11 @@
           signature            OCTET STRING (SIZE(64))
         }
 
+        ZenroomSha512Fulfillment ::= SEQUENCE {
+          script               OCTET STRING,
+          keys                 OCTET STRING,
+        }
+
     END
 
 """
@@ -49,15 +55,13 @@ from pyasn1.type.constraint import ValueRangeConstraint, ValueSizeConstraint
 from pyasn1.type.tag import (
     Tag, tagClassContext, tagFormatConstructed, tagFormatSimple)
 
-from .condition import Condition
-
+from cryptoconditions.schemas.condition import Condition
 
 class Ed25519Sha512Fulfillment(Sequence):
 
     # TODO implement
     def __deepcopy__(self, memo):
         return None
-
 
 Ed25519Sha512Fulfillment.componentType = NamedTypes(
     NamedType(
@@ -74,10 +78,37 @@ Ed25519Sha512Fulfillment.componentType = NamedTypes(
     ),
 )
 
+class ZenroomSha512Fulfillment(Sequence):
+
+    # TODO implement
+    def __deepcopy__(self, memo):
+        return None
+
+ZenroomSha512Fulfillment.componentType = NamedTypes(
+    NamedType(
+        'script',
+        OctetString().subtype(
+            implicitTag=Tag(tagClassContext, tagFormatSimple, 0)),
+    ),
+    NamedType(
+        'data',
+        OctetString().subtype(
+            implicitTag=Tag(tagClassContext, tagFormatSimple, 1)),
+    ),
+    NamedType(
+        'keys',
+        OctetString().subtype(
+            implicitTag=Tag(tagClassContext, tagFormatSimple, 1)),
+    ),
+    # NamedType(
+    #     'conf',
+    #     OctetString().subtype(
+    #         implicitTag=Tag(tagClassContext, tagFormatSimple, 3)),
+    # ),
+)
 
 class RsaSha256Fulfillment(Sequence):
     pass
-
 
 RsaSha256Fulfillment.componentType = NamedTypes(
     NamedType(
@@ -92,21 +123,17 @@ RsaSha256Fulfillment.componentType = NamedTypes(
     ),
 )
 
-
 class PreimageFulfillment(Sequence):
     componentType = NamedTypes(
         NamedType('preimage', OctetString().subtype(
             implicitTag=Tag(tagClassContext, tagFormatSimple, 0))),
     )
 
-
 class ThresholdFulfillment(Sequence):
     pass
 
-
 class PrefixFulfillment(Sequence):
     pass
-
 
 class Fulfillment(Choice):
 
@@ -114,14 +141,12 @@ class Fulfillment(Choice):
     def __deepcopy__(self, memo):
         return None
 
-
 ThresholdFulfillment.componentType = NamedTypes(
     NamedType('subfulfillments', univ.Any()),
     NamedType('subconditions', univ.SetOf(
         componentType=Condition()
     ).subtype(implicitTag=Tag(tagClassContext, tagFormatSimple, 1)))
 )
-
 
 PrefixFulfillment.componentType = NamedTypes(
     NamedType(
@@ -135,7 +160,6 @@ PrefixFulfillment.componentType = NamedTypes(
         ).subtype(implicitTag=Tag(tagClassContext, tagFormatSimple, 1))),
     NamedType('subfulfillment', univ.Any()),
 )
-
 
 Fulfillment.componentType = NamedTypes(
     NamedType(
@@ -158,6 +182,10 @@ Fulfillment.componentType = NamedTypes(
         'ed25519Sha256',
         Ed25519Sha512Fulfillment().subtype(
             implicitTag=Tag(tagClassContext, tagFormatConstructed, 4))),
+    NamedType(
+        'zenroomSha256',
+        ZenroomSha512Fulfillment().subtype(
+            implicitTag=Tag(tagClassContext, tagFormatConstructed, 5))),
 )
 
 PrefixFulfillment.componentType[2]._NamedType__type = Fulfillment().subtype(

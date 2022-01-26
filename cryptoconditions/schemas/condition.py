@@ -12,6 +12,7 @@
           thresholdSha256  [2] CompoundSha256Condition,
           rsaSha256        [3] SimpleSha256Condition,
           ed25519Sha256    [4] SimpleSha256Condition
+          zenroomSha256    [5] SimpleSha256Condition
         }
 
         SimpleSha256Condition ::= SEQUENCE {
@@ -30,7 +31,8 @@
           prefixSha256     (1),
           thresholdSha256  (2),
           rsaSha256        (3),
-          ed25519Sha256    (4)
+          ed25519Sha256    (4),
+          zenroomSha256    (5)
         }
 
     END
@@ -43,7 +45,6 @@ from pyasn1.type.constraint import ValueRangeConstraint, ValueSizeConstraint
 from pyasn1.type.tag import (
     Tag, tagClassContext, tagFormatConstructed, tagFormatSimple)
 
-
 class ConditionTypes(BitString):
     namedValues = NamedValues(
         ('preImageSha256', 0),
@@ -51,8 +52,8 @@ class ConditionTypes(BitString):
         ('thresholdSha256', 2),
         ('rsaSha256', 3),
         ('ed25519Sha256', 4),
+        ('zenroomSha256', 5),
     )
-
 
 class CompoundSha256Condition(Sequence):
     componentType = NamedTypes(
@@ -72,7 +73,6 @@ class CompoundSha256Condition(Sequence):
                 implicitTag=Tag(tagClassContext, tagFormatSimple, 2))),
     )
 
-
 class SimpleSha256Condition(Sequence):
     componentType = NamedTypes(
         NamedType(
@@ -86,7 +86,6 @@ class SimpleSha256Condition(Sequence):
                 subtypeSpec=ValueRangeConstraint(0, 4294967295)).subtype(
                     implicitTag=Tag(tagClassContext, tagFormatSimple, 1))),
     )
-
 
 class Condition(Choice):
     componentType = NamedTypes(
@@ -110,4 +109,8 @@ class Condition(Choice):
             'ed25519Sha256',
             SimpleSha256Condition().subtype(
                 implicitTag=Tag(tagClassContext, tagFormatConstructed, 4))),
+        NamedType(
+            'zenroomSha256',
+            SimpleSha256Condition().subtype(
+                implicitTag=Tag(tagClassContext, tagFormatConstructed, 5))),
     )
