@@ -3,6 +3,7 @@ from base64 import urlsafe_b64decode, urlsafe_b64encode
 from multiprocessing import Manager, Process
 from zenroom import zencode_exec
 import json
+from json.decoder import JSONDecodeError
 from pyasn1.codec.der.encoder import encode as der_encode
 from pyasn1.codec.native.decoder import decode as nat_decode
 
@@ -23,8 +24,8 @@ class ZenroomException(Exception):
 class MalformedMessageException(Exception):
     def __init__(self, *args, **kwargs):
         return super().__init__(
-            "The message has to include the" \
-            " result of the zenroom execution",*args, **kwargs)
+            "The message has to include the"
+            " result of the zenroom execution", *args, **kwargs)
 
 
 class ZenroomSha256(BaseSha256):
@@ -174,12 +175,12 @@ class ZenroomSha256(BaseSha256):
         keys = keys or {}
         data = data or {}
         m = Manager()
-        q= m.Queue()
+        q = m.Queue()
         with CaptureOutput() as capturer:
-            p = Process(target = _execute,
+            p = Process(target=_execute,
                         args=(q, script,),
                         kwargs={'keys': json.dumps(keys),
-                                'data': json.dumps(data),})
+                                'data': json.dumps(data)})
             p.start()
             p.join()
 
@@ -288,13 +289,13 @@ class ZenroomSha256(BaseSha256):
         """
         try:
             message = json.loads(message)
-        except:
+        except JSONDecodeError:
             return False
         data = {}
         try:
             if message['asset']['data']:
                 data['asset'] = message['asset']['data']
-        except:
+        except JSONDecodeError:
             pass
         if self.data is not None:
             data['output'] = self.data
@@ -305,7 +306,7 @@ class ZenroomSha256(BaseSha256):
         try:
             if message['metadata'] and message['metadata']['data']:
                 data['result'] = message['metadata']['data']
-        except:
+        except ValueError:
             pass
         # We can put pulic keys either in the keys or the data of zenroom
         data.update(self.keys)
@@ -315,7 +316,7 @@ class ZenroomSha256(BaseSha256):
                                            data)
         try:
             message['metadata']['result']
-        except:
+        except ValueError:
             raise MalformedMessageException()
 
         try:
@@ -325,5 +326,5 @@ class ZenroomSha256(BaseSha256):
             # this is stored in result and compared against the content of
             # the metadata
             return result["output"][0] == message['metadata']['result']
-        except:
+        except JSONDecodeError:
             return False

@@ -12,8 +12,9 @@ import json
 
 import hashlib
 from cryptoconditions import ZenroomSha256
+from json.decoder import JSONDecodeError
 
-from zenroom import zencode_exec
+# from zenroom import zencode_exec
 
 # from bigchaindb_driver import BigchainDB
 # # bdb_root_url = 'https://ipdb3.riddleandcode.com'
@@ -167,7 +168,9 @@ condition_script = """Rule input encoding base58
 # THIS FILLS THE METADATA WITH THE RESULT
 try:
     assert(not zenSha.validate(message=message))
-except:
+except JSONDecodeError:
+    pass
+except ValueError:
     pass
 
 message = zenSha.sign(message, condition_script, alice)
@@ -197,8 +200,8 @@ shared_creation_txid = hashlib.sha3_256(json_str_tx.encode()).hexdigest()
 # add the id
 token_creation_tx['id'] = shared_creation_txid
 
-#exit()
+# exit()
 # send CREATE tx into the bdb network
-#returned_creation_tx = bdb.transactions.send_async(token_creation_tx)
+# returned_creation_tx = bdb.transactions.send_async(token_creation_tx)
 
-#print(returned_creation_tx)
+# print(returned_creation_tx)
