@@ -9,13 +9,22 @@ from pyasn1.codec.native.decoder import decode as nat_decode
 from cryptoconditions.crypto import base64_add_padding, base64_remove_padding
 from cryptoconditions.types.base_sha256 import BaseSha256
 from cryptoconditions.schemas.fingerprint import ZenroomFingerprintContents
-
+from capturer import CaptureOutput
 # from cryptoconditions.zencode import read_zencode
 # from zenroom_minimal import Zenroom
 
 def _execute(result, *args, **kwargs):
     z = zencode_exec(*args, **kwargs)
     result.put(z)
+
+class ZenroomException(Exception):
+    pass
+
+class MalformedMessageException(Exception):
+    def __init__(self, *args, **kwargs):
+        return super().__init__(
+            "The message has to include the" \
+            " result of the zenroom execution",*args, **kwargs)
 
 
 class ZenroomSha256(BaseSha256):
@@ -107,7 +116,7 @@ class ZenroomSha256(BaseSha256):
         return self._data or b''
 
     @data.setter
-    def data(self, keys):
+    def data(self, data):
         self._data = self._validate_data(data)
 
     @property
@@ -161,17 +170,22 @@ class ZenroomSha256(BaseSha256):
 
     # Create a new process and run a zenroom instance in it
     @staticmethod
-    def run_zenroom(script, keys, data):
-        # We could use Capturer to remove what is printed on screen
+    def run_zenroom(script, keys=None, data=None):
+        keys = keys or {}
+        data = data or {}
         m = Manager()
-        q = m.Queue()
-        p = Process(target=_execute,
-                    args=(q, script,),
-                    kwargs={'keys': json.dumps(keys),
-                            'data': json.dumps(data), })
-        p.start()
+        q= m.Queue()
+        with CaptureOutput() as capturer:
+            p = Process(target = _execute,
+                        args=(q, script,),
+                        kwargs={'keys': json.dumps(keys),
+                                'data': json.dumps(data),})
+            p.start()
+            p.join()
+
+        if q.empty():
+            raise ZenroomException(capturer.get_text())
         result = q.get()
-        p.join()
 
         return result
 
@@ -272,25 +286,37 @@ class ZenroomSha256(BaseSha256):
         Return:
             boolean: Whether this fulfillment is valid.
         """
-        message = json.loads(message)
+        try:
+            message = json.loads(message)
+        except:
+            return False
         data = {}
-        if 'data' in message['asset'].keys():
-            data['asset'] = message['asset']['data']
+        try:
+            if message['asset']['data']:
+                data['asset'] = message['asset']['data']
+        except:
+            pass
         if self.data is not None:
             data['output'] = self.data
 
         # There could also be some data in the metadata,
         # this is an output of the condition script which
         # become an input for the fulfillment script
-        if message['metadata'] and 'data' in message['metadata']:
-            data['result'] = message['metadata']['data']
-
+        try:
+            if message['metadata'] and message['metadata']['data']:
+                data['result'] = message['metadata']['data']
+        except:
+            pass
         # We can put pulic keys either in the keys or the data of zenroom
         data.update(self.keys)
 
         result = ZenroomSha256.run_zenroom(self.script,
                                            {},
                                            data)
+        try:
+            message['metadata']['result']
+        except:
+            raise MalformedMessageException()
 
         try:
             result = json.loads(result.output)
