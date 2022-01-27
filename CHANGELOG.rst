@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.9.0 (2022-01-27)
+------------------
+
+* added zenroom support
+* fixed various warnings 
+
+
 0.8.1 (2021-06-07)
 ------------------
 
