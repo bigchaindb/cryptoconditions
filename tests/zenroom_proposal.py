@@ -10,12 +10,11 @@
 
 import json
 
-import base58
-import base64
 import hashlib
 from cryptoconditions import ZenroomSha256
+from json.decoder import JSONDecodeError
 
-from zenroom import zencode_exec
+# from zenroom import zencode_exec
 
 # from bigchaindb_driver import BigchainDB
 # # bdb_root_url = 'https://ipdb3.riddleandcode.com'
@@ -26,13 +25,13 @@ from zenroom import zencode_exec
 # fixed in the code base, it depends on the particular
 # smart contract
 GENERATE_KEYPAIR = \
-"""Rule input encoding base58
-Rule output encoding base58
-Scenario 'ecdh': Create the keypair
-Given that I am known as 'Pippo'
-When I create the ecdh key
-When I create the testnet key
-Then print data"""
+    """Rule input encoding base58
+    Rule output encoding base58
+    Scenario 'ecdh': Create the keypair
+    Given that I am known as 'Pippo'
+    When I create the ecdh key
+    When I create the testnet key
+    Then print data"""
 
 def genkey():
     return json.loads(ZenroomSha256.run_zenroom(GENERATE_KEYPAIR).output)['keys']
@@ -42,19 +41,19 @@ def genkey():
 # public key but the address (but there could exist
 # a script in which the user want the public key and
 # not the address)
-# Thus we cannot fix it inside the script 
+# Thus we cannot fix it inside the script
 
 # secret key to public key
 SK_TO_PK = \
-"""Rule input encoding base58
-Rule output encoding base58
-Scenario 'ecdh': Create the keypair
-Given that I am known as '{}'
-Given I have the 'keys'
-When I create the ecdh public key
-When I create the testnet address
-Then print my 'ecdh public key'
-Then print my 'testnet address'"""
+    """Rule input encoding base58
+    Rule output encoding base58
+    Scenario 'ecdh': Create the keypair
+    Given that I am known as '{}'
+    Given I have the 'keys'
+    When I create the ecdh public key
+    When I create the testnet address
+    Then print my 'ecdh public key'
+    Then print my 'testnet address'"""
 
 def sk2pk(name, keys):
     return json.loads(ZenroomSha256.run_zenroom(SK_TO_PK.format(name),
@@ -99,12 +98,12 @@ version = '2.0'
 
 fulfill_script = """Rule input encoding base58
 Rule output encoding base58
-Scenario 'ecdh': Bob verifies the signature from Alice 
+Scenario 'ecdh': Bob verifies the signature from Alice
 Given I have a 'ecdh public key' from 'Alice'
 Given that I have a 'string dictionary' named 'houses' inside 'asset'
 Given I have a 'signature' named 'data.signature' inside 'result'
 When I verify the 'houses' has a signature in 'data.signature' by 'Alice'
-Then print the string 'ok' 
+Then print the string 'ok'
 """
 # CRYPTO-CONDITIONS: instantiate an Ed25519 crypto-condition for buyer
 zenSha = ZenroomSha256(script=fulfill_script, keys=zen_public_keys, data=data)
@@ -157,19 +156,21 @@ message = json.dumps(
 
 print("====== GENERATE RESULT (METADATA) =======")
 condition_script = """Rule input encoding base58
-Rule output encoding base58
-Scenario 'ecdh': create the signature of an object 
-Given I have the 'keys'
-Given that I have a 'string dictionary' named 'houses' inside 'asset' 
-When I create the signature of 'houses' 
-When I rename the 'signature' to 'data.signature' 
-Then print the 'data.signature'
-"""
+    Rule output encoding base58
+    Scenario 'ecdh': create the signature of an object
+    Given I have the 'keys'
+    Given that I have a 'string dictionary' named 'houses' inside 'asset'
+    When I create the signature of 'houses'
+    When I rename the 'signature' to 'data.signature'
+    Then print the 'data.signature'
+    """
 
 # THIS FILLS THE METADATA WITH THE RESULT
 try:
     assert(not zenSha.validate(message=message))
-except:
+except JSONDecodeError:
+    pass
+except ValueError:
     pass
 
 message = zenSha.sign(message, condition_script, alice)
@@ -199,9 +200,8 @@ shared_creation_txid = hashlib.sha3_256(json_str_tx.encode()).hexdigest()
 # add the id
 token_creation_tx['id'] = shared_creation_txid
 
-exit()
+# exit()
 # send CREATE tx into the bdb network
-returned_creation_tx = bdb.transactions.send_async(token_creation_tx)
+# returned_creation_tx = bdb.transactions.send_async(token_creation_tx)
 
-print(returned_creation_tx)
-
+# print(returned_creation_tx)

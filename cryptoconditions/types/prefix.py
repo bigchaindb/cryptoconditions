@@ -72,7 +72,7 @@ class PrefixSha256(BaseSha256):
     def subcondition(self, subcondition):
         if isinstance(subcondition, str):
             subcondition = Condition.from_uri(subcondition)
-        elif not isinstance(subcondition,  Condition):
+        elif not isinstance(subcondition, Condition):
             raise Exception(
                 'Subconditions must be URIs or objects of type Condition')
         self._subcondition = subcondition
@@ -265,6 +265,6 @@ class PrefixSha256(BaseSha256):
 
         if not isinstance(message, bytes):
             raise Exception(
-                'Message must be provided as a bytes, was: '.format(message))
+                'Message must be provided as a bytes, was: {0}'.format(message))
 
         return self.subcondition.validate(message=self.prefix + message)

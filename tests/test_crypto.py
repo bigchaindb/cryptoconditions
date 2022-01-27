@@ -5,7 +5,7 @@ import base64
 from cryptoconditions.crypto import \
     Ed25519SigningKey as SigningKey, \
     Ed25519VerifyingKey as VerifyingKey, \
-    ed25519_generate_key_pair, base64_add_padding
+    ed25519_generate_key_pair
 
 
 class TestBigchainCryptoED25519(object):
@@ -114,7 +114,7 @@ class TestBigchainCryptoED25519(object):
     def test_weak_public_keys(self):
         """reproduce the problem in https://github.com/bigchaindb/bigchaindb/issues/617
 
-        This problem is due to weak keys, specially in this case the key and signature 
+        This problem is due to weak keys, specially in this case the key and signature
         when decoded from base58 correspond to a key and a signature that are zero.
         In this case its possible to come up with messages that would verify.
 
@@ -126,4 +126,4 @@ class TestBigchainCryptoED25519(object):
         vk_b58 = VerifyingKey('1' * 32)
         message = b'age=33&name=luo&title=architecture'
         signature = b'1' * 64
-        assert vk_b58.verify(message, signature) == False
+        assert vk_b58.verify(message, signature) is False
