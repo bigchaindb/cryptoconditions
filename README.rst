@@ -1,12 +1,12 @@
 .. image:: https://img.shields.io/pypi/v/cryptoconditions.svg
         :target: https://pypi.python.org/pypi/cryptoconditions
 
-.. image:: https://img.shields.io/travis/bigchaindb/cryptoconditions/master.svg
-        :target: https://travis-ci.com/bigchaindb/cryptoconditions
+.. image:: https://img.shields.io/travis/planetmint/cryptoconditions/master.svg
+        :target: https://travis-ci.com/planetmint/cryptoconditions
 
-.. image:: https://img.shields.io/codecov/c/github/bigchaindb/cryptoconditions/master.svg
-    :target: https://codecov.io/github/bigchaindb/cryptoconditions?branch=master
-
+.. image:: https://codecov.io/gh/planetmint/cryptoconditions/branch/main/graph/badge.svg?token=2Bo1knLW0Q
+        :target: https://codecov.io/gh/planetmint/cryptoconditions
+    
 The cryptoconditions Package
 ============================
 
