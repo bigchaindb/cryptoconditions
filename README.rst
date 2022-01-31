@@ -23,7 +23,7 @@ To install latest release from PyPI:
 
 .. code-block:: bash
 
-    $ pip install cryptoconditions
+    $ pip install planetmint-cryptoconditions
 
 Documentation
 -------------

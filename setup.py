@@ -8,6 +8,8 @@ it matches the description.
 from setuptools import setup, find_packages
 
 
+
+
 version = {}
 with open('cryptoconditions/version.py') as fp:
     exec(fp.read(), version)
@@ -45,8 +47,8 @@ setup(
     version=version['__version__'],
     description='Multi-algorithm, multi-level, multi-signature format for '
                 'expressing conditions and fulfillments according to the Interledger Protocol (ILP).',
-    long_description='readme',
-    long_description_content_type='text/plain',
+    long_description=readme,
+    long_description_content_type='text/x-rst',
     summary="Cryptoconditions as specified by the interledger protocol and extended.",
     keywords="cryptoconditions, interledger, merkle tree, ed25519, threshold signatures, hash lock, zenroom",
     url='https://github.com/planetmint/cryptoconditions/',
