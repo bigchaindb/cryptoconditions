@@ -4,9 +4,9 @@
 .. image:: https://img.shields.io/travis/planetmint/cryptoconditions/master.svg
         :target: https://travis-ci.com/planetmint/cryptoconditions
 
-.. image:: https://img.shields.io/codecov/c/github/planetmint/cryptoconditions/master.svg
-    :target: https://codecov.io/github/planetmint/cryptoconditions?branch=master
-
+.. image:: https://codecov.io/gh/planetmint/cryptoconditions/branch/main/graph/badge.svg?token=2Bo1knLW0Q
+        :target: https://codecov.io/gh/planetmint/cryptoconditions
+    
 The cryptoconditions Package
 ============================
 
