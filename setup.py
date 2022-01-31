@@ -25,6 +25,7 @@ tests_require = [
     'pytest',
     'pytest-cov',
     'pytest-xdist',
+    'twine',
 ]
 
 dev_require = [
@@ -40,16 +41,17 @@ docs_require = [
 ]
 
 setup(
-    name='cryptoconditions',
+    name='planetmint-cryptoconditions',
     version=version['__version__'],
     description='Multi-algorithm, multi-level, multi-signature format for '
                 'expressing conditions and fulfillments according to the Interledger Protocol (ILP).',
-    long_description=readme,
-    summary="Cryptoconditions as specified by the interledger protocol",
-    keywords="cryptoconditions, interledger, merkle tree, ed25519, threshold signatures, hash lock",
-    url='https://github.com/bigchaindb/cryptoconditions/',
+    long_description='readme',
+    long_description_content_type='text/plain',
+    summary="Cryptoconditions as specified by the interledger protocol and extended.",
+    keywords="cryptoconditions, interledger, merkle tree, ed25519, threshold signatures, hash lock, zenroom",
+    url='https://github.com/planetmint/cryptoconditions/',
     author='Cryptoconditions Contributors',
-    author_email='devs@bigchaindb.com',
+    author_email='contact@ipdb.global',
     license='MIT',
     zip_safe=True,
 
@@ -61,10 +63,7 @@ setup(
         'Topic :: Software Development',
         'Natural Language :: English',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX :: Linux',
     ],
@@ -72,7 +71,8 @@ setup(
     packages=find_packages(exclude=['tests*', 'examples']),
 
     install_requires=[
-        'zenroom @ git+https://github.com/dyne/Zenroom.git#subdirectory=bindings/python3&egg=zenroom_2.0.0',
+#        'zenroom @ git+https://github.com/dyne/Zenroom.git#subdirectory=bindings/python3&egg=zenroom_2.0.0',
+        'zenroom>=2.0.0',
         'capturer==3.0',
         'base58==2.1.0',
         'PyNaCl==1.4.0',
