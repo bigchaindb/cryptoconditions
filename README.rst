@@ -1,8 +1,8 @@
-.. image:: https://img.shields.io/pypi/v/cryptoconditions.svg
-        :target: https://pypi.python.org/pypi/cryptoconditions
+.. image:: https://badge.fury.io/py/planetmint-cryptoconditions.svg
+        :target: https://badge.fury.io/py/planetmint-cryptoconditions
 
-.. image:: https://img.shields.io/travis/planetmint/cryptoconditions/master.svg
-        :target: https://travis-ci.com/planetmint/cryptoconditions
+.. image:: https://app.travis-ci.com/planetmint/cryptoconditions.svg?branch=main
+        :target: https://app.travis-ci.com/planetmint/cryptoconditions
 
 .. image:: https://codecov.io/gh/planetmint/cryptoconditions/branch/main/graph/badge.svg?token=2Bo1knLW0Q
         :target: https://codecov.io/gh/planetmint/cryptoconditions
