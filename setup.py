@@ -73,8 +73,7 @@ setup(
     packages=find_packages(exclude=['tests*', 'examples']),
 
     install_requires=[
-#        'zenroom @ git+https://github.com/dyne/Zenroom.git#subdirectory=bindings/python3&egg=zenroom_2.0.0',
-        'zenroom>=2.0.0',
+        'zenroom>=2.0.0.dev1644927841',
         'capturer==3.0',
         'base58==2.1.0',
         'PyNaCl==1.4.0',
