@@ -33,6 +33,7 @@ tests_require = [
 dev_require = [
     'ipdb',
     'ipython',
+    'twine'
 ]
 
 docs_require = [
