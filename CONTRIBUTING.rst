@@ -10,7 +10,7 @@ Contributing
 
 3. Add the ``upstream`` remote::
     
-    $ git remote add upstream git@github.com:bigchaindb/cryptoconditions.git
+    $ git remote add upstream git@github.com:planetmint/cryptoconditions.git
 
 4. Install in development mode::
 
@@ -27,4 +27,4 @@ For the installation step and running the tests you can also use the provided
     $ docker-compose run --rm cryptoconditions pytest -v
 
 
-.. _cryptoconditions: https://github.com/bigchaindb/cryptoconditions
+.. _cryptoconditions: https://github.com/planetmint/cryptoconditions

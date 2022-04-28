@@ -112,7 +112,7 @@ class TestBigchainCryptoED25519(object):
         assert vk.verify(message, sk.sign(message)) is False
 
     def test_weak_public_keys(self):
-        """reproduce the problem in https://github.com/bigchaindb/bigchaindb/issues/617
+        """reproduce the problem in https://github.com/planetmint/planetmint/issues/617
 
         This problem is due to weak keys, specially in this case the key and signature
         when decoded from base58 correspond to a key and a signature that are zero.

@@ -12,7 +12,7 @@ The cryptoconditions Package
 
 A Python implementation of the Crypto-Conditions spec: a multi-algorithm, multi-level, multi-signature format for expressing conditions and fulfillments.
 
-This implementation doesn't implement the entire Crypto-Conditions spec. It implements the conditions needed by BigchainDB, and some others. It's compliant with `version 02 <https://tools.ietf.org/html/draft-thomas-crypto-conditions-02>`_ and `version 03 <https://tools.ietf.org/html/draft-thomas-crypto-conditions-02>`_ of the spec.
+This implementation doesn't implement the entire Crypto-Conditions spec. It implements the conditions needed by Planetmint, and some others. It's compliant with `version 02 <https://tools.ietf.org/html/draft-thomas-crypto-conditions-02>`_ and `version 03 <https://tools.ietf.org/html/draft-thomas-crypto-conditions-02>`_ of the spec.
 
 See also: the `rfcs/crypto-conditions repository <https://github.com/rfcs/crypto-conditions>`_.
 

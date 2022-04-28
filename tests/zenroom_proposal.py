@@ -16,10 +16,10 @@ from json.decoder import JSONDecodeError
 
 # from zenroom import zencode_exec
 
-# from bigchaindb_driver import BigchainDB
+# from planetmint_driver import Planetmint
 # # bdb_root_url = 'https://ipdb3.riddleandcode.com'
 # bdb_root_url = 'http://localhost:9984/'
-# bdb = BigchainDB(bdb_root_url)
+# bdb = Planetmint(bdb_root_url)
 
 # The procedure to generate the keyring cannot be
 # fixed in the code base, it depends on the particular
