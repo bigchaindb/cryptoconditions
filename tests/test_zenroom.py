@@ -69,7 +69,7 @@ def test_zenroom():
     print("============== BOB KEYPAIR =================")
     print(bob)
 
-    assets = [{
+    asset = {
         "data": {
             "houses": [
                 {
@@ -82,7 +82,7 @@ def test_zenroom():
                 }
             ],
         }
-    }]
+    }
     zen_public_keys = sk2pk('Alice', alice)
     zen_public_keys.update(sk2pk('Bob', bob))
 
@@ -138,7 +138,7 @@ def test_zenroom():
 
     token_creation_tx = {
         'operation': 'CREATE',
-        'assets': assets,
+        'asset': asset,
         'metadata': None,
         'outputs': (output,),
         'inputs': (input_,),
