@@ -74,7 +74,7 @@ setup(
     packages=find_packages(exclude=['tests*', 'examples']),
 
     install_requires=[
-        'zenroom==2.0.0.dev1644927841',
+        'zenroom==2.1.0.dev1654703596',
         'capturer==3.0',
         'base58==2.1.0',
         'PyNaCl==1.4.0',

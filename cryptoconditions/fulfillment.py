@@ -54,6 +54,7 @@ class Fulfillment(metaclass=ABCMeta):
         except (SubstrateUnderrunError, PyAsn1Error, TypeError) as exc:
             raise ASN1DecodeError('Failed to decode fulfillment.') from exc
         asn1_dict = nat_encode(asn1_obj)
+        print (f"asn1_dict : {asn1_dict}")
         return Fulfillment.from_asn1_dict(asn1_dict)
 
     @staticmethod
