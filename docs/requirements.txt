@@ -1,2 +1,2 @@
 sphinx
-sphinx_rtd_theme
+sphinx-press-theme==0.8.0
