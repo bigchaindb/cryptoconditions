@@ -12,23 +12,8 @@ from pyasn1.codec.native.decoder import decode as nat_decode
 from cryptoconditions.crypto import base64_add_padding, base64_remove_padding
 from cryptoconditions.types.base_sha256 import BaseSha256
 from cryptoconditions.schemas.fingerprint import ZenroomFingerprintContents
-from capturer import CaptureOutput
 # from cryptoconditions.zencode import read_zencode
 # from zenroom_minimal import Zenroom
-
-def _execute(result, *args, **kwargs):
-    z = zencode_exec(*args, **kwargs)
-    result.put(z)
-
-class ZenroomException(Exception):
-    pass
-
-class MalformedMessageException(Exception):
-    def __init__(self, *args, **kwargs):
-        return super().__init__(
-            "The message has to include the"
-            " result of the zenroom execution", *args, **kwargs)
-
 
 class ZenroomSha256(BaseSha256):
 
@@ -179,27 +164,6 @@ class ZenroomSha256(BaseSha256):
             'keys': base58.b58encode(json.dumps(self._keys)),
         }
 
-    # Create a new process and run a zenroom instance in it
-    @staticmethod
-    def run_zenroom(script, keys=None, data=None):
-        keys = keys or {}
-        data = data or {}
-        m = Manager()
-        q = m.Queue()
-        with CaptureOutput() as capturer:
-            p = Process(target=_execute,
-                        args=(q, script,),
-                        kwargs={'keys': json.dumps(keys),
-                                'data': json.dumps(data)})
-            p.start()
-            p.join()
-
-        if q.empty():
-            raise ZenroomException(capturer.get_text())
-        result = q.get()
-
-        return result
-
     # This function is not always necessary, sometime the initial message (transaction)
     # is not ready to be validated, we need a zenroom script which produces some
     # intermediate data that will be verified by the validate method
@@ -218,13 +182,14 @@ class ZenroomSha256(BaseSha256):
         if self.data is not None:
             data['output'] = self.data
 
-        result = ZenroomSha256.run_zenroom(condition_script,
-                                           {"keyring": private_keys},
-                                           data)
-        message['metadata'] = {'data': json.loads(result.output),
-                               'result': 'ok'}
+        result = zencode_exec(condition_script,
+                              keys=json.dumps({"keyring": private_keys}),
+                              data=json.dumps(data))
+        if not 'metadata' in message.keys() or not message['metadata']:
+            message['metadata'] = {}
+        message['metadata'].update({'data': json.loads(result.output),
+                                    'logs': result.logs})
 
-        print(message)
         return json.dumps(message)
 
     # TODO Adapt according to outcomes of
@@ -328,9 +293,9 @@ class ZenroomSha256(BaseSha256):
         # We can put pulic keys either in the keys or the data of zenroom
         data.update(self.keys)
 
-        result = ZenroomSha256.run_zenroom(self.script,
-                                           {},
-                                           data)
+        result = zencode_exec(self.script,
+                              keys="{}",
+                              data=json.dumps(data))
         try:
             message['metadata']['result']
         except ValueError:
@@ -342,6 +307,6 @@ class ZenroomSha256(BaseSha256):
             # dictionary of array with the string 'ok'
             # this is stored in result and compared against the content of
             # the metadata
-            return result["output"][0] == message['metadata']['result']
+            return result == message['metadata']['result']
         except JSONDecodeError:
             return False

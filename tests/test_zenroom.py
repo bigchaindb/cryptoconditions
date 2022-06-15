@@ -12,6 +12,7 @@ import json
 
 import hashlib
 from cryptoconditions import ZenroomSha256, Fulfillment
+from zenroom import zencode_exec
 from json.decoder import JSONDecodeError
 
 # from zenroom import zencode_exec
@@ -34,7 +35,7 @@ GENERATE_KEYPAIR = \
     Then print data"""
 
 def genkey():
-    return json.loads(ZenroomSha256.run_zenroom(GENERATE_KEYPAIR).output)['keyring']
+    return json.loads(zencode_exec(GENERATE_KEYPAIR).output)['keyring']
 
 # There is not a unique way of generating the public
 # key, for example, for the testnet I don't want the
@@ -56,8 +57,8 @@ SK_TO_PK = \
     Then print my 'testnet address'"""
 
 def sk2pk(name, keys):
-    return json.loads(ZenroomSha256.run_zenroom(SK_TO_PK.format(name),
-                                                keys={'keyring': keys}).output)
+    return json.loads(zencode_exec(SK_TO_PK.format(name),
+                                   keys=json.dumps({'keyring': keys})).output)
 # Alice assert the composition of the houses
 
 # zen_public_keys is an identity dictionary
@@ -92,7 +93,15 @@ def test_zenroom():
     print("============== PUBLIC IDENTITIES =================")
     print(zen_public_keys)
 
+    # the result key is the expected result of the fulfill script
+    # it depends on the script, in this case I know that
+    #     `Then print the string 'ok'`,
+    # results in
+    #     { "output": ["ok"] }
     metadata = {
+            "result": {
+                "output": ["ok"]
+            }
     }
 
     version = '2.0'
@@ -139,7 +148,7 @@ def test_zenroom():
     token_creation_tx = {
         'operation': 'CREATE',
         'asset': asset,
-        'metadata': None,
+        'metadata': metadata,
         'outputs': (output,),
         'inputs': (input_,),
         'version': version,
