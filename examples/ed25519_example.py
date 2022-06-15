@@ -1,8 +1,8 @@
 ################################################################################################################
 # Code upgrade done by Via Science Inc.                                                                        #
 #                                                                                                              #
-# This is to confirm that my company has agreed to and accepted the BigchainDB Entity Contributor Agreement    #
-# at https://www.bigchaindb.com/cla/ and to represent and warrant that I have authority to do so.              #
+# This is to confirm that my company has agreed to and accepted the Planetmint Entity Contributor Agreement    #
+# at https://www.planetmint.com/cla/ and to represent and warrant that I have authority to do so.              #
 #                                                                                                              #
 # USq6mSPklezAirGcWi6ntfAlG2OhEobGhnNIstM6xH4UCZGX5KgXQemE4wLk0R6                                              #
 ################################################################################################################
