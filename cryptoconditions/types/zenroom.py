@@ -224,7 +224,6 @@ class ZenroomSha256(BaseSha256):
         message['metadata'] = {'data': json.loads(result.output),
                                'result': 'ok'}
 
-        print(message)
         return json.dumps(message)
 
     # TODO Adapt according to outcomes of
