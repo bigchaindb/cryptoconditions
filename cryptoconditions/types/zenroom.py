@@ -78,14 +78,9 @@ class ZenroomSha256(BaseSha256):
             keys = json.loads(keys.decode())
         if not isinstance(keys, dict):
             raise TypeError('the keys must be a dictionary')
-        for name in keys.keys():
-            if not isinstance(name, str):
-                raise TypeError('{} is not the name of a user', name)
-            for k in keys[name].keys():
-                if not isinstance(k, str):
-                    raise TypeError('key type must be a string', name)
-                if not isinstance(keys[name][k], str):
-                    raise TypeError('the output of zencode keys must be a string', name)
+        dict_keys = keys.keys()
+        if 'asset' in dict_keys or 'metadata' in dict_keys:
+            raise TypeError('keys cannot have a asset or a metadata key')
         return keys
 
     @property
@@ -101,6 +96,9 @@ class ZenroomSha256(BaseSha256):
         # Any dictionary (that can be serialized in json) could be valid data
         if not isinstance(data, dict):
             raise TypeError('the keys must be a dictionary')
+        dict_keys = data.keys()
+        if 'asset' in dict_keys or 'metadata' in dict_keys:
+            raise TypeError('keys cannot have a asset or a metadata key')
         # If data is not serializable this will throw an exception
         json.dumps(data)
         return data
@@ -176,11 +174,13 @@ class ZenroomSha256(BaseSha256):
     # the code would be different)
     def sign(self, message, condition_script, private_keys):
         message = json.loads(message)
-        data = {}
-        if 'data' in message['asset'].keys():
+        data = self.data if self.data is not None else {}
+        try:
             data['asset'] = message['asset']['data']
-        if self.data is not None:
-            data['output'] = self.data
+        except KeyError:
+            # If the message doesn't have a asset key
+            # go on without setting the asset in the data
+            pass
 
         result = zencode_exec(condition_script,
                               keys=json.dumps({"keyring": private_keys}),
@@ -273,28 +273,24 @@ class ZenroomSha256(BaseSha256):
             message = json.loads(message)
         except JSONDecodeError:
             return False
-        data = {}
+        data = {} if self._data is None else self._data
         try:
             if message['asset']['data']:
                 data['asset'] = message['asset']['data']
-        except JSONDecodeError:
+        except KeyError:
             pass
-        if self._data is not None:
-            data['output'] = self._data
 
         # There could also be some data in the metadata,
         # this is an output of the condition script which
         # become an input for the fulfillment script
         try:
-            if message['metadata'] and message['metadata']['data']:
-                data['result'] = message['metadata']['data']
-        except ValueError:
+            if message['metadata']['data']:
+                data['metadata'] = message['metadata']['data']
+        except KeyError:
             pass
         # We can put pulic keys either in the keys or the data of zenroom
-        data.update(self.keys)
-
         result = zencode_exec(self.script,
-                              keys="{}",
+                              keys=json.dumps(self._keys),
                               data=json.dumps(data))
         try:
             message['metadata']['result']
@@ -303,10 +299,6 @@ class ZenroomSha256(BaseSha256):
 
         try:
             result = json.loads(result.output)
-            # "Then print the string 'ok'" in zenroom produces a
-            # dictionary of array with the string 'ok'
-            # this is stored in result and compared against the content of
-            # the metadata
             return result == message['metadata']['result']
         except JSONDecodeError:
             return False
