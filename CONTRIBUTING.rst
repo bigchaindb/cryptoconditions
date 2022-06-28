@@ -14,7 +14,7 @@ Contributing
 
 4. Install in development mode::
 
-    $ pip install -e .[dev]
+    $ pip install -e '.[dev]'
 
 5. Make sure you can run the tests::
 

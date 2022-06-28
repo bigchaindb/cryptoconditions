@@ -26,8 +26,6 @@ Base Modules
 ``crypto``
 ----------
 .. automodule:: cryptoconditions.crypto
-    :special-members: __init__
-
 
 ``exceptions``
 --------------
@@ -81,4 +79,3 @@ Types Modules
 ``ed25519``
 -----------
 .. automodule:: cryptoconditions.types.ed25519
-    :special-members: __init__

@@ -1,4 +1,4 @@
-import sphinx_rtd_theme
+#import sphinx_rtd_theme
 import datetime
 
 _version = {}
@@ -14,6 +14,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
+    'sphinx.ext.intersphinx',
 ]
 
 autodoc_default_flags = [
@@ -21,6 +22,10 @@ autodoc_default_flags = [
     'inherited-members',
     'show-inheritance',
 ]
+
+intersphinx_mapping = {
+    'planetmint': ('https://docs.planetmint.io/en/latest/', None),
+}
 
 templates_path = ['_templates']
 source_suffix = '.rst'
@@ -31,14 +36,14 @@ copyright = str(now.year) + ', Cryptoconditions Contributors'
 author = 'Cryptoconditions Contributors'
 version = _version['__short_version__']
 release = _version['__version__']
-language = None
+language = 'en'
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 pygments_style = 'sphinx'
 todo_include_todos = True
 html_theme = 'press'
 #html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_static_path = ['_static']
-htmlhelp_basename = 'cryptoconditionsdoc'
+htmlhelp_basename = 'cryptoconditions'
 
 latex_elements = {}
 
@@ -47,4 +52,3 @@ latex_documents = [
      'Cryptoconditions Contributors', 'manual'),
 ]
 
-intersphinx_mapping = {'https://docs.python.org/3/': None}

@@ -30,13 +30,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/planetmint/cryptoconditions
+    $ git clone git@github.com:planetmint/cryptoconditions.git
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/planetmint/cryptoconditions/tarball/master
+    $ curl  -OL https://github.com/planetmint/cryptoconditions/archive/refs/heads/main.zip
 
 Once you have a copy of the source, you can install it with:
 
@@ -46,4 +46,4 @@ Once you have a copy of the source, you can install it with:
 
 
 .. _Github repo: https://github.com/planetmint/cryptoconditions
-.. _tarball: https://github.com/planetmint/cryptoconditions/tarball/master
+.. _tarball: https://github.com/planetmint/cryptoconditions/archive/refs/heads/main.zip

@@ -1,19 +1,30 @@
 .. include:: ../README.rst
 
+
+
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
+    :caption: Planetmint
 
-    installation
-    usage
-    examples
+    Planetmint <https://docs.planetmint.io>
+    planetmint
+
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Cryptoconditions & Smart Contracts
+
+    Installation <installation>
+    Usage <usage>
+    Examples <examples>
+    Contributing <contributing>
+
+..
     libref
-    contributing
+    Indices and tables
+    ==================
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+    * :ref:`genindex`
+    * :ref:`modindex`
+    * :ref:`search`
 

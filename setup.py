@@ -43,6 +43,14 @@ docs_require = [
     'sphinx-press-theme==0.8.0',
 ]
 
+install_requires=[
+    'zenroom==2.1.0.dev1655293214',
+    'base58==2.1.0',
+    'PyNaCl==1.4.0',
+    'pyasn1==0.4.8',
+    'cryptography==3.4.7',
+]
+
 setup(
     name='planetmint-cryptoconditions',
     version=version['__version__'],
@@ -72,19 +80,11 @@ setup(
     ],
 
     packages=find_packages(exclude=['tests*', 'examples']),
-
-    install_requires=[
-        'zenroom==2.1.0.dev1655293214',
-        'base58==2.1.0',
-        'PyNaCl==1.4.0',
-        'pyasn1==0.4.8',
-        'cryptography==3.4.7',
-    ],
     setup_requires=['pytest-runner'],
     tests_require=tests_require,
     extras_require={
-        'test': tests_require,
-        'dev': dev_require + tests_require + docs_require,
+        'test': install_requires + tests_require,
+        'dev': install_requires + dev_require + tests_require + docs_require,
         'docs': docs_require,
     },
 )
