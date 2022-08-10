@@ -11,18 +11,19 @@ from cryptoconditions.exceptions import MissingDataError
 from cryptoconditions.types.base_sha256 import BaseSha256
 from cryptoconditions.schemas.fingerprint import PrefixFingerprintContents
 
-CONDITION = 'condition'
-FULFILLMENT = 'fulfillment'
+CONDITION = "condition"
+FULFILLMENT = "fulfillment"
 
 
 class PrefixSha256(BaseSha256):
     """ """
+
     TYPE_ID = 1
-    TYPE_NAME = 'prefix-sha-256'
-    TYPE_ASN1 = 'prefixSha256'
-    TYPE_ASN1_CONDITION = 'prefixSha256Condition'
-    TYPE_ASN1_FULFILLMENT = 'prefixSha256Fulfillment'
-    TYPE_CATEGORY = 'compound'
+    TYPE_NAME = "prefix-sha-256"
+    TYPE_ASN1 = "prefixSha256"
+    TYPE_ASN1_CONDITION = "prefixSha256Condition"
+    TYPE_ASN1_FULFILLMENT = "prefixSha256Fulfillment"
+    TYPE_CATEGORY = "compound"
 
     CONSTANT_BASE_COST = 16384
     CONSTANT_COST_DIVISOR = 256
@@ -49,7 +50,7 @@ class PrefixSha256(BaseSha256):
         bitmask of 0x05.
 
         """
-        self._prefix = b''
+        self._prefix = b""
         self._subcondition = None
         self._max_message_length = 16384
 
@@ -73,8 +74,7 @@ class PrefixSha256(BaseSha256):
         if isinstance(subcondition, str):
             subcondition = Condition.from_uri(subcondition)
         elif not isinstance(subcondition, Condition):
-            raise Exception(
-                'Subconditions must be URIs or objects of type Condition')
+            raise Exception("Subconditions must be URIs or objects of type Condition")
         self._subcondition = subcondition
 
     def _set_subfulfillment(self, subfulfillment):
@@ -96,8 +96,7 @@ class PrefixSha256(BaseSha256):
         if isinstance(subfulfillment, str):
             subfulfillment = Fulfillment.from_uri(subfulfillment)
         elif not isinstance(subfulfillment, Fulfillment):
-            raise Exception(
-                'Subfulfillments must be URIs or objects of type Fulfillment')
+            raise Exception("Subfulfillments must be URIs or objects of type Fulfillment")
         self._subcondition = subfulfillment
 
     @property
@@ -116,8 +115,7 @@ class PrefixSha256(BaseSha256):
     @prefix.setter
     def prefix(self, prefix):
         if not isinstance(prefix, bytes):
-            raise TypeError(
-                'Prefix must be bytes, was: {}'.format(type(prefix)))
+            raise TypeError("Prefix must be bytes, was: {}".format(type(prefix)))
         self._prefix = prefix
 
     @property
@@ -139,8 +137,8 @@ class PrefixSha256(BaseSha256):
         """
         if not isinstance(max_message_length, int) or max_message_length < 0:
             raise TypeError(
-                'Max message length must be an integer greater than or '
-                'equal to zero, was: {}'.format(max_message_length)
+                "Max message length must be an integer greater than or "
+                "equal to zero, was: {}".format(max_message_length)
             )
 
         self._max_message_length = max_message_length
@@ -166,9 +164,7 @@ class PrefixSha256(BaseSha256):
             verify this fulfillment to begin with.
 
         """
-        return {t for t in chain(self.subcondition.subtypes,
-                                 (self.subcondition.type_name,))
-                if t != self.TYPE_NAME}
+        return {t for t in chain(self.subcondition.subtypes, (self.subcondition.type_name,)) if t != self.TYPE_NAME}
 
     @property
     def fingerprint_contents(self):
@@ -182,40 +178,44 @@ class PrefixSha256(BaseSha256):
 
         """
         if not self.subcondition:
-            raise MissingDataError('Requires subcondition')
+            raise MissingDataError("Requires subcondition")
 
         try:
             subcondition_asn1_dict = self.subcondition.condition.to_asn1_dict()
         except AttributeError:
             subcondition_asn1_dict = self.subcondition.to_asn1_dict()
 
-        return der_encode(nat_decode({
-            'prefix': self.prefix,
-            'maxMessageLength': self.max_message_length,
-            'subcondition': subcondition_asn1_dict,
-        }, asn1Spec=PrefixFingerprintContents()))
+        return der_encode(
+            nat_decode(
+                {
+                    "prefix": self.prefix,
+                    "maxMessageLength": self.max_message_length,
+                    "subcondition": subcondition_asn1_dict,
+                },
+                asn1Spec=PrefixFingerprintContents(),
+            )
+        )
 
     @property
     def asn1_dict_payload(self):
         return {
-            'prefix': self.prefix,
-            'maxMessageLength': self.max_message_length,
-            'subfulfillment': self.subcondition.to_asn1_dict(),
+            "prefix": self.prefix,
+            "maxMessageLength": self.max_message_length,
+            "subfulfillment": self.subcondition.to_asn1_dict(),
         }
 
     def to_asn1_dict(self):
         return {self.TYPE_ASN1: self.asn1_dict_payload}
 
     def parse_json(self, data):
-        self.prefix = urlsafe_b64decode(base64_add_padding(data['prefix']))
-        self.max_message_length = data['maxMessageLength']
-        self._set_subfulfillment(Fulfillment.from_json(data['subfulfillment']))
+        self.prefix = urlsafe_b64decode(base64_add_padding(data["prefix"]))
+        self.max_message_length = data["maxMessageLength"]
+        self._set_subfulfillment(Fulfillment.from_json(data["subfulfillment"]))
 
     def parse_asn1_dict_payload(self, data):
-        self.prefix = data['prefix']
-        self.max_message_length = data['maxMessageLength']
-        self._set_subfulfillment(
-            Fulfillment.from_asn1_dict(data['subfulfillment']))
+        self.prefix = data["prefix"]
+        self.max_message_length = data["maxMessageLength"]
+        self._set_subfulfillment(Fulfillment.from_asn1_dict(data["subfulfillment"]))
 
     def calculate_cost(self):
         """Calculate the cost of fulfilling this condition.
@@ -232,18 +232,17 @@ class PrefixSha256(BaseSha256):
 
         """
         if self.prefix is None:
-            raise MissingDataError('Prefix must be specified')
+            raise MissingDataError("Prefix must be specified")
 
         if not self.subcondition:
-            raise MissingDataError('Subcondition must be specified')
+            raise MissingDataError("Subcondition must be specified")
 
         try:
             subcondition_cost = self.subcondition.cost
         except AttributeError:
             subcondition_cost = self.subcondition.condition.cost
 
-        cost = (len(self.prefix) +
-                self.max_message_length + subcondition_cost + 1024)
+        cost = len(self.prefix) + self.max_message_length + subcondition_cost + 1024
         return cost
 
     def validate(self, message):
@@ -261,10 +260,9 @@ class PrefixSha256(BaseSha256):
 
         """
         if not isinstance(self.subcondition, Fulfillment):
-            raise Exception('Subcondition is not a fulfillment')
+            raise Exception("Subcondition is not a fulfillment")
 
         if not isinstance(message, bytes):
-            raise Exception(
-                'Message must be provided as a bytes, was: {0}'.format(message))
+            raise Exception("Message must be provided as a bytes, was: {0}".format(message))
 
         return self.subcondition.validate(message=self.prefix + message)

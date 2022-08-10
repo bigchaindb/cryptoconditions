@@ -10,26 +10,24 @@ def test_validate_condition(minimal_ed25519):
 def test_validate_fulfillment(minimal_ed25519):
     from cryptoconditions import validate_fulfillment
 
-    assert validate_fulfillment(minimal_ed25519.fulfillment,
-                                minimal_ed25519.condition_uri,
-                                minimal_ed25519.message) is True
+    assert (
+        validate_fulfillment(minimal_ed25519.fulfillment, minimal_ed25519.condition_uri, minimal_ed25519.message)
+        is True
+    )
 
 
-def test_validate_fulfillment_condition_mismatch(minimal_ed25519,
-                                                 minimal_preimage):
+def test_validate_fulfillment_condition_mismatch(minimal_ed25519, minimal_preimage):
     from cryptoconditions import validate_fulfillment
     from cryptoconditions.exceptions import ValidationError
 
     with pytest.raises(ValidationError):
-        validate_fulfillment(minimal_ed25519.fulfillment,
-                             minimal_preimage.condition_uri)
+        validate_fulfillment(minimal_ed25519.fulfillment, minimal_preimage.condition_uri)
 
 
 def test_fulfillment_to_condition(minimal_ed25519):
     from cryptoconditions import fulfillment_to_condition
 
-    assert fulfillment_to_condition(minimal_ed25519.fulfillment) == \
-        minimal_ed25519.condition_uri
+    assert fulfillment_to_condition(minimal_ed25519.fulfillment) == minimal_ed25519.condition_uri
 
 
 def test_from_dict(minimal_ed25519):

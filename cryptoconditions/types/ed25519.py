@@ -15,11 +15,11 @@ class Ed25519Sha256(BaseSha256):
     """ """
 
     TYPE_ID = 4
-    TYPE_NAME = 'ed25519-sha-256'
-    TYPE_ASN1 = 'ed25519Sha256'
-    TYPE_ASN1_CONDITION = 'ed25519Sha256Condition'
-    TYPE_ASN1_FULFILLMENT = 'ed25519Sha256Fulfillment'
-    TYPE_CATEGORY = 'simple'
+    TYPE_NAME = "ed25519-sha-256"
+    TYPE_ASN1 = "ed25519Sha256"
+    TYPE_ASN1_CONDITION = "ed25519Sha256Condition"
+    TYPE_ASN1_FULFILLMENT = "ed25519Sha256Fulfillment"
+    TYPE_CATEGORY = "simple"
 
     CONSTANT_COST = 131072
     PUBLIC_KEY_LENGTH = 32
@@ -50,11 +50,9 @@ class Ed25519Sha256(BaseSha256):
     # TODO check type or use static typing (mypy)
     def _validate_public_key(self, public_key):
         if not isinstance(public_key, bytes):
-            raise TypeError('public_key must be bytes')
+            raise TypeError("public_key must be bytes")
         if len(public_key) != self.PUBLIC_KEY_LENGTH:
-            raise ValueError(
-                'Public key must be {} bytes, was: {}'.format(
-                    self.PUBLIC_KEY_LENGTH, len(public_key)))
+            raise ValueError("Public key must be {} bytes, was: {}".format(self.PUBLIC_KEY_LENGTH, len(public_key)))
         # TODO More validation? Ask ILP folks.
         return public_key
 
@@ -70,11 +68,9 @@ class Ed25519Sha256(BaseSha256):
     # TODO check type or use static typing (mypy)
     def _validate_signature(self, signature):
         if not isinstance(signature, bytes):
-            raise TypeError('signature must be bytes')
+            raise TypeError("signature must be bytes")
         if len(signature) != self.SIGNATURE_LENGTH:
-            raise Exception(
-                'Signature must be {} bytes, was: {}'.format(
-                    self.SIGNATURE_LENGTH, len(signature)))
+            raise Exception("Signature must be {} bytes, was: {}".format(self.SIGNATURE_LENGTH, len(signature)))
         return signature
 
     @property
@@ -89,12 +85,12 @@ class Ed25519Sha256(BaseSha256):
 
     @property
     def asn1_dict_payload(self):
-        return {'publicKey': self.public_key, 'signature': self.signature}
+        return {"publicKey": self.public_key, "signature": self.signature}
 
     @property
     def fingerprint_contents(self):
         asn1_fingerprint_obj = nat_decode(
-            {'publicKey': self.public_key},
+            {"publicKey": self.public_key},
             asn1Spec=Ed25519FingerprintContents(),
         )
         return der_encode(asn1_fingerprint_obj)
@@ -133,9 +129,9 @@ class Ed25519Sha256(BaseSha256):
             dict: representing the fulfillment
         """
         return {
-            'type': Ed25519Sha256.TYPE_NAME,
-            'public_key': base58.b58encode(self.public_key),
-            'signature': base58.b58encode(self.signature) if self.signature else None
+            "type": Ed25519Sha256.TYPE_NAME,
+            "public_key": base58.b58encode(self.public_key),
+            "signature": base58.b58encode(self.signature) if self.signature else None,
         }
 
     # TODO Adapt according to outcomes of
@@ -148,11 +144,9 @@ class Ed25519Sha256(BaseSha256):
             dict: representing the fulfillment
         """
         return {
-            'type': Ed25519Sha256.TYPE_NAME,
-            'public_key': base64_remove_padding(
-                urlsafe_b64encode(self.public_key)),
-            'signature': base64_remove_padding(
-                urlsafe_b64encode(self.signature)) if self.signature else None
+            "type": Ed25519Sha256.TYPE_NAME,
+            "public_key": base64_remove_padding(urlsafe_b64encode(self.public_key)),
+            "signature": base64_remove_padding(urlsafe_b64encode(self.signature)) if self.signature else None,
         }
 
     # TODO Adapt according to outcomes of
@@ -167,9 +161,9 @@ class Ed25519Sha256(BaseSha256):
         Returns:
             Fulfillment
         """
-        self.public_key = base58.b58decode(data['public_key'])
-        if data['signature']:
-            self.signature = base58.b58decode(data['signature'])
+        self.public_key = base58.b58decode(data["public_key"])
+        if data["signature"]:
+            self.signature = base58.b58decode(data["signature"])
 
     # TODO Adapt according to outcomes of
     # https://github.com/rfcs/crypto-conditions/issues/16
@@ -183,14 +177,12 @@ class Ed25519Sha256(BaseSha256):
         Returns:
             Fulfillment
         """
-        self.public_key = urlsafe_b64decode(base64_add_padding(
-            data['publicKey']))
-        self.signature = urlsafe_b64decode(base64_add_padding(
-            data['signature']))
+        self.public_key = urlsafe_b64decode(base64_add_padding(data["publicKey"]))
+        self.signature = urlsafe_b64decode(base64_add_padding(data["signature"]))
 
     def parse_asn1_dict_payload(self, data):
-        self.public_key = data['publicKey']
-        self.signature = data['signature']
+        self.public_key = data["publicKey"]
+        self.signature = data["signature"]
 
     def validate(self, *, message):
         """
@@ -206,8 +198,7 @@ class Ed25519Sha256(BaseSha256):
             boolean: Whether this fulfillment is valid.
         """
         try:
-            VerifyKey(self.public_key).verify(
-                message, signature=self.signature)
+            VerifyKey(self.public_key).verify(message, signature=self.signature)
         except BadSignatureError:
             return False
         # TODO Check returned message against given message

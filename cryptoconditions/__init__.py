@@ -5,8 +5,8 @@ from cryptoconditions.types.rsa import RsaSha256
 from cryptoconditions.types.threshold import ThresholdSha256
 from cryptoconditions.types.ed25519 import Ed25519Sha256
 from cryptoconditions.types.zenroom import ZenroomSha256
-from cryptoconditions.fulfillment import Fulfillment    # noqa: W0611
-from cryptoconditions.condition import Condition        # noqa: W0611
+from cryptoconditions.fulfillment import Fulfillment  # noqa: W0611
+from cryptoconditions.condition import Condition  # noqa: W0611
 from cryptoconditions.exceptions import ValidationError
 
 
@@ -25,14 +25,14 @@ def validate_condition(serialized_condition):
     return condition.validate()
 
 
-def validate_fulfillment(serialized_fulfillment,
-                         serialized_condition, message=None):
+def validate_fulfillment(serialized_fulfillment, serialized_condition, message=None):
     fulfillment = Fulfillment.from_uri(serialized_fulfillment)
     condition_uri = fulfillment.condition_uri
     if condition_uri != serialized_condition:
         raise ValidationError(
-            'Fulfillment does not match condition (expected: {}, actual: {})'
-            .format(serialized_condition, condition_uri)
+            "Fulfillment does not match condition (expected: {}, actual: {})".format(
+                serialized_condition, condition_uri
+            )
         )
     return fulfillment.validate(message=message)
 

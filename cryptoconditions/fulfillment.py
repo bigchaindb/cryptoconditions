@@ -32,9 +32,8 @@ class Fulfillment(metaclass=ABCMeta):
             Fulfillment: Resulting object
         """
         if not isinstance(serialized_fulfillment, str):
-            raise TypeError('Serialized fulfillment must be a string')
-        uri_bytes = base64.urlsafe_b64decode(
-            base64_add_padding(serialized_fulfillment))
+            raise TypeError("Serialized fulfillment must be a string")
+        uri_bytes = base64.urlsafe_b64decode(base64_add_padding(serialized_fulfillment))
         return Fulfillment.from_binary(uri_bytes)
 
     @staticmethod
@@ -52,29 +51,29 @@ class Fulfillment(metaclass=ABCMeta):
         try:
             asn1_obj, _ = der_decode(data, asn1Spec=Asn1Fulfillment())
         except (SubstrateUnderrunError, PyAsn1Error, TypeError) as exc:
-            raise ASN1DecodeError('Failed to decode fulfillment.') from exc
+            raise ASN1DecodeError("Failed to decode fulfillment.") from exc
         asn1_dict = nat_encode(asn1_obj)
         return Fulfillment.from_asn1_dict(asn1_dict)
 
     @staticmethod
     def from_asn1_dict(asn1_dict):
         asn1_type, value = asn1_dict.popitem()
-        instance = TypeRegistry.find_by_asn1_type(asn1_type)['class']()
+        instance = TypeRegistry.find_by_asn1_type(asn1_type)["class"]()
         instance.parse_asn1_dict_payload(value)
         instance.asn1_dict = {asn1_type: value}
         return instance
 
     @staticmethod
     def from_dict(data):
-        type_ = TypeRegistry.find_by_name(data['type'])
-        fulfillment = type_['class']()
+        type_ = TypeRegistry.find_by_name(data["type"])
+        fulfillment = type_["class"]()
         fulfillment.parse_dict(data)
         return fulfillment
 
     @staticmethod
     def from_json(data):
-        type_ = TypeRegistry.find_by_name(data['type'])
-        fulfillment = type_['class']()
+        type_ = TypeRegistry.find_by_name(data["type"])
+        fulfillment = type_["class"]()
         fulfillment.parse_json(data)
         return fulfillment
 
@@ -173,8 +172,7 @@ class Fulfillment(metaclass=ABCMeta):
         Return:
              str: Fulfillment as a URI
         """
-        return base64_remove_padding(
-            base64.urlsafe_b64encode(self.serialize_binary())).decode()
+        return base64_remove_padding(base64.urlsafe_b64encode(self.serialize_binary())).decode()
 
     def serialize_binary(self):
         """
@@ -192,13 +190,12 @@ class Fulfillment(metaclass=ABCMeta):
             asn1 = nat_decode(asn1_dict, asn1Spec=Asn1Fulfillment())
         except TypeError as exc:
             raise ASN1DecodeError(
-                'Internal error! Failed to transform dict "{}" '
-                'into pyasn1 schema object.'.format(asn1_dict)
+                'Internal error! Failed to transform dict "{}" ' "into pyasn1 schema object.".format(asn1_dict)
             ) from exc
         try:
             bin_obj = der_encode(asn1)
         except PyAsn1Error as exc:
-            raise ASN1EncodeError('Failed to encode fulfillment.') from exc
+            raise ASN1EncodeError("Failed to encode fulfillment.") from exc
         return bin_obj
 
     def to_dict(self):

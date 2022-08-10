@@ -9,11 +9,11 @@ class PreimageSha256(BaseSha256):
     """ """
 
     TYPE_ID = 0
-    TYPE_NAME = 'preimage-sha-256'
-    TYPE_ASN1 = 'preimageSha256'
-    TYPE_ASN1_CONDITION = 'preimageSha256Condition'
-    TYPE_ASN1_FULFILLMENT = 'preimageSha256Fulfillment'
-    TYPE_CATEGORY = 'simple'
+    TYPE_NAME = "preimage-sha-256"
+    TYPE_ASN1 = "preimageSha256"
+    TYPE_ASN1_CONDITION = "preimageSha256Condition"
+    TYPE_ASN1_FULFILLMENT = "preimageSha256Fulfillment"
+    TYPE_CATEGORY = "simple"
 
     def __init__(self, preimage=None):
         """
@@ -41,7 +41,7 @@ class PreimageSha256(BaseSha256):
              preimage: Secret data that will be hashed to form the condition.
         """
         if preimage and (not isinstance(preimage, bytes)):
-            raise TypeError('Preimage must be bytes, was: {}'.format(preimage))
+            raise TypeError("Preimage must be bytes, was: {}".format(preimage))
         self.preimage = preimage
 
     def to_dict(self):
@@ -51,15 +51,11 @@ class PreimageSha256(BaseSha256):
         Returns:
             dict: representing the fulfillment
         """
-        return {
-            'type': 'fulfillment',
-            'type_id': self.TYPE_ID,
-            'preimage': self.preimage.decode()
-        }
+        return {"type": "fulfillment", "type_id": self.TYPE_ID, "preimage": self.preimage.decode()}
 
     @property
     def asn1_dict_payload(self):
-        return {'preimage': self.preimage}
+        return {"preimage": self.preimage}
 
     def to_asn1_dict(self):
         return {PreimageSha256.TYPE_ASN1: self.asn1_dict_payload}
@@ -67,8 +63,7 @@ class PreimageSha256(BaseSha256):
     @property
     def fingerprint_contents(self):
         if self.preimage is None:
-            raise MissingDataError(
-                'Could not calculate hash, no preimage provided')
+            raise MissingDataError("Could not calculate hash, no preimage provided")
         return self.preimage
 
     def parse_json(self, data):
@@ -80,7 +75,7 @@ class PreimageSha256(BaseSha256):
         Returns:
             Fulfillment
         """
-        self.preimage = urlsafe_b64decode(base64_add_padding(data['preimage']))
+        self.preimage = urlsafe_b64decode(base64_add_padding(data["preimage"]))
 
     # TODO remove
     def parse_dict(self, data):
@@ -93,14 +88,14 @@ class PreimageSha256(BaseSha256):
         Returns:
             Fulfillment
         """
-        self.preimage = b64decode(data['preimage'])
+        self.preimage = b64decode(data["preimage"])
 
     def parse_asn1_dict_payload(self, data):
-        self.preimage = data['preimage']
+        self.preimage = data["preimage"]
 
     def calculate_cost(self):
         if self.preimage is None:
-            raise MissingDataError('Preimage must be specified')
+            raise MissingDataError("Preimage must be specified")
         return len(self.preimage)
 
     def validate(self, *args, **kwargs):

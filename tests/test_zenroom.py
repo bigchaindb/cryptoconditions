@@ -56,9 +56,7 @@ SK_TO_PK = """Scenario 'ecdh': Create the keypair
 
 
 def sk2pk(name, keys):
-    return json.loads(
-        zencode_exec(SK_TO_PK.format(name), keys=json.dumps({"keyring": keys})).output
-    )
+    return json.loads(zencode_exec(SK_TO_PK.format(name), keys=json.dumps({"keyring": keys})).output)
 
 
 # Alice assert the composition of the houses
@@ -158,34 +156,32 @@ def test_zenroom():
 def test_wrong_data():
     with pytest.raises(TypeError):
         ZenroomSha256(
-                script="Given nothing",
-                data={"asset": {}},
+            script="Given nothing",
+            data={"asset": {}},
         )
     with pytest.raises(TypeError):
         ZenroomSha256(
-                script="Given nothing",
-                keys={"metadata": {}},
+            script="Given nothing",
+            keys={"metadata": {}},
         )
     ZenroomSha256(
-            script="Given nothing",
-            keys={},
-            data={},
+        script="Given nothing",
+        keys={},
+        data={},
     )
+
 
 def test_no_asset_no_metadata():
     zenSha = ZenroomSha256(
-            script="Given nothing\nThen print the string 'Hello'",
+        script="Given nothing\nThen print the string 'Hello'",
     )
-    metadata = {
-        "result": {
-            "output": ["Hello"]
-        }
-    }
+    metadata = {"result": {"output": ["Hello"]}}
     message = {
         "metadata": metadata,
     }
     message = json.dumps(message)
-    assert(zenSha.validate(message=message))
+    assert zenSha.validate(message=message)
+
 
 def test_use_asset_and_metadata():
     script = """Given I have a 'string dictionary' named 'asset'
@@ -196,82 +192,54 @@ def test_use_asset_and_metadata():
         When I append 'word2' to 'word1'
         When I append 'word3' to 'word1'
         Then print the 'word1'"""
-    zenSha = ZenroomSha256(
-            script=script,
-            data={"word3":"3"}
-    )
-    metadata = {
-        "result": {
-            "word1": "123"
-        },
-        "data": {
-            "word2": "2"
-        }
-    }
-    asset = {
-        "data": {
-            "word1": "1"
-        }
-    }
-    message = {
-        "metadata": metadata,
-        "asset": asset
-    }
+    zenSha = ZenroomSha256(script=script, data={"word3": "3"})
+    metadata = {"result": {"word1": "123"}, "data": {"word2": "2"}}
+    asset = {"data": {"word1": "1"}}
+    message = {"metadata": metadata, "asset": asset}
     message = json.dumps(message)
-    assert(zenSha.validate(message=message))
+    assert zenSha.validate(message=message)
+
 
 def test_valid_keys():
     zenSha = ZenroomSha256(
-            script="Given I am 'Alice'\nGiven I have my 'keyring'\nThen print the string 'ok'",
-            keys={
-                "Alice": {
-                    "keyring": {
-                        "bitcoin": "L1r9SjgSsaZUaiKb38mSYoZWGENg2J52kgCJyGAmPJNjrPzkcXWc",
-                        "ecdh": "aODoXr8wCpFiVRc0RqWopKtS2wD73fqC1LyXJxePfnQ=",
-                        "ethereum": "78ff5aaeabfa1b800ccab5c60dbaf1e249be5d2707993f4fbd27df09bca7e821",
-                        "reflow": "BxsBo94hLKU96c0MX4GehsrQUfIGY7UgMqdZaWaHwrE=",
-                        "schnorr": "aPC2VllaEbQJlQvo8KVKQGf8oMMGERb099sCbswpPq0="
-                        }
-                    }
-                }
-            )
-
-    metadata = {
-            "result": {
-                "output": ["ok"]
-                },
-            }
-    asset = {
-            }
-    message = {
-            "metadata": metadata,
-            "asset": asset
-            }
-    message = json.dumps(message)
-    assert(zenSha.validate(message=message))
-    zenSha = ZenroomSha256(
-            script="Given I have the 'keyring'\nThen print the string 'ok'",
-            keys={
+        script="Given I am 'Alice'\nGiven I have my 'keyring'\nThen print the string 'ok'",
+        keys={
+            "Alice": {
                 "keyring": {
                     "bitcoin": "L1r9SjgSsaZUaiKb38mSYoZWGENg2J52kgCJyGAmPJNjrPzkcXWc",
                     "ecdh": "aODoXr8wCpFiVRc0RqWopKtS2wD73fqC1LyXJxePfnQ=",
                     "ethereum": "78ff5aaeabfa1b800ccab5c60dbaf1e249be5d2707993f4fbd27df09bca7e821",
                     "reflow": "BxsBo94hLKU96c0MX4GehsrQUfIGY7UgMqdZaWaHwrE=",
-                    "schnorr": "aPC2VllaEbQJlQvo8KVKQGf8oMMGERb099sCbswpPq0="
-                    }
+                    "schnorr": "aPC2VllaEbQJlQvo8KVKQGf8oMMGERb099sCbswpPq0=",
                 }
-            )
+            }
+        },
+    )
 
     metadata = {
-            "result": {
-                "output": ["ok"]
-                },
-            }
-    asset = {
-            }
-    message = {
-            "metadata": metadata,
-            "asset": asset
-            }
+        "result": {"output": ["ok"]},
+    }
+    asset = {}
+    message = {"metadata": metadata, "asset": asset}
     message = json.dumps(message)
-    assert(zenSha.validate(message=message))
+    assert zenSha.validate(message=message)
+    zenSha = ZenroomSha256(
+        script="Given I have the 'keyring'\nThen print the string 'ok'",
+        keys={
+            "keyring": {
+                "bitcoin": "L1r9SjgSsaZUaiKb38mSYoZWGENg2J52kgCJyGAmPJNjrPzkcXWc",
+                "ecdh": "aODoXr8wCpFiVRc0RqWopKtS2wD73fqC1LyXJxePfnQ=",
+                "ethereum": "78ff5aaeabfa1b800ccab5c60dbaf1e249be5d2707993f4fbd27df09bca7e821",
+                "reflow": "BxsBo94hLKU96c0MX4GehsrQUfIGY7UgMqdZaWaHwrE=",
+                "schnorr": "aPC2VllaEbQJlQvo8KVKQGf8oMMGERb099sCbswpPq0=",
+            }
+        },
+    )
+
+    metadata = {
+        "result": {"output": ["ok"]},
+    }
+    asset = {}
+    message = {"metadata": metadata, "asset": asset}
+    message = json.dumps(message)
+    assert zenSha.validate(message=message)

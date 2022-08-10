@@ -18,17 +18,17 @@ from cryptoconditions.exceptions import ParsingError, PrefixError
 
 from cryptoconditions.schemas.condition import Condition as Asn1Condition
 
-CONDITION_URI_SCHEME = 'ni'
+CONDITION_URI_SCHEME = "ni"
 
 # Regex for validating conditions
 # This is a generic, future-proof version of the crypto-condition regular expression.
-CONDITION_REGEX = r'^ni:\/\/\/sha-256;([a-zA-Z0-9_-]{0,86})\?(.+)$'
+CONDITION_REGEX = r"^ni:\/\/\/sha-256;([a-zA-Z0-9_-]{0,86})\?(.+)$"
 
 # This is a stricter version based on limitations of the current implementation.
 # Specifically, we can't handle bitmasks greater than 32 bits.
 CONDITION_REGEX_STRICT = CONDITION_REGEX
 
-INTEGER_REGEX = r'^0|[1-9]\d*$'
+INTEGER_REGEX = r"^0|[1-9]\d*$"
 
 
 @total_ordering
@@ -52,12 +52,12 @@ class Condition(metaclass=ABCMeta):
     """
 
     SUPPORTED_SUBTYPES = {
-        'preimage-sha-256',
-        'prefix-sha-256',
-        'threshold-sha-256',
-        'rsa-sha-256',
-        'ed25519-sha-256',
-        'zenroom-sha-256'
+        "preimage-sha-256",
+        "prefix-sha-256",
+        "threshold-sha-256",
+        "rsa-sha-256",
+        "ed25519-sha-256",
+        "zenroom-sha-256",
     }
 
     MAX_SAFE_SUBTYPES = len(SUPPORTED_SUBTYPES)
@@ -101,46 +101,39 @@ class Condition(metaclass=ABCMeta):
             return serialized_condition
         # TODO Use static typing instead (e.g.: with mypy).
         elif not isinstance(serialized_condition, str):
-            raise TypeError('Serialized condition must be a string')
+            raise TypeError("Serialized condition must be a string")
 
-        pieces = serialized_condition.split(':')
+        pieces = serialized_condition.split(":")
         if pieces[0] != CONDITION_URI_SCHEME:
-            raise PrefixError(
-                'Serialized condition must start with "{}:"'.format(
-                    CONDITION_URI_SCHEME
-                )
-            )
+            raise PrefixError('Serialized condition must start with "{}:"'.format(CONDITION_URI_SCHEME))
 
         regex_match = re.match(CONDITION_REGEX_STRICT, serialized_condition)
         if not regex_match:
-            raise ParsingError('Invalid condition format')
+            raise ParsingError("Invalid condition format")
 
         qs_dict = parse_qs(regex_match.group(2))
 
         try:
-            fingerprint_type = qs_dict['fpt'][0]
+            fingerprint_type = qs_dict["fpt"][0]
         except (KeyError, IndexError):
-            raise ParsingError(
-                'Invalid condition format: "fpt" parameter or value missing.')
+            raise ParsingError('Invalid condition format: "fpt" parameter or value missing.')
 
         condition_type = TypeRegistry.find_by_name(fingerprint_type)
         try:
-            cost = qs_dict['cost'][0]
+            cost = qs_dict["cost"][0]
         except (KeyError, IndexError):
-            raise ParsingError(
-                'Invalid condition format: "cost" parameter or value missing.')
+            raise ParsingError('Invalid condition format: "cost" parameter or value missing.')
 
         if not re.match(INTEGER_REGEX, cost):
-            raise ParsingError('No or invalid cost provided')
+            raise ParsingError("No or invalid cost provided")
 
         fingerprint = regex_match.group(1)
         condition = Condition()
-        condition.type_id = condition_type['type_id']
+        condition.type_id = condition_type["type_id"]
         condition._subtypes = set()
-        if condition_type['class'].TYPE_CATEGORY == 'compound':
-            condition._subtypes.update(qs_dict['subtypes'][0].split(','))
-        condition.hash = base64.urlsafe_b64decode(
-            base64_add_padding(fingerprint))
+        if condition_type["class"].TYPE_CATEGORY == "compound":
+            condition._subtypes.update(qs_dict["subtypes"][0].split(","))
+        condition.hash = base64.urlsafe_b64decode(base64_add_padding(fingerprint))
         condition.cost = int(cost)
         return condition
 
@@ -171,16 +164,15 @@ class Condition(metaclass=ABCMeta):
         registered_type = TypeRegistry.find_by_asn1_type(asn1_type)
         # Instantiate condition
         condition = Condition()
-        condition.type_id = registered_type['type_id']
-        condition.hash = value['fingerprint']
-        condition.cost = value['cost']
+        condition.type_id = registered_type["type_id"]
+        condition.hash = value["fingerprint"]
+        condition.cost = value["cost"]
         condition._subtypes = set()
-        if registered_type['class'].TYPE_CATEGORY == 'compound':
+        if registered_type["class"].TYPE_CATEGORY == "compound":
             subtypes = {
-                TypeRegistry.find_by_type_id(type_id)['name']
+                TypeRegistry.find_by_type_id(type_id)["name"]
                 for type_id in compress(
-                    range(Condition.MAX_SAFE_SUBTYPES),
-                    map(lambda bit: int(bit), value['subtypes'])
+                    range(Condition.MAX_SAFE_SUBTYPES), map(lambda bit: int(bit), value["subtypes"])
                 )
             }
             condition._subtypes.update(subtypes)
@@ -228,9 +220,7 @@ class Condition(metaclass=ABCMeta):
         """
         # TODO Use more precise Exception class
         if len(value) != 32:
-            raise ValueError(
-                'Hash is of invalid length {}, should be 32'.format(len(value))
-            )
+            raise ValueError("Hash is of invalid length {}, should be 32".format(len(value)))
         self._hash = value
 
     # TODO update docstrings
@@ -272,7 +262,7 @@ class Condition(metaclass=ABCMeta):
 
     @property
     def type_name(self):
-        return TypeRegistry.find_by_type_id(self.type_id)['name']
+        return TypeRegistry.find_by_type_id(self.type_id)["name"]
 
     @property
     def subtypes(self):
@@ -296,16 +286,15 @@ class Condition(metaclass=ABCMeta):
             string: Condition as a URI
         """
         condition_type = TypeRegistry.find_by_type_id(self.type_id)
-        condition_class = TypeRegistry.find_by_type_id(self.type_id)['class']
-        include_subtypes = condition_class.TYPE_CATEGORY == 'compound'
-        uri = 'ni:///sha-256;{}?fpt={}&cost={}'.format(
-            base64_remove_padding(
-                base64.urlsafe_b64encode(self.hash)).decode(),
-            condition_type['name'],
+        condition_class = TypeRegistry.find_by_type_id(self.type_id)["class"]
+        include_subtypes = condition_class.TYPE_CATEGORY == "compound"
+        uri = "ni:///sha-256;{}?fpt={}&cost={}".format(
+            base64_remove_padding(base64.urlsafe_b64encode(self.hash)).decode(),
+            condition_type["name"],
             self.cost,
         )
         if include_subtypes:
-            uri += '&subtypes=' + ','.join(sorted(self.subtypes))
+            uri += "&subtypes=" + ",".join(sorted(self.subtypes))
         return uri
 
     # TODO update docstrings
@@ -338,10 +327,10 @@ class Condition(metaclass=ABCMeta):
 
         """
         return {
-            'type_id': self.type_id,
-            'hash': base58.b58encode(self.hash),
-            'cost': self.cost,
-            'subtypes': self.subtypes,
+            "type_id": self.type_id,
+            "hash": base58.b58encode(self.hash),
+            "cost": self.cost,
+            "subtypes": self.subtypes,
         }
 
     def to_json(self):
@@ -349,18 +338,15 @@ class Condition(metaclass=ABCMeta):
 
     def to_asn1_dict(self):
         condition_type = TypeRegistry.find_by_type_id(self.type_id)
-        condition_class = condition_type['class']
-        payload = {'fingerprint': self.hash, 'cost': self.cost}
-        if condition_class.TYPE_CATEGORY == 'compound':
-            subtype_ids = [
-                TypeRegistry.find_by_name(subtype)['type_id']
-                for subtype in self.subtypes
-            ]
-            bits = ['0' for bit in range(5)]
+        condition_class = condition_type["class"]
+        payload = {"fingerprint": self.hash, "cost": self.cost}
+        if condition_class.TYPE_CATEGORY == "compound":
+            subtype_ids = [TypeRegistry.find_by_name(subtype)["type_id"] for subtype in self.subtypes]
+            bits = ["0" for bit in range(5)]
             for subtype_id in subtype_ids:
-                bits[subtype_id] = '1'
-            bitstring = ''.join(bits).rstrip('0')
-            payload['subtypes'] = bitstring
+                bits[subtype_id] = "1"
+            bitstring = "".join(bits).rstrip("0")
+            payload["subtypes"] = bitstring
         return {condition_class.TYPE_ASN1: payload}
 
     # TODO ILP Clarification NEEDED
@@ -370,7 +356,7 @@ class Condition(metaclass=ABCMeta):
     def to_asn1_json(self):
         asn1_type, value = self.to_asn1_dict().popitem()
         condition_type = TypeRegistry.find_by_asn1_type(asn1_type)
-        return {'type': condition_type['asn1_condition'], 'value': value}
+        return {"type": condition_type["asn1_condition"], "value": value}
 
     # TODO ILP Clarification NEEDED
     def validate(self):
@@ -388,17 +374,15 @@ class Condition(metaclass=ABCMeta):
 
         # Subtypes can have at most 32 bits with current implementation
         if len(self.subtypes) > Condition.MAX_SAFE_SUBTYPES:
-            raise ValueError('Subtypes too large to be safely represented')
+            raise ValueError("Subtypes too large to be safely represented")
 
         # Assert all requested features are supported by this implementation
-        if any(subtype not in Condition.SUPPORTED_SUBTYPES
-               for subtype in self.subtypes):
-            raise ValueError('Condition requested unsupported feature suites')
+        if any(subtype not in Condition.SUPPORTED_SUBTYPES for subtype in self.subtypes):
+            raise ValueError("Condition requested unsupported feature suites")
 
         # Assert the requested fulfillment size
         # is supported by this implementation
         if self.cost > Condition.MAX_COST:
-            raise ValueError(
-                'Condition requested too large of a max fulfillment size')
+            raise ValueError("Condition requested too large of a max fulfillment size")
 
         return True

@@ -8,7 +8,6 @@ from cryptoconditions import exceptions
 
 
 class Base58Encoder(object):
-
     @staticmethod
     def encode(data):
         return base58.b58encode(data)
@@ -19,17 +18,17 @@ class Base58Encoder(object):
 
 
 def _get_nacl_encoder(encoding):
-    if encoding == 'base58':
+    if encoding == "base58":
         return Base58Encoder
-    elif encoding == 'base64':
+    elif encoding == "base64":
         return nacl.encoding.Base64Encoder
-    elif encoding == 'base32':
+    elif encoding == "base32":
         return nacl.encoding.Base32Encoder
-    elif encoding == 'base16':
+    elif encoding == "base16":
         return nacl.encoding.Base16Encoder
-    elif encoding == 'hex':
+    elif encoding == "hex":
         return nacl.encoding.HexEncoder
-    elif encoding == 'bytes':
+    elif encoding == "bytes":
         return nacl.encoding.RawEncoder
     else:
         raise exceptions.UnknownEncodingError("Unknown or unsupported encoding")
@@ -40,7 +39,7 @@ class Ed25519SigningKey(nacl.signing.SigningKey):
     PrivateKey instance
     """
 
-    def __init__(self, key, encoding='base58'):
+    def __init__(self, key, encoding="base58"):
         """
         Instantiate the private key with the private value.
 
@@ -60,7 +59,7 @@ class Ed25519SigningKey(nacl.signing.SigningKey):
         """
         return Ed25519VerifyingKey(self.verify_key.encode(encoder=Base58Encoder))
 
-    def sign(self, data, encoding='base58'):
+    def sign(self, data, encoding="base58"):
         """
         Sign data with private key
 
@@ -75,7 +74,7 @@ class Ed25519SigningKey(nacl.signing.SigningKey):
         raw_signature = super().sign(data).signature
         return _get_nacl_encoder(encoding).encode(raw_signature)
 
-    def encode(self, encoding='base58'):
+    def encode(self, encoding="base58"):
         """
         Encode the private key
 
@@ -94,12 +93,11 @@ class Ed25519SigningKey(nacl.signing.SigningKey):
 
     @classmethod
     def generate_with_seed(cls, seed):
-        return cls(nacl.signing.SigningKey(seed, _get_nacl_encoder('bytes')).encode(encoder=Base58Encoder))
+        return cls(nacl.signing.SigningKey(seed, _get_nacl_encoder("bytes")).encode(encoder=Base58Encoder))
 
 
 class Ed25519VerifyingKey(nacl.signing.VerifyKey):
-
-    def __init__(self, key, encoding='base58'):
+    def __init__(self, key, encoding="base58"):
         """
         Instantiate the public key with the public value.
 
@@ -110,7 +108,7 @@ class Ed25519VerifyingKey(nacl.signing.VerifyKey):
         """
         super().__init__(key, encoder=_get_nacl_encoder(encoding))
 
-    def verify(self, data, signature, encoding='base58'):
+    def verify(self, data, signature, encoding="base58"):
         """
         Verify if the signature signs the data with this verifying key
 
@@ -132,7 +130,7 @@ class Ed25519VerifyingKey(nacl.signing.VerifyKey):
 
         return True
 
-    def encode(self, encoding='base58'):
+    def encode(self, encoding="base58"):
         """
         Encode the public key
 
@@ -160,10 +158,10 @@ def ed25519_generate_key_pair(seed=None):
     else:
         sk = Ed25519SigningKey.generate()
     # Private key
-    private_value_base58 = sk.encode(encoding='base58')
+    private_value_base58 = sk.encode(encoding="base58")
 
     # Public key
-    public_value_compressed_base58 = sk.get_verifying_key().encode(encoding='base58')
+    public_value_compressed_base58 = sk.get_verifying_key().encode(encoding="base58")
 
     return private_value_base58, public_value_compressed_base58
 
@@ -180,10 +178,10 @@ def base64_add_padding(data):
     """
 
     if isinstance(data, str):
-        data = data.encode('utf-8')
+        data = data.encode("utf-8")
     missing_padding = 4 - len(data) % 4
     if missing_padding:
-        data += b'=' * missing_padding
+        data += b"=" * missing_padding
     return data
 
 
@@ -198,5 +196,5 @@ def base64_remove_padding(data):
 
     """
     if isinstance(data, str):
-        data = data.encode('utf-8')
-    return data.rstrip(b'=')
+        data = data.encode("utf-8")
+    return data.rstrip(b"=")

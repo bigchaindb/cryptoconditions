@@ -33,27 +33,27 @@ class RsaSha256(BaseSha256):
     0x11.
 
     """
-    TYPE_ID = 3
-    TYPE_NAME = 'rsa-sha-256'
-    TYPE_ASN1 = 'rsaSha256'
-    TYPE_ASN1_CONDITION = 'rsaSha256Condition'
-    TYPE_ASN1_FULFILLMENT = 'rsaSha256Fulfillment'
-    TYPE_CATEGORY = 'simple'
 
-    COST_RIGHT_SHIFT = 6    # 2**6 = 64
+    TYPE_ID = 3
+    TYPE_NAME = "rsa-sha-256"
+    TYPE_ASN1 = "rsaSha256"
+    TYPE_ASN1_CONDITION = "rsaSha256Condition"
+    TYPE_ASN1_FULFILLMENT = "rsaSha256Fulfillment"
+    TYPE_CATEGORY = "simple"
+
+    COST_RIGHT_SHIFT = 6  # 2**6 = 64
 
     def __init__(self):
         self.modulus = None
         self.signature = None
 
     def parse_json(self, json):
-        self.modulus = urlsafe_b64decode(base64_add_padding(json['modulus']))
-        self.signature = urlsafe_b64decode(
-            base64_add_padding(json['signature']))
+        self.modulus = urlsafe_b64decode(base64_add_padding(json["modulus"]))
+        self.signature = urlsafe_b64decode(base64_add_padding(json["signature"]))
 
     def parse_asn1_dict_payload(self, data):
-        self.modulus = data['modulus']
-        self.signature = data['signature']
+        self.modulus = data["modulus"]
+        self.signature = data["signature"]
 
     @property
     def fingerprint_contents(self):
@@ -66,16 +66,15 @@ class RsaSha256(BaseSha256):
 
         """
         if self.modulus is None:
-            raise MissingDataError('Requires modulus')
+            raise MissingDataError("Requires modulus")
 
-        asn1_obj = nat_decode({'modulus': self.modulus},
-                              asn1Spec=RsaFingerprintContents())
+        asn1_obj = nat_decode({"modulus": self.modulus}, asn1Spec=RsaFingerprintContents())
         asn1_der = der_encode(asn1_obj)
         return asn1_der
 
     @property
     def asn1_dict_payload(self):
-        return {'modulus': self.modulus, 'signature': self.signature}
+        return {"modulus": self.modulus, "signature": self.signature}
 
     def _set_public_modulus(self, modulus):
         """Set the public modulus.
@@ -88,15 +87,16 @@ class RsaSha256(BaseSha256):
 
         """
         if not isinstance(modulus, bytes):
-            raise TypeError('Modulus must be bytes, was: {}'.format(modulus))
+            raise TypeError("Modulus must be bytes, was: {}".format(modulus))
 
         if modulus[0] == 0:
-            raise Exception('Modulus may not contain leading zeros')
+            raise Exception("Modulus may not contain leading zeros")
 
         if not 128 <= len(modulus) <= 512:
             raise Exception(
-                'Modulus must be between 128 bytes (1017 bits) and ' +
-                '512 bytes (4096 bits), was: {} bytes'.format(len(modulus)))
+                "Modulus must be between 128 bytes (1017 bits) and "
+                + "512 bytes (4096 bits), was: {} bytes".format(len(modulus))
+            )
 
         self.modulus = modulus
 
@@ -110,7 +110,7 @@ class RsaSha256(BaseSha256):
 
         """
         if not isinstance(signature, bytes):
-            raise TypeError('Signature must be bytes, was: ' + signature)
+            raise TypeError("Signature must be bytes, was: " + signature)
 
         self.signature = signature
 
@@ -138,8 +138,7 @@ class RsaSha256(BaseSha256):
 
         if self.modulus is None:
             m_int = private_key_obj.public_key().public_numbers().n
-            m_bytes = m_int.to_bytes(
-                (m_int.bit_length() + 7) // 8, 'big')
+            m_bytes = m_int.to_bytes((m_int.bit_length() + 7) // 8, "big")
             self._set_public_modulus(m_bytes)
 
         self.signature = private_key_obj.sign(
@@ -162,11 +161,11 @@ class RsaSha256(BaseSha256):
 
         """
         if self.modulus is None:
-            raise MissingDataError('Requires a public modulus')
+            raise MissingDataError("Requires a public modulus")
 
         public_numbers = RSAPublicNumbers(
             PUBLIC_EXPONENT,
-            int.from_bytes(self.modulus, byteorder='big'),
+            int.from_bytes(self.modulus, byteorder="big"),
         )
         public_key = public_numbers.public_key(default_backend())
         modulus_bit_length = public_key.key_size
@@ -189,25 +188,24 @@ class RsaSha256(BaseSha256):
 
         """
         if not isinstance(message, bytes):
-            raise Exception(
-                'Message must be provided as bytes, was: ' + message)
+            raise Exception("Message must be provided as bytes, was: " + message)
 
         public_numbers = RSAPublicNumbers(
             PUBLIC_EXPONENT,
-            int.from_bytes(self.modulus, byteorder='big'),
+            int.from_bytes(self.modulus, byteorder="big"),
         )
         public_key = public_numbers.public_key(default_backend())
         try:
             public_key.verify(
-                        self.signature,
-                        message,
-                        padding.PSS(
-                            mgf=padding.MGF1(hashes.SHA256()),
-                            salt_length=SALT_LENGTH,
-                        ),
-                        hashes.SHA256()
-                    )
+                self.signature,
+                message,
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=SALT_LENGTH,
+                ),
+                hashes.SHA256(),
+            )
         except InvalidSignature as exc:
-            raise ValidationError('Invalid RSA signature') from exc
+            raise ValidationError("Invalid RSA signature") from exc
 
         return True
