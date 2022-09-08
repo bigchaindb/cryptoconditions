@@ -33,13 +33,14 @@ ZENROOM-SHA-256
 
 The 'ZenroomSha256' Condition/Fulfillment is created by the following set of data: a script, keys and data.
 
-* the 'script' is that script that needs to be fulfilled.
+* the 'script' is that script that needs to be fulfilled/is exeuged
 
 * the keys are the keys that are used by the script
 
-* the data is some transaction based data
+* the data object is a JSON object with data that is used and addressed by the script
 
-The fulfillment can be signed-off by a script:
+
+The fulfillment (e.g. the script/policy/contract) can be signed-off by a script:
 
 * the message to be signed e.g. the transaction
 
@@ -54,8 +55,8 @@ Sample fulfillment:
     fulfill_script = """
     Scenario 'ecdh': Bob verifies the signature from Alice
     Given I have a 'ecdh public key' from 'Alice'
-    Given that I have a 'string dictionary' named 'houses' inside 'asset'
-    Given I have a 'signature' named 'signature' inside 'result'
+    Given that I have a 'string dictionary' named 'houses'
+    Given I have a 'signature' named 'signature'
     When I verify the 'houses' has a signature in 'signature' by 'Alice'
     Then print the string 'ok'
     """
@@ -67,37 +68,36 @@ Sample condition:
     condition_script = """
       Scenario 'ecdh': create the signature of an object
       Given I have the 'keyring'
-      Given that I have a 'string dictionary' named 'houses' inside 'asset'
+      Given that I have a 'string dictionary' named 'houses'
       When I create the signature of 'houses'
       Then print the 'signature'
       """
 
 The message being signed is required to be a JSON document and needs to contain the following set of data:
 
-* message.metadata containing a 'houses' object
+* message containing the input tag with the 'houses' object 
 
 .. code-block:: JSON
 
-    "data": {
-      "houses": [
-          {
-              "name": "Harry",
-              "team": "Gryffindor",
-          },
-          {
-              "name": "Draco",
-              "team": "Slytherin",
-          },
-      ],
+    "input": {
+        "houses": [
+            {
+                "name": "Harry",
+                "team": "Gryffindor",
+            },
+            {
+                "name": "Draco",
+                "team": "Slytherin",
+            },
+        ],
     }
 
-* message.metadata containing 
+* message output tag containing the output data (e.g. result of calling the sign-method)
 
 .. code-block:: JSON
 
-  "metadata" : {
-    "result": {"output": ["ok"]}
-  }
+    "output": {"output": ["ok"]}
+  
 
 ..
   ED25519-SHA-256

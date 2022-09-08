@@ -17,6 +17,15 @@ from cryptoconditions.schemas.fingerprint import ZenroomFingerprintContents
 # from zenroom_minimal import Zenroom
 
 
+class ZenroomException(Exception):
+    pass
+
+
+class MalformedMessageException(Exception):
+    def __init__(self, *args, **kwargs):
+        return super().__init__("The message has to include the" " result of the zenroom execution", *args, **kwargs)
+
+
 class ZenroomSha256(BaseSha256):
 
     TYPE_ID = 5
@@ -134,7 +143,11 @@ class ZenroomSha256(BaseSha256):
     @property
     def fingerprint_contents(self):
         asn1_fingerprint_obj = nat_decode(
-            {"script": self._script, "data": json.dumps(self._data), "keys": json.dumps(self._keys)},
+            {
+                "script": self._script,
+                "data": json.dumps(self._data),
+                "keys": json.dumps(self._keys),
+            },
             asn1Spec=ZenroomFingerprintContents(),
         )
         return der_encode(asn1_fingerprint_obj)
@@ -145,6 +158,21 @@ class ZenroomSha256(BaseSha256):
 
     def to_asn1_dict(self):
         return {self.TYPE_ASN1: self.asn1_dict_payload}
+
+    def convert_input_message_2_data(self, message):
+        try:
+            message["input"]
+        except KeyError:
+            message["input"] = {}
+        try:
+            message["output"]
+        except KeyError:
+            message["output"] = {}
+
+        input_data = {} if self._data is None else self._data
+        input_data = {**input_data, **message["input"]}
+        output_data = message["output"]
+        return input_data, output_data
 
     # TODO Adapt according to outcomes of
     # https://github.com/rfcs/crypto-conditions/issues/16
@@ -173,20 +201,22 @@ class ZenroomSha256(BaseSha256):
     # only time we need this (e.g. we could produce a bitcoin signed transaction and
     # the code would be different)
     def sign(self, message, condition_script, private_keys):
-        message = json.loads(message)
-        data = self.data if self.data is not None else {}
         try:
-            data["asset"] = message["asset"]["data"]
-        except KeyError:
-            # If the message doesn't have a asset key
-            # go on without setting the asset in the data
-            pass
+            message = json.loads(message)
+        except JSONDecodeError:
+            return False
 
-        result = zencode_exec(condition_script, keys=json.dumps({"keyring": private_keys}), data=json.dumps(data))
-        if not "metadata" in message.keys() or not message["metadata"]:
-            message["metadata"] = {}
-        message["metadata"].update({"data": json.loads(result.output), "logs": result.logs})
+        in_data, out_data = self.convert_input_message_2_data(message)
+        result = zencode_exec(
+            condition_script,
+            keys=json.dumps({"keyring": private_keys}),
+            data=json.dumps(in_data),
+        )
 
+        output = result.output if len(result.output) > 0 else "{}"
+        output = json.loads(output)
+        response = {"output": {**output, "logs": result.logs}}
+        message = {**message, **response}
         return json.dumps(message)
 
     # TODO Adapt according to outcomes of
@@ -203,8 +233,6 @@ class ZenroomSha256(BaseSha256):
             "script": base64_remove_padding(urlsafe_b64encode(self._script)),
             "data": base64_remove_padding(urlsafe_b64encode(self._data)),
             "keys": base64_remove_padding(urlsafe_b64encode(self._keys)),
-            # 'conf': base64_remove_padding(
-            #     urlsafe_b64encode(self.conf)),
         }
 
     # TODO Adapt according to outcomes of
@@ -264,30 +292,26 @@ class ZenroomSha256(BaseSha256):
             message = json.loads(message)
         except JSONDecodeError:
             return False
-        data = {} if self._data is None else self._data
-        try:
-            if message["asset"]["data"]:
-                data["asset"] = message["asset"]["data"]
-        except KeyError:
-            pass
-
-        # There could also be some data in the metadata,
-        # this is an output of the condition script which
-        # become an input for the fulfillment script
-        try:
-            if message["metadata"]["data"]:
-                data["metadata"] = message["metadata"]["data"]
-        except KeyError:
-            pass
-        # We can put pulic keys either in the keys or the data of zenroom
-        result = zencode_exec(self.script, keys=json.dumps(self._keys), data=json.dumps(data))
-        try:
-            message["metadata"]["result"]
         except ValueError:
             raise MalformedMessageException()
 
+        in_data, out_data = self.convert_input_message_2_data(message)
+
+        # We can put pulic keys either in the keys or the data of zenroom
+        result = zencode_exec(self.script, keys=json.dumps(self._keys), data=json.dumps(in_data))
+        if len(result.output) == 0 and len(result.logs) > 0:
+            return False
+
         try:
             result = json.loads(result.output)
-            return result == message["metadata"]["result"]
+            # output tag is only defined if zenroom returns a type (int, string, ...)
+            # in case a 'variable' is returned, the output will look like follows: 'variable':'value'
+            # that's the cause for the KeyError catch
+            try:
+                result["output"]
+            except KeyError:
+                return result == message["output"]
+            else:
+                return result["output"] == message["output"]
         except JSONDecodeError:
             return False

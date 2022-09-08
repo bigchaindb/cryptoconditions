@@ -1,0 +1,34 @@
+
+name: Deploy packages
+on: 
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: pip install -e .[dev] wheel
+
+      - name: Test build
+        run: python setup.py sdist bdist_wheel && twine check dist/*
+
+      - name: Upload to TestPyPI
+        run: |
+          python setup.py sdist bdist_wheel
+          python -m twine upload dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+          #TWINE_REPOSITORY: testpypi

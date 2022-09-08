@@ -39,7 +39,7 @@ docs_require = [
 
 install_requires = [
     "zenroom==2.1.0.dev1655293214",
-    "base58==2.1.1",
+    "base58>=2.1.0",
     "PyNaCl==1.4.0",
     "pyasn1==0.4.8",
     "cryptography==3.4.7",

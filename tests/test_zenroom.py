@@ -31,7 +31,7 @@ GENERATE_KEYPAIR = """Rule input encoding base58
     Given that I am known as 'Pippo'
     When I create the ecdh key
     When I create the testnet key
-    Then print data"""
+    Then print keyring"""
 
 
 def genkey():
@@ -64,15 +64,32 @@ def sk2pk(name, keys):
 # zen_public_keys is an identity dictionary
 
 
-def test_zenroom():
-    alice, bob = genkey(), genkey()
-    print("============== ALICE KEYPAIR =================")
-    print(alice)
-    print("============== BOB KEYPAIR =================")
-    print(bob)
+fulfillscript = """
+    Scenario 'ecdh': Bob verifies the signature from Alice
+    Given I have a 'ecdh public key' from 'Alice'
+    Given that I have a 'string dictionary' named 'houses'
+    Given I have a 'signature' named 'signature'
+    When I verify the 'houses' has a signature in 'signature' by 'Alice'
+    Then print the string 'ok'
+    """
 
-    asset = {
-        "data": {
+condictionalscript = """
+        Scenario 'ecdh': create the signature of an object
+        Given I have the 'keyring'
+        Given that I have a 'string dictionary' named 'houses'
+        When I create the signature of 'houses'
+        Then print the 'signature'
+        """
+
+
+def test_valid_signature():
+    alice, bob = genkey(), genkey()
+    # the result key is the expected result of the fulfill script
+    # it depends on the script, in this case I know that
+    #     `Then print the string 'ok'`,
+
+    script_input = {
+        "input": {
             "houses": [
                 {
                     "name": "Harry",
@@ -83,60 +100,35 @@ def test_zenroom():
                     "team": "Slytherin",
                 },
             ],
-        }
+        },
+        "output": ["ok"],
     }
+
     zen_public_keys = sk2pk("Alice", alice)
     zen_public_keys.update(sk2pk("Bob", bob))
-
     data = {"also": "more data"}
-    print("============== PUBLIC IDENTITIES =================")
-    print(zen_public_keys)
-
-    # the result key is the expected result of the fulfill script
-    # it depends on the script, in this case I know that
-    #     `Then print the string 'ok'`,
-    # results in
-    #     { "output": ["ok"] }
-    metadata = {"result": {"output": ["ok"]}}
-
-    fulfill_script = """
-    Scenario 'ecdh': Bob verifies the signature from Alice
-    Given I have a 'ecdh public key' from 'Alice'
-    Given that I have a 'string dictionary' named 'houses' inside 'asset'
-    Given I have a 'signature' named 'signature' inside 'metadata'
-    When I verify the 'houses' has a signature in 'signature' by 'Alice'
-    Then print the string 'ok'
-    """
     # CRYPTO-CONDITIONS: instantiate an Ed25519 crypto-condition for buyer
-    zenSha = ZenroomSha256(script=fulfill_script, keys=zen_public_keys, data=data)
+    zenSha = ZenroomSha256(script=fulfillscript, keys=zen_public_keys, data=data)
 
     # CRYPTO-CONDITIONS: generate the condition uri
     condition_uri = zenSha.condition.serialize_uri()
-
-    message = {"asset": asset, "metadata": metadata}
-    message = json.dumps(
-        message,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=False,
-    )
-    print("====== GENERATE RESULT (METADATA) =======")
-    condition_script = """
-        Scenario 'ecdh': create the signature of an object
-        Given I have the 'keyring'
-        Given that I have a 'string dictionary' named 'houses' inside 'asset'
-        When I create the signature of 'houses'
-        Then print the 'signature'
-        """
+    script_input = json.dumps(script_input)
 
     # THIS FILLS THE METADATA WITH THE RESULT
     try:
-        assert not zenSha.validate(message=message)
+        assert not zenSha.validate(message=script_input)
     except:
         pass
 
-    message = zenSha.sign(message, condition_script, alice)
-    assert zenSha.validate(message=message)
+    message = zenSha.sign(script_input, condictionalscript, alice)
+    # don't dump message like json.dumps(message) - beause this has already been performed by the sign-call
+    output = json.loads(message)
+    output["input"]["signature"] = output["output"]["signature"]  # verify input signature
+    del output["output"]["signature"]
+    del output["output"]["logs"]
+    output["output"] = ["ok"]  # define expected output that is to be compared
+    input_msg = json.dumps(output)
+    assert zenSha.validate(message=input_msg)
 
     # CRYPTO-CONDITIONS: generate the fulfillment uri
     fulfillment_uri = zenSha.serialize_uri()
@@ -151,6 +143,40 @@ def test_zenroom():
     assert ff_from_uri_.script == zenSha.script
     assert ff_from_uri_.data == zenSha.data
     assert ff_from_uri_.keys == zenSha.keys
+
+
+def test_invalid_signing_call():
+    alice, bob = genkey(), genkey()
+    # the result key is the expected result of the fulfill script
+    # it depends on the script, in this case I know that
+    #     `Then print the string 'ok'`,
+
+    script_input = {
+        "input": {},
+        "output": ["ok"],
+    }
+
+    zen_public_keys = sk2pk("Alice", alice)
+    zen_public_keys.update(sk2pk("Bob", bob))
+
+    data = {"also": "more data"}
+
+    # CRYPTO-CONDITIONS: instantiate an Ed25519 crypto-condition for buyer
+    zenSha = ZenroomSha256(script=fulfillscript, keys=zen_public_keys, data=data)
+
+    # CRYPTO-CONDITIONS: generate the condition uri
+    condition_uri = zenSha.condition.serialize_uri()
+    script_input = json.dumps(script_input)
+
+    # THIS FILLS THE METADATA WITH THE RESULT
+    try:
+        assert not zenSha.validate(message=script_input)
+    except:
+        pass
+
+    message = zenSha.sign(script_input, condictionalscript, alice)
+    # don't dump message like json.dumps(message) - beause this has already been performed by the sign-call
+    assert not zenSha.validate(message=message)
 
 
 def test_wrong_data():
@@ -172,30 +198,22 @@ def test_wrong_data():
 
 
 def test_no_asset_no_metadata():
-    zenSha = ZenroomSha256(
-        script="Given nothing\nThen print the string 'Hello'",
-    )
-    metadata = {"result": {"output": ["Hello"]}}
-    message = {
-        "metadata": metadata,
-    }
+    script = "Given nothing\nThen print the string 'Hello'"
+    zenSha = ZenroomSha256(script=script)
+    message = {"input": {}, "output": ["Hello"]}
     message = json.dumps(message)
     assert zenSha.validate(message=message)
 
 
 def test_use_asset_and_metadata():
-    script = """Given I have a 'string dictionary' named 'asset'
-        Given I have a 'string dictionary' named 'metadata'
-        Given I have a 'string' named 'word1' in 'asset'
-        Given I have a 'string' named 'word2' in 'metadata'
+    script = """Given I have a 'string' named 'word1'
+        Given I have a 'string' named 'word2'
         Given I have a 'string' named 'word3'
         When I append 'word2' to 'word1'
         When I append 'word3' to 'word1'
         Then print the 'word1'"""
-    zenSha = ZenroomSha256(script=script, data={"word3": "3"})
-    metadata = {"result": {"word1": "123"}, "data": {"word2": "2"}}
-    asset = {"data": {"word1": "1"}}
-    message = {"metadata": metadata, "asset": asset}
+    zenSha = ZenroomSha256(script=script)
+    message = {"input": {"word3": "3", "word1": "1", "word2": "2"}, "output": {"word1": "123"}}
     message = json.dumps(message)
     assert zenSha.validate(message=message)
 
@@ -216,11 +234,7 @@ def test_valid_keys():
         },
     )
 
-    metadata = {
-        "result": {"output": ["ok"]},
-    }
-    asset = {}
-    message = {"metadata": metadata, "asset": asset}
+    message = {"output": ["ok"]}
     message = json.dumps(message)
     assert zenSha.validate(message=message)
     zenSha = ZenroomSha256(
@@ -236,10 +250,6 @@ def test_valid_keys():
         },
     )
 
-    metadata = {
-        "result": {"output": ["ok"]},
-    }
-    asset = {}
-    message = {"metadata": metadata, "asset": asset}
+    message = {"output": ["ok"]}
     message = json.dumps(message)
     assert zenSha.validate(message=message)
