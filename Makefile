@@ -51,14 +51,13 @@ lint: ## check style with flake8
 	flake8 cryptoconditions tests
 
 test: ## run tests quickly with the default Python
-	pytest -v
-	
+	poetry run pytest -v
 
 test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	pytest -v -n auto --cov=cryptoconditions --cov-report term --cov-report html
+	poetry run pytest -v -n auto --cov=cryptoconditions --cov-report term --cov-report html
 	$(BROWSER) htmlcov/index.html
 
 docs: ## generate Sphinx HTML documentation, including API docs
@@ -76,9 +75,7 @@ release: dist verify-dist ## package and upload a release
 	twine upload dist/*
 
 dist: clean ## builds source and wheel package
-	python setup.py sdist bdist_wheel
-	# python setup.py bdist_wheel
-	ls -l dist
+	poetry build
 
 install: clean ## install the package to the active Python's site-packages
-	python setup.py install
+	poetry install --no-interaction

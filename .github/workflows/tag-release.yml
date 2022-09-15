@@ -18,16 +18,19 @@ jobs:
         with:
           python-version: 3.9
 
+      - name: Setup poetry
+        uses: Gr1N/setup-poetry@v7
+
       - name: Install dependencies
-        run: pip install -e .[dev] wheel
+        run: poetry install --with dev 
 
       - name: Test build
-        run: python setup.py sdist bdist_wheel && twine check dist/*
+        run: poetry build && poetry run twine check dist/*
 
       - name: Upload to TestPyPI
         run: |
-          python setup.py sdist bdist_wheel
-          python -m twine upload dist/*
+          poetry build
+          poetry run twine upload dist/*
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}

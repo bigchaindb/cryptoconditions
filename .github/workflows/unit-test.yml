@@ -18,15 +18,18 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
+      
+      - name: Setup poetry
+        uses: Gr1N/setup-poetry@v7
 
       - name: Install dependencies
-        run: pip install -e .[test]
+        run: poetry install --with test
 
       - name: Install codecov
-        run: pip install codecov
+        run: poetry add codecov
 
       - name: Run tests
-        run: pytest -v --cov=cryptoconditions --cov-report xml:htmlcov/coverage.xml
+        run: poetry run pytest -v --cov=cryptoconditions --cov-report xml:htmlcov/coverage.xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3

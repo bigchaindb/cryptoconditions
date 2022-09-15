@@ -44,3 +44,8 @@ Documentation
 -------------
 Public documentation is available at `https://docs.planetmint.io/projects/cryptoconditions/ <https://docs.planetmint.io/projects/cryptoconditions/en/latest/>`_.
 
+
+Development
+-----------
+This project uses `poetry <https://python-poetry.org/>` for dependency management.
+Run `poetry install` to start local development.
