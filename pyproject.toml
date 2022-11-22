@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cryptoconditions"
-version = "0.1.0"
+version = "0.11.0"
 description = "Multi-algorithm, multi-level, multi-signature format for expressing conditions and fulfillments according to the Interledger Protocol (ILP)."
 authors = ["Cryptoconditions contributors <contact@ipdb.global>"]
 readme = "README.rst"
@@ -23,7 +23,7 @@ exclude = ["tests*", "examples"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-zenroom = "2.1.0.dev1655293214"
+zenroom = "^2.3.1"
 base58 = "2.1.1"
 PyNaCl = "1.4.0"
 pyasn1 = "0.4.8"
