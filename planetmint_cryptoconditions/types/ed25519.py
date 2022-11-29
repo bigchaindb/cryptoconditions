@@ -6,9 +6,9 @@ from nacl.exceptions import BadSignatureError
 from pyasn1.codec.der.encoder import encode as der_encode
 from pyasn1.codec.native.decoder import decode as nat_decode
 
-from cryptoconditions.crypto import base64_add_padding, base64_remove_padding
-from cryptoconditions.types.base_sha256 import BaseSha256
-from cryptoconditions.schemas.fingerprint import Ed25519FingerprintContents
+from planetmint_cryptoconditions.crypto import base64_add_padding, base64_remove_padding
+from planetmint_cryptoconditions.types.base_sha256 import BaseSha256
+from planetmint_cryptoconditions.schemas.fingerprint import Ed25519FingerprintContents
 
 
 class Ed25519Sha256(BaseSha256):

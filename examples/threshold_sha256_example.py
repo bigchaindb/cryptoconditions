@@ -1,4 +1,4 @@
-import cryptoconditions as cc
+import planetmint_cryptoconditions as cc
 
 
 threshold_fulfillment = cc.ThresholdSha256()

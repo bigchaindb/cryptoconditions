@@ -3,12 +3,12 @@ from itertools import chain
 from pyasn1.codec.der.encoder import encode as der_encode
 from pyasn1.codec.native.decoder import decode as nat_decode
 
-from cryptoconditions.condition import Condition
-from cryptoconditions.exceptions import MissingDataError, ValidationError
-from cryptoconditions.fulfillment import Fulfillment
-from cryptoconditions.types.ed25519 import Ed25519Sha256
-from cryptoconditions.types.base_sha256 import BaseSha256
-from cryptoconditions.schemas.fingerprint import ThresholdFingerprintContents
+from planetmint_cryptoconditions.condition import Condition
+from planetmint_cryptoconditions.exceptions import MissingDataError, ValidationError
+from planetmint_cryptoconditions.fulfillment import Fulfillment
+from planetmint_cryptoconditions.types.ed25519 import Ed25519Sha256
+from planetmint_cryptoconditions.types.base_sha256 import BaseSha256
+from planetmint_cryptoconditions.schemas.fingerprint import ThresholdFingerprintContents
 
 CONDITION = "condition"
 FULFILLMENT = "fulfillment"
@@ -70,7 +70,7 @@ class ThresholdSha256(BaseSha256):
         creating a threshold fulfillment.
 
         Args:
-            subcondition (:class:`~cryptoconditions.condition.Condition` or :obj:`str`):
+            subcondition (:class:`~planetmint_cryptoconditions.condition.Condition` or :obj:`str`):
                 Condition object or URI string representing a new
                 subcondition to be added.
 
@@ -93,7 +93,7 @@ class ThresholdSha256(BaseSha256):
         fulfillment and will be added automatically.
 
         Args:
-            subfulfillment (:class:`~cryptoconditions.fulfillment.Fulfillment or :obj:`str`):
+            subfulfillment (:class:`~planetmint_cryptoconditions.fulfillment.Fulfillment or :obj:`str`):
                 Fulfillment object or URI string representing a new
                 subfulfillment to be added.
 
@@ -213,7 +213,7 @@ class ThresholdSha256(BaseSha256):
         Args:
             threshold (int): Threshold that the remaining subconditions
                 have to meet.
-            subcondition_costs (:obj:`list` of :class:`~cryptoconditions.condition.Condition`):
+            subcondition_costs (:obj:`list` of :class:`~planetmint_cryptoconditions.condition.Condition`):
                 Set of subconditions.
 
         Returns:

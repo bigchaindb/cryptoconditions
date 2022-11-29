@@ -1,6 +1,6 @@
 import hashlib
 
-from cryptoconditions.fulfillment import Fulfillment
+from planetmint_cryptoconditions.fulfillment import Fulfillment
 
 
 class BaseSha256(Fulfillment):

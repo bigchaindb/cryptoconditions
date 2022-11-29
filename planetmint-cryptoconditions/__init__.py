@@ -1,13 +1,13 @@
-from cryptoconditions.type_registry import TypeRegistry
-from cryptoconditions.types.preimage import PreimageSha256
-from cryptoconditions.types.prefix import PrefixSha256
-from cryptoconditions.types.rsa import RsaSha256
-from cryptoconditions.types.threshold import ThresholdSha256
-from cryptoconditions.types.ed25519 import Ed25519Sha256
-from cryptoconditions.types.zenroom import ZenroomSha256
-from cryptoconditions.fulfillment import Fulfillment  # noqa: W0611
-from cryptoconditions.condition import Condition  # noqa: W0611
-from cryptoconditions.exceptions import ValidationError
+from planetmint_cryptoconditions.type_registry import TypeRegistry
+from planetmint_cryptoconditions.types.preimage import PreimageSha256
+from planetmint_cryptoconditions.types.prefix import PrefixSha256
+from planetmint_cryptoconditions.types.rsa import RsaSha256
+from planetmint_cryptoconditions.types.threshold import ThresholdSha256
+from planetmint_cryptoconditions.types.ed25519 import Ed25519Sha256
+from planetmint_cryptoconditions.types.zenroom import ZenroomSha256
+from planetmint_cryptoconditions.fulfillment import Fulfillment  # noqa: W0611
+from planetmint_cryptoconditions.condition import Condition  # noqa: W0611
+from planetmint_cryptoconditions.exceptions import ValidationError
 
 
 TypeRegistry.register_type(PreimageSha256)

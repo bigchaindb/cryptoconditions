@@ -169,7 +169,7 @@ def snake_case(camel_case_string):
 
 
 def normalize_value(value, key):
-    from cryptoconditions.crypto import base64_add_padding, base64_remove_padding
+    from planetmint_cryptoconditions.crypto import base64_add_padding, base64_remove_padding
 
     if key in ("public_key", "signature"):
         value = urlsafe_b64decode(base64_add_padding(value))
@@ -247,7 +247,7 @@ def minimal_ed25519_private_key_base64url():
 
 @pytest.fixture
 def minimal_ed25519_private_key(minimal_ed25519_private_key_base64url):
-    from cryptoconditions.crypto import base64_add_padding
+    from planetmint_cryptoconditions.crypto import base64_add_padding
 
     return urlsafe_b64decode(base64_add_padding(minimal_ed25519_private_key_base64url))
 
@@ -349,7 +349,7 @@ def basic_ed25519_private_key_base64url():
 
 @pytest.fixture
 def basic_ed25519_private_key(basic_ed25519_private_key_base64url):
-    from cryptoconditions.crypto import base64_add_padding
+    from planetmint_cryptoconditions.crypto import base64_add_padding
 
     return urlsafe_b64decode(base64_add_padding(basic_ed25519_private_key_base64url))
 

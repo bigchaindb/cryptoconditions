@@ -10,8 +10,8 @@
 import binascii
 import base58
 
-import cryptoconditions as cc
-from cryptoconditions.crypto import Ed25519SigningKey as SigningKey
+import planetmint_cryptoconditions as cc
+from planetmint_cryptoconditions.crypto import Ed25519SigningKey as SigningKey
 
 message = "Hello World! Conditions are here!"
 sk_b58 = base58.b58encode(binascii.unhexlify("833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42"))

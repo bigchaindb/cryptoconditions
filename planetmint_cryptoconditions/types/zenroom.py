@@ -9,11 +9,11 @@ from json.decoder import JSONDecodeError
 from pyasn1.codec.der.encoder import encode as der_encode
 from pyasn1.codec.native.decoder import decode as nat_decode
 
-from cryptoconditions.crypto import base64_add_padding, base64_remove_padding
-from cryptoconditions.types.base_sha256 import BaseSha256
-from cryptoconditions.schemas.fingerprint import ZenroomFingerprintContents
+from planetmint_cryptoconditions.crypto import base64_add_padding, base64_remove_padding
+from planetmint_cryptoconditions.types.base_sha256 import BaseSha256
+from planetmint_cryptoconditions.schemas.fingerprint import ZenroomFingerprintContents
 
-# from cryptoconditions.zencode import read_zencode
+# from planetmint_cryptoconditions.zencode import read_zencode
 # from zenroom_minimal import Zenroom
 
 

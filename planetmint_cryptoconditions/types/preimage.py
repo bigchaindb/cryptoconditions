@@ -1,8 +1,8 @@
 from base64 import b64decode, urlsafe_b64decode
 
-from cryptoconditions.crypto import base64_add_padding
-from cryptoconditions.types.base_sha256 import BaseSha256
-from cryptoconditions.exceptions import MissingDataError
+from planetmint_cryptoconditions.crypto import base64_add_padding
+from planetmint_cryptoconditions.types.base_sha256 import BaseSha256
+from planetmint_cryptoconditions.exceptions import MissingDataError
 
 
 class PreimageSha256(BaseSha256):

@@ -2,9 +2,9 @@ import pytest
 
 
 def test_find_type_by_id():
-    from cryptoconditions.type_registry import TypeRegistry, MAX_SAFE_INTEGER_JS
-    from cryptoconditions.exceptions import UnsupportedTypeError
-    from cryptoconditions.types.preimage import PreimageSha256
+    from planetmint_cryptoconditions.type_registry import TypeRegistry, MAX_SAFE_INTEGER_JS
+    from planetmint_cryptoconditions.exceptions import UnsupportedTypeError
+    from planetmint_cryptoconditions.types.preimage import PreimageSha256
 
     # test type_id > MAX_SAFE_INTEGER_JS
     with pytest.raises(UnsupportedTypeError):
@@ -22,9 +22,9 @@ def test_find_type_by_id():
 
 
 def test_find_by_name():
-    from cryptoconditions.type_registry import TypeRegistry
-    from cryptoconditions.exceptions import UnsupportedTypeError
-    from cryptoconditions.types.preimage import PreimageSha256
+    from planetmint_cryptoconditions.type_registry import TypeRegistry
+    from planetmint_cryptoconditions.exceptions import UnsupportedTypeError
+    from planetmint_cryptoconditions.types.preimage import PreimageSha256
 
     # test type name not in registered_types
     with pytest.raises(UnsupportedTypeError):
@@ -36,9 +36,9 @@ def test_find_by_name():
 
 
 def test_find_by_asn1_type():
-    from cryptoconditions.type_registry import TypeRegistry
-    from cryptoconditions.exceptions import UnsupportedTypeError
-    from cryptoconditions.types.preimage import PreimageSha256
+    from planetmint_cryptoconditions.type_registry import TypeRegistry
+    from planetmint_cryptoconditions.exceptions import UnsupportedTypeError
+    from planetmint_cryptoconditions.types.preimage import PreimageSha256
 
     # test asn1 type not in registered_types
     with pytest.raises(UnsupportedTypeError):
@@ -50,9 +50,9 @@ def test_find_by_asn1_type():
 
 
 def test_find_by_asn1_condition_type():
-    from cryptoconditions.type_registry import TypeRegistry
-    from cryptoconditions.exceptions import UnsupportedTypeError
-    from cryptoconditions.types.preimage import PreimageSha256
+    from planetmint_cryptoconditions.type_registry import TypeRegistry
+    from planetmint_cryptoconditions.exceptions import UnsupportedTypeError
+    from planetmint_cryptoconditions.types.preimage import PreimageSha256
 
     # test asn1 condition_type not in registered_types
     with pytest.raises(UnsupportedTypeError):
@@ -64,9 +64,9 @@ def test_find_by_asn1_condition_type():
 
 
 def test_find_by_asn1_fulfillment_type():
-    from cryptoconditions.type_registry import TypeRegistry
-    from cryptoconditions.exceptions import UnsupportedTypeError
-    from cryptoconditions.types.preimage import PreimageSha256
+    from planetmint_cryptoconditions.type_registry import TypeRegistry
+    from planetmint_cryptoconditions.exceptions import UnsupportedTypeError
+    from planetmint_cryptoconditions.types.preimage import PreimageSha256
 
     # test asn1 fulfillment_type not in registered_types
     with pytest.raises(UnsupportedTypeError):
@@ -78,7 +78,7 @@ def test_find_by_asn1_fulfillment_type():
 
 
 def test_register_type():
-    from cryptoconditions.type_registry import TypeRegistry
+    from planetmint_cryptoconditions.type_registry import TypeRegistry
 
     class NewType:
         TYPE_ID = 1000

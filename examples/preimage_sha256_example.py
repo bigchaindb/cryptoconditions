@@ -2,7 +2,7 @@ import array
 
 import binascii
 
-import cryptoconditions as cc
+import planetmint_cryptoconditions as cc
 
 my_fulfillment = cc.PreimageSha256("")
 print(my_fulfillment.condition_uri)

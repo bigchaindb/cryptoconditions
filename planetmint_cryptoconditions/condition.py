@@ -12,11 +12,11 @@ from pyasn1.codec.der.encoder import encode as der_encode
 from pyasn1.codec.native.encoder import encode as nat_encode
 from pyasn1.codec.native.decoder import decode as nat_decode
 
-from cryptoconditions import TypeRegistry
-from cryptoconditions.crypto import base64_add_padding, base64_remove_padding
-from cryptoconditions.exceptions import ParsingError, PrefixError
+from planetmint_cryptoconditions import TypeRegistry
+from planetmint_cryptoconditions.crypto import base64_add_padding, base64_remove_padding
+from planetmint_cryptoconditions.exceptions import ParsingError, PrefixError
 
-from cryptoconditions.schemas.condition import Condition as Asn1Condition
+from planetmint_cryptoconditions.schemas.condition import Condition as Asn1Condition
 
 CONDITION_URI_SCHEME = "ni"
 

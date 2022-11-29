@@ -4,7 +4,7 @@ import nacl.signing
 import nacl.encoding
 import nacl.exceptions
 
-from cryptoconditions import exceptions
+from planetmint_cryptoconditions import exceptions
 
 
 class Base58Encoder(object):

@@ -1,6 +1,12 @@
 Changelog
 =========
 
+1.0.0 (2022-11-28)
+------------------
+* support of the neweste zenroom 2.3.1
+* package renaming to be compatible to poetry deyploments and naming conventions
+
+
 0.10.0 (2022-09-08)
 ------------------
 

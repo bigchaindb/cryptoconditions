@@ -4,12 +4,12 @@ from itertools import chain
 from pyasn1.codec.der.encoder import encode as der_encode
 from pyasn1.codec.native.decoder import decode as nat_decode
 
-from cryptoconditions.condition import Condition
-from cryptoconditions.crypto import base64_add_padding
-from cryptoconditions.fulfillment import Fulfillment
-from cryptoconditions.exceptions import MissingDataError
-from cryptoconditions.types.base_sha256 import BaseSha256
-from cryptoconditions.schemas.fingerprint import PrefixFingerprintContents
+from planetmint_cryptoconditions.condition import Condition
+from planetmint_cryptoconditions.crypto import base64_add_padding
+from planetmint_cryptoconditions.fulfillment import Fulfillment
+from planetmint_cryptoconditions.exceptions import MissingDataError
+from planetmint_cryptoconditions.types.base_sha256 import BaseSha256
+from planetmint_cryptoconditions.schemas.fingerprint import PrefixFingerprintContents
 
 CONDITION = "condition"
 FULFILLMENT = "fulfillment"

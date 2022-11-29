@@ -2,7 +2,7 @@ import binascii
 import base58
 import base64
 
-from cryptoconditions.crypto import (
+from planetmint_cryptoconditions.crypto import (
     Ed25519SigningKey as SigningKey,
     Ed25519VerifyingKey as VerifyingKey,
     ed25519_generate_key_pair,

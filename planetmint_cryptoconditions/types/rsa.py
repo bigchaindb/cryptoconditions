@@ -10,10 +10,10 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
 from pyasn1.codec.der.encoder import encode as der_encode
 from pyasn1.codec.native.decoder import decode as nat_decode
 
-from cryptoconditions.crypto import base64_add_padding
-from cryptoconditions.exceptions import MissingDataError, ValidationError
-from cryptoconditions.types.base_sha256 import BaseSha256
-from cryptoconditions.schemas.fingerprint import RsaFingerprintContents
+from planetmint_cryptoconditions.crypto import base64_add_padding
+from planetmint_cryptoconditions.exceptions import MissingDataError, ValidationError
+from planetmint_cryptoconditions.types.base_sha256 import BaseSha256
+from planetmint_cryptoconditions.schemas.fingerprint import RsaFingerprintContents
 
 PUBLIC_EXPONENT = 65537
 SALT_LENGTH = 32

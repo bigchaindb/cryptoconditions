@@ -10,7 +10,7 @@
 
 import json
 
-from cryptoconditions import ZenroomSha256, Fulfillment
+from planetmint_cryptoconditions import ZenroomSha256, Fulfillment
 from zenroom import zencode_exec
 from json.decoder import JSONDecodeError
 import pytest

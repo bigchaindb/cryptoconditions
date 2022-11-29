@@ -54,7 +54,7 @@ from pyasn1.type.namedtype import NamedType, NamedTypes
 from pyasn1.type.constraint import ValueRangeConstraint, ValueSizeConstraint
 from pyasn1.type.tag import Tag, tagClassContext, tagFormatConstructed, tagFormatSimple
 
-from cryptoconditions.schemas.condition import Condition
+from planetmint_cryptoconditions.schemas.condition import Condition
 
 
 class Ed25519Sha512Fulfillment(Sequence):

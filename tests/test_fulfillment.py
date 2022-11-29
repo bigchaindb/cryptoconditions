@@ -1,15 +1,15 @@
 import pytest
 from pyasn1.error import SubstrateUnderrunError
 
-from cryptoconditions import Condition, Fulfillment, Ed25519Sha256, ThresholdSha256
-from cryptoconditions.crypto import Ed25519VerifyingKey as VerifyingKey
+from planetmint_cryptoconditions import Condition, Fulfillment, Ed25519Sha256, ThresholdSha256
+from planetmint_cryptoconditions.crypto import Ed25519VerifyingKey as VerifyingKey
 
 MESSAGE = b"Hello World! Conditions are here!"
 
 
 class TestFulfillment:
     def test_from_uri_with_invalid_type(self):
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         with pytest.raises(TypeError) as exc:
             Fulfillment.from_uri(123)
@@ -23,8 +23,8 @@ class TestFulfillment:
         ),
     )
     def test_from_binary_with_invalid_value(self, fulfillment, error):
-        from cryptoconditions import Fulfillment
-        from cryptoconditions.exceptions import ASN1DecodeError
+        from planetmint_cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions.exceptions import ASN1DecodeError
 
         with pytest.raises(ASN1DecodeError) as exc:
             Fulfillment.from_binary(fulfillment)
@@ -32,13 +32,13 @@ class TestFulfillment:
         assert isinstance(exc.value.__cause__, error)
 
     def test_condition_uri(self, test_vector):
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(test_vector.fulfillment)
         assert fulfillment.condition_uri == test_vector.condition_uri
 
     def test_condition_binary(self, test_vector):
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(test_vector.fulfillment)
         assert fulfillment.condition_binary == test_vector.condition_binary
@@ -52,10 +52,10 @@ class TestFulfillment:
         ),
     )
     def test_serialize_binary_raises_with_non_initialize_simple_types(self, simple_cryptocondition_type):
-        import cryptoconditions
-        from cryptoconditions.exceptions import ASN1DecodeError
+        import planetmint_cryptoconditions
+        from planetmint_cryptoconditions.exceptions import ASN1DecodeError
 
-        fulfillment = getattr(cryptoconditions, simple_cryptocondition_type)()
+        fulfillment = getattr(planetmint_cryptoconditions, simple_cryptocondition_type)()
         with pytest.raises(ASN1DecodeError) as exc:
             fulfillment.serialize_binary()
         assert isinstance(exc.value.__cause__, TypeError)

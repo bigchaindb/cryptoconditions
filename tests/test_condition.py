@@ -4,11 +4,11 @@ from hypothesis import given
 from hypothesis.strategies import from_regex
 from pytest import raises
 
-from cryptoconditions.condition import CONDITION_REGEX
+from planetmint_cryptoconditions.condition import CONDITION_REGEX
 
 # NOTE: Hardcoding the supported types for now, because fetching them directly
 # from the type registry strangely caused a test failure with hypothesis.
-# from cryptoconditions import TypeRegistry
+# from planetmint_cryptoconditions import TypeRegistry
 # SUPPORTED_TYPES = '$|'.join(t['name'] for t in TypeRegistry.registered_types)
 SUPPORTED_TYPES = (
     "preimage-sha-256",
@@ -21,8 +21,8 @@ SUPPORTED_TYPES = (
 
 @given(from_regex(r"^(?!ni$).*:///sha-256;47DEQpj?fpt=preimage-sha-256&cost=0$"))
 def test_from_uri_prefix_error(uri):
-    from cryptoconditions.condition import Condition, CONDITION_URI_SCHEME
-    from cryptoconditions.exceptions import PrefixError
+    from planetmint_cryptoconditions.condition import Condition, CONDITION_URI_SCHEME
+    from planetmint_cryptoconditions.exceptions import PrefixError
 
     with raises(PrefixError) as exc_info:
         Condition.from_uri(uri)
@@ -31,8 +31,8 @@ def test_from_uri_prefix_error(uri):
 
 @given(from_regex(CONDITION_REGEX))
 def test_from_uri_parse_error_missing_fpt(uri):
-    from cryptoconditions.condition import Condition
-    from cryptoconditions.exceptions import ParsingError
+    from planetmint_cryptoconditions.condition import Condition
+    from planetmint_cryptoconditions.exceptions import ParsingError
 
     with raises(ParsingError) as exc_info:
         Condition.from_uri(uri)
@@ -41,8 +41,8 @@ def test_from_uri_parse_error_missing_fpt(uri):
 
 @given(from_regex(r"^ni:\/\/\/sha-256;([a-zA-Z0-9_-]{0,86})\?fpt=preimage-sha-256&(.+)$"))
 def test_from_uri_parse_error_missing_cost(uri):
-    from cryptoconditions.condition import Condition
-    from cryptoconditions.exceptions import ParsingError
+    from planetmint_cryptoconditions.condition import Condition
+    from planetmint_cryptoconditions.exceptions import ParsingError
 
     with raises(ParsingError) as exc_info:
         Condition.from_uri(uri)
@@ -51,8 +51,8 @@ def test_from_uri_parse_error_missing_cost(uri):
 
 @given(from_regex(r"^ni:\/\/\/sha-256;([a-zA-Z0-9_-]{0,86})" r"\?fpt=preimage-sha-256&cost=[a-z]+$"))
 def test_from_uri_parse_error_invalid_cost(uri):
-    from cryptoconditions.condition import Condition
-    from cryptoconditions.exceptions import ParsingError
+    from planetmint_cryptoconditions.condition import Condition
+    from planetmint_cryptoconditions.exceptions import ParsingError
 
     with raises(ParsingError) as exc_info:
         Condition.from_uri(uri)
@@ -67,8 +67,8 @@ def test_from_uri_parse_error_invalid_cost(uri):
     )
 )
 def test_from_uri_with_unsupported_type(uri):
-    from cryptoconditions.condition import Condition
-    from cryptoconditions.exceptions import UnsupportedTypeError
+    from planetmint_cryptoconditions.condition import Condition
+    from planetmint_cryptoconditions.exceptions import UnsupportedTypeError
 
     with raises(UnsupportedTypeError) as exc_info:
         Condition.from_uri(uri)
@@ -78,8 +78,8 @@ def test_from_uri_with_unsupported_type(uri):
 
 @given(from_regex(r"^ni:\/\/\/sha-265;([a-zA-Z0-9_-]{0,86})\?(.+)$"))
 def test_from_uri_malformed_uri(uri):
-    from cryptoconditions.condition import Condition
-    from cryptoconditions.exceptions import ParsingError
+    from planetmint_cryptoconditions.condition import Condition
+    from planetmint_cryptoconditions.exceptions import ParsingError
 
     # Note that the uri will contain `sha-265` instead of `sha-256`
     with raises(ParsingError):
@@ -87,7 +87,7 @@ def test_from_uri_malformed_uri(uri):
 
 
 def test_from_uri_invalid_arguments(minimal_ed25519):
-    from cryptoconditions.condition import Condition
+    from planetmint_cryptoconditions.condition import Condition
 
     # raises a TypeError if the serialized_condition is not a str
     with raises(TypeError):
@@ -101,7 +101,7 @@ def test_from_uri_invalid_arguments(minimal_ed25519):
 
 
 def test_condition_comparison(minimal_ed25519, minimal_prefix):
-    from cryptoconditions.condition import Condition
+    from planetmint_cryptoconditions.condition import Condition
 
     assert Condition.from_uri(minimal_ed25519.condition_uri) == Condition.from_uri(minimal_ed25519.condition_uri)
 
@@ -109,7 +109,7 @@ def test_condition_comparison(minimal_ed25519, minimal_prefix):
 
 
 def test_condition_hash():
-    from cryptoconditions.condition import Condition
+    from planetmint_cryptoconditions.condition import Condition
 
     condition = Condition()
 
@@ -127,7 +127,7 @@ def test_condition_hash():
 
 
 def test_condition_cost():
-    from cryptoconditions.condition import Condition
+    from planetmint_cryptoconditions.condition import Condition
 
     condition = Condition()
 
@@ -138,7 +138,7 @@ def test_condition_cost():
 
 
 def test_condition_validate():
-    from cryptoconditions.condition import Condition
+    from planetmint_cryptoconditions.condition import Condition
 
     # lets set a known type_id so that the TypeRegistry can return the correct
     # condition type
@@ -163,8 +163,8 @@ def test_condition_validate():
 
 
 def test_condition_to_asn1_json(basic_threshold):
-    from cryptoconditions.condition import Condition
-    from cryptoconditions.type_registry import TypeRegistry
+    from planetmint_cryptoconditions.condition import Condition
+    from planetmint_cryptoconditions.type_registry import TypeRegistry
 
     condition = Condition.from_uri(basic_threshold.condition_uri)
     condition_type = TypeRegistry.find_by_type_id(condition.type_id)

@@ -12,7 +12,7 @@ To install cryptoconditions, run this very simple command in your terminal:
 
 .. code-block:: console
 
-    $ pip install cryptoconditions
+    $ pip install planetmint-cryptoconditions
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.

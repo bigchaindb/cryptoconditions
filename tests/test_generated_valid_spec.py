@@ -30,7 +30,7 @@ class TestVector:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(test_vector.condition_binary)
         assert condition.serialize_uri() == test_vector.condition_uri
@@ -43,7 +43,7 @@ class TestVector:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(test_vector.condition_uri)
         assert condition.serialize_binary() == test_vector.condition_binary
@@ -56,7 +56,7 @@ class TestVector:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(test_vector.fulfillment)
         assert fulfillment.serialize_uri() == test_vector.fulfillment
@@ -69,7 +69,7 @@ class TestVector:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(test_vector.fulfillment)
         assert fulfillment.validate(message=test_vector.message)
@@ -82,7 +82,7 @@ class TestVector:
         3. Should return True.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(test_vector.condition_binary)
         assert condition.validate()
@@ -95,7 +95,7 @@ class TestVector:
         3. Should return True.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(test_vector.condition_uri)
         assert condition.validate()
@@ -108,7 +108,7 @@ class TestVector:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(test_vector.fulfillment)
         assert fulfillment.fingerprint_contents == test_vector.fingerprint_contents
@@ -122,7 +122,7 @@ class TestVector:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(test_vector.fulfillment)
         condition = fulfillment.condition
@@ -136,7 +136,7 @@ class TestVector:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(test_vector.json)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -157,7 +157,7 @@ class TestMinimalPreimage:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         buffer_ = minimal_preimage.condition_binary
         condition = Condition.from_binary(buffer_)
@@ -171,7 +171,7 @@ class TestMinimalPreimage:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(minimal_preimage.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -185,7 +185,7 @@ class TestMinimalPreimage:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_preimage.fulfillment)
         assert fulfillment.serialize_uri() == minimal_preimage.fulfillment
@@ -198,7 +198,7 @@ class TestMinimalPreimage:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_preimage.fulfillment)
         assert fulfillment.validate(minimal_preimage.message)
@@ -211,7 +211,7 @@ class TestMinimalPreimage:
         3. Should return True.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(minimal_preimage.condition_binary)
         assert condition.validate()
@@ -224,7 +224,7 @@ class TestMinimalPreimage:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_preimage.fulfillment)
         assert fulfillment.fingerprint_contents == minimal_preimage.fingerprint_contents
@@ -238,7 +238,7 @@ class TestMinimalPreimage:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_preimage.fulfillment)
         condition = fulfillment.condition
@@ -252,7 +252,7 @@ class TestMinimalPreimage:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(minimal_preimage.json)
         assert fulfillment.serialize_uri() == minimal_preimage.fulfillment
@@ -267,7 +267,7 @@ class TestMinimalPrefix:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(minimal_prefix.condition_binary)
         assert condition.serialize_uri() == minimal_prefix.condition_uri
@@ -280,7 +280,7 @@ class TestMinimalPrefix:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(minimal_prefix.condition_uri)
         assert condition.serialize_binary() == minimal_prefix.condition_binary
@@ -293,7 +293,7 @@ class TestMinimalPrefix:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_prefix.fulfillment)
         assert fulfillment.serialize_uri() == minimal_prefix.fulfillment
@@ -306,7 +306,7 @@ class TestMinimalPrefix:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_prefix.fulfillment)
         assert fulfillment.validate(minimal_prefix.message)
@@ -319,7 +319,7 @@ class TestMinimalPrefix:
         3. Should return True.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(minimal_prefix.condition_binary)
         assert condition.validate()
@@ -332,7 +332,7 @@ class TestMinimalPrefix:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_prefix.fulfillment)
         fingerprint_contents = fulfillment.fingerprint_contents
@@ -347,7 +347,7 @@ class TestMinimalPrefix:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_prefix.fulfillment)
         condition = fulfillment.condition
@@ -362,7 +362,7 @@ class TestMinimalPrefix:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(minimal_prefix.json)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -378,7 +378,7 @@ class TestMinimalThreshold:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         buffer_ = minimal_threshold.condition_binary
         condition = Condition.from_binary(buffer_)
@@ -392,7 +392,7 @@ class TestMinimalThreshold:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(minimal_threshold.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -406,7 +406,7 @@ class TestMinimalThreshold:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_threshold.fulfillment)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -420,7 +420,7 @@ class TestMinimalThreshold:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_threshold.fulfillment)
         assert fulfillment.validate(minimal_threshold.message)
@@ -433,7 +433,7 @@ class TestMinimalThreshold:
         3. Should return True.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(minimal_threshold.condition_binary)
         assert condition.validate()
@@ -446,7 +446,7 @@ class TestMinimalThreshold:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_threshold.fulfillment)
         fingerprint_contents = fulfillment.fingerprint_contents
@@ -461,7 +461,7 @@ class TestMinimalThreshold:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_threshold.fulfillment)
         condition = fulfillment.condition
@@ -476,7 +476,7 @@ class TestMinimalThreshold:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(minimal_threshold.json)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -492,7 +492,7 @@ class TestMinimalRsa:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(minimal_rsa.condition_binary)
         assert condition.serialize_uri() == minimal_rsa.condition_uri
@@ -505,7 +505,7 @@ class TestMinimalRsa:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(minimal_rsa.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -519,7 +519,7 @@ class TestMinimalRsa:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_rsa.fulfillment)
         assert fulfillment.serialize_uri() == minimal_rsa.fulfillment
@@ -532,7 +532,7 @@ class TestMinimalRsa:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_rsa.fulfillment)
         assert fulfillment.validate(minimal_rsa.message)
@@ -545,7 +545,7 @@ class TestMinimalRsa:
         3. Should return True.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(minimal_rsa.condition_binary)
         assert condition.validate()
@@ -558,7 +558,7 @@ class TestMinimalRsa:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_rsa.fulfillment)
         fingerprint_contents = fulfillment.fingerprint_contents
@@ -573,7 +573,7 @@ class TestMinimalRsa:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_rsa.fulfillment)
         condition = fulfillment.condition
@@ -587,7 +587,7 @@ class TestMinimalRsa:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(minimal_rsa.json)
         assert fulfillment.serialize_uri() == minimal_rsa.fulfillment
@@ -602,7 +602,7 @@ class TestMinimalEd25519:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(minimal_ed25519.condition_binary)
         assert condition.serialize_uri() == minimal_ed25519.condition_uri
@@ -615,7 +615,7 @@ class TestMinimalEd25519:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(minimal_ed25519.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -629,7 +629,7 @@ class TestMinimalEd25519:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_ed25519.fulfillment)
         generated_fulfillment_uri = fulfillment.serialize_uri()
@@ -643,7 +643,7 @@ class TestMinimalEd25519:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_ed25519.fulfillment)
         assert fulfillment.validate(message=minimal_ed25519.message)
@@ -656,7 +656,7 @@ class TestMinimalEd25519:
         3. Should return True.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(minimal_ed25519.condition_binary)
         assert condition.validate()
@@ -669,7 +669,7 @@ class TestMinimalEd25519:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_ed25519.fulfillment)
         fingerprint_contents = fulfillment.fingerprint_contents
@@ -684,7 +684,7 @@ class TestMinimalEd25519:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(minimal_ed25519.fulfillment)
         condition = fulfillment.condition
@@ -699,7 +699,7 @@ class TestMinimalEd25519:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(minimal_ed25519.json)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -715,8 +715,8 @@ class TestMinimalEd25519:
         generate the correct signature using the public key and message.
 
         """
-        from cryptoconditions.types.ed25519 import Ed25519Sha256
-        from cryptoconditions.crypto import base64_add_padding
+        from planetmint_cryptoconditions.types.ed25519 import Ed25519Sha256
+        from planetmint_cryptoconditions.crypto import base64_add_padding
 
         fulfillment = Ed25519Sha256(
             public_key=urlsafe_b64decode(base64_add_padding(minimal_ed25519.json["publicKey"]))
@@ -742,7 +742,7 @@ class TestBasicPreimage:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         buffer_ = basic_preimage.condition_binary
         condition = Condition.from_binary(buffer_)
@@ -756,7 +756,7 @@ class TestBasicPreimage:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(basic_preimage.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -770,7 +770,7 @@ class TestBasicPreimage:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_preimage.fulfillment)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -784,7 +784,7 @@ class TestBasicPreimage:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_preimage.fulfillment)
         assert fulfillment.validate(basic_preimage.message)
@@ -797,7 +797,7 @@ class TestBasicPreimage:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_preimage.fulfillment)
         fingerprint_contents = fulfillment.fingerprint_contents
@@ -812,7 +812,7 @@ class TestBasicPreimage:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_preimage.fulfillment)
         condition = fulfillment.condition
@@ -827,7 +827,7 @@ class TestBasicPreimage:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(basic_preimage.json)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -843,7 +843,7 @@ class TestBasicPrefix:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(basic_prefix.condition_binary)
         assert condition.serialize_uri() == basic_prefix.condition_uri
@@ -856,7 +856,7 @@ class TestBasicPrefix:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(basic_prefix.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -870,7 +870,7 @@ class TestBasicPrefix:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_prefix.fulfillment)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -884,7 +884,7 @@ class TestBasicPrefix:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_prefix.fulfillment)
         assert fulfillment.validate(basic_prefix.message)
@@ -897,7 +897,7 @@ class TestBasicPrefix:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_prefix.fulfillment)
         fingerprint_contents = fulfillment.fingerprint_contents
@@ -912,7 +912,7 @@ class TestBasicPrefix:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_prefix.fulfillment)
         condition = fulfillment.condition
@@ -927,7 +927,7 @@ class TestBasicPrefix:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(basic_prefix.json)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -943,7 +943,7 @@ class TestBasicPrefixTwoLevelsDeep:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(basic_prefix_two_levels_deep.condition_binary)
         assert condition.serialize_uri() == basic_prefix_two_levels_deep.condition_uri
@@ -956,7 +956,7 @@ class TestBasicPrefixTwoLevelsDeep:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(basic_prefix_two_levels_deep.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -970,7 +970,7 @@ class TestBasicPrefixTwoLevelsDeep:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_prefix_two_levels_deep.fulfillment)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -984,7 +984,7 @@ class TestBasicPrefixTwoLevelsDeep:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_prefix_two_levels_deep.fulfillment)
         assert fulfillment.validate(basic_prefix_two_levels_deep.message)
@@ -997,7 +997,7 @@ class TestBasicPrefixTwoLevelsDeep:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_prefix_two_levels_deep.fulfillment)
         fingerprint_contents = fulfillment.fingerprint_contents
@@ -1012,7 +1012,7 @@ class TestBasicPrefixTwoLevelsDeep:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_prefix_two_levels_deep.fulfillment)
         condition = fulfillment.condition
@@ -1027,7 +1027,7 @@ class TestBasicPrefixTwoLevelsDeep:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(basic_prefix_two_levels_deep.json)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1043,7 +1043,7 @@ class TestBasicThreshold:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(basic_threshold.condition_binary)
         assert condition.serialize_uri() == basic_threshold.condition_uri
@@ -1056,7 +1056,7 @@ class TestBasicThreshold:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(basic_threshold.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -1070,7 +1070,7 @@ class TestBasicThreshold:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold.fulfillment)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1084,7 +1084,7 @@ class TestBasicThreshold:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold.fulfillment)
         assert fulfillment.validate(basic_threshold.message)
@@ -1097,7 +1097,7 @@ class TestBasicThreshold:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold.fulfillment)
         fingerprint_contents = fulfillment.fingerprint_contents
@@ -1112,7 +1112,7 @@ class TestBasicThreshold:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold.fulfillment)
         condition = fulfillment.condition
@@ -1127,7 +1127,7 @@ class TestBasicThreshold:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(basic_threshold.json)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1143,7 +1143,7 @@ class TestBasicThresholdSameConditionTwice:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(basic_threshold_same_condition_twice.condition_binary)
         assert condition.serialize_uri() == basic_threshold_same_condition_twice.condition_uri
@@ -1156,7 +1156,7 @@ class TestBasicThresholdSameConditionTwice:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(basic_threshold_same_condition_twice.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -1170,7 +1170,7 @@ class TestBasicThresholdSameConditionTwice:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold_same_condition_twice.fulfillment)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1184,7 +1184,7 @@ class TestBasicThresholdSameConditionTwice:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold_same_condition_twice.fulfillment)
         assert fulfillment.validate(basic_threshold_same_condition_twice.message)
@@ -1197,7 +1197,7 @@ class TestBasicThresholdSameConditionTwice:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold_same_condition_twice.fulfillment)
         fingerprint_contents = fulfillment.fingerprint_contents
@@ -1212,7 +1212,7 @@ class TestBasicThresholdSameConditionTwice:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold_same_condition_twice.fulfillment)
         condition = fulfillment.condition
@@ -1227,7 +1227,7 @@ class TestBasicThresholdSameConditionTwice:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(basic_threshold_same_condition_twice.json)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1243,7 +1243,7 @@ class TestBasicThresholdSameFulfillmentTwice:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(basic_threshold_same_fulfillment_twice.condition_binary)
         assert condition.serialize_uri() == basic_threshold_same_fulfillment_twice.condition_uri
@@ -1256,7 +1256,7 @@ class TestBasicThresholdSameFulfillmentTwice:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(basic_threshold_same_fulfillment_twice.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -1270,7 +1270,7 @@ class TestBasicThresholdSameFulfillmentTwice:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold_same_fulfillment_twice.fulfillment)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1284,7 +1284,7 @@ class TestBasicThresholdSameFulfillmentTwice:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold_same_fulfillment_twice.fulfillment)
         assert fulfillment.validate(basic_threshold_same_fulfillment_twice.message)
@@ -1297,7 +1297,7 @@ class TestBasicThresholdSameFulfillmentTwice:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold_same_fulfillment_twice.fulfillment)
         fingerprint_contents = fulfillment.fingerprint_contents
@@ -1312,7 +1312,7 @@ class TestBasicThresholdSameFulfillmentTwice:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold_same_fulfillment_twice.fulfillment)
         condition = fulfillment.condition
@@ -1327,7 +1327,7 @@ class TestBasicThresholdSameFulfillmentTwice:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(basic_threshold_same_fulfillment_twice.json)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1343,7 +1343,7 @@ class TestBasicThresholdTwoLevelsDeep:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(basic_threshold_two_levels_deep.condition_binary)
         assert condition.serialize_uri() == basic_threshold_two_levels_deep.condition_uri
@@ -1356,7 +1356,7 @@ class TestBasicThresholdTwoLevelsDeep:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(basic_threshold_two_levels_deep.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -1370,7 +1370,7 @@ class TestBasicThresholdTwoLevelsDeep:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold_two_levels_deep.fulfillment)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1384,7 +1384,7 @@ class TestBasicThresholdTwoLevelsDeep:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold_two_levels_deep.fulfillment)
         assert fulfillment.validate(basic_threshold_two_levels_deep.message)
@@ -1397,7 +1397,7 @@ class TestBasicThresholdTwoLevelsDeep:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold_two_levels_deep.fulfillment)
         fingerprint_contents = fulfillment.fingerprint_contents
@@ -1412,7 +1412,7 @@ class TestBasicThresholdTwoLevelsDeep:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold_two_levels_deep.fulfillment)
         condition = fulfillment.condition
@@ -1427,7 +1427,7 @@ class TestBasicThresholdTwoLevelsDeep:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(basic_threshold_two_levels_deep.json)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1443,7 +1443,7 @@ class TestBasicThresholdSchroedinger:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(basic_threshold_schroedinger.condition_binary)
         assert condition.serialize_uri() == basic_threshold_schroedinger.condition_uri
@@ -1456,7 +1456,7 @@ class TestBasicThresholdSchroedinger:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(basic_threshold_schroedinger.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -1470,7 +1470,7 @@ class TestBasicThresholdSchroedinger:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold_schroedinger.fulfillment)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1484,7 +1484,7 @@ class TestBasicThresholdSchroedinger:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold_schroedinger.fulfillment)
         assert fulfillment.validate(basic_threshold_schroedinger.message)
@@ -1497,7 +1497,7 @@ class TestBasicThresholdSchroedinger:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold_schroedinger.fulfillment)
         fingerprint_contents = fulfillment.fingerprint_contents
@@ -1512,7 +1512,7 @@ class TestBasicThresholdSchroedinger:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_threshold_schroedinger.fulfillment)
         condition = fulfillment.condition
@@ -1527,7 +1527,7 @@ class TestBasicThresholdSchroedinger:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(basic_threshold_schroedinger.json)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1543,7 +1543,7 @@ class TestBasicRsa:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         buffer_ = basic_rsa.condition_binary
         condition = Condition.from_binary(buffer_)
@@ -1557,7 +1557,7 @@ class TestBasicRsa:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(basic_rsa.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -1571,7 +1571,7 @@ class TestBasicRsa:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_rsa.fulfillment)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1585,7 +1585,7 @@ class TestBasicRsa:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_rsa.fulfillment)
         assert fulfillment.validate(basic_rsa.message)
@@ -1598,7 +1598,7 @@ class TestBasicRsa:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_rsa.fulfillment)
         fingerprint_contents = fulfillment.fingerprint_contents
@@ -1613,7 +1613,7 @@ class TestBasicRsa:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_rsa.fulfillment)
         condition = fulfillment.condition
@@ -1628,7 +1628,7 @@ class TestBasicRsa:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(basic_rsa.json)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1644,7 +1644,7 @@ class TestBasicRsa4096:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(basic_rsa4096.condition_binary)
         assert condition.serialize_uri() == basic_rsa4096.condition_uri
@@ -1657,7 +1657,7 @@ class TestBasicRsa4096:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(basic_rsa4096.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -1671,7 +1671,7 @@ class TestBasicRsa4096:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_rsa4096.fulfillment)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1685,7 +1685,7 @@ class TestBasicRsa4096:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_rsa4096.fulfillment)
         assert fulfillment.validate(basic_rsa4096.message)
@@ -1698,7 +1698,7 @@ class TestBasicRsa4096:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_rsa4096.fulfillment)
         fingerprint_contents = fulfillment.fingerprint_contents
@@ -1713,7 +1713,7 @@ class TestBasicRsa4096:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_rsa4096.fulfillment)
         condition = fulfillment.condition
@@ -1728,7 +1728,7 @@ class TestBasicRsa4096:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(basic_rsa4096.json)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1744,7 +1744,7 @@ class TestBasicEd25519:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(basic_ed25519.condition_binary)
         assert condition.serialize_uri() == basic_ed25519.condition_uri
@@ -1757,7 +1757,7 @@ class TestBasicEd25519:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(basic_ed25519.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -1771,7 +1771,7 @@ class TestBasicEd25519:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_ed25519.fulfillment)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1785,7 +1785,7 @@ class TestBasicEd25519:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_ed25519.fulfillment)
         assert fulfillment.validate(message=basic_ed25519.message)
@@ -1798,7 +1798,7 @@ class TestBasicEd25519:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_ed25519.fulfillment)
         fingerprint_contents = fulfillment.fingerprint_contents
@@ -1813,7 +1813,7 @@ class TestBasicEd25519:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(basic_ed25519.fulfillment)
         condition = fulfillment.condition
@@ -1828,7 +1828,7 @@ class TestBasicEd25519:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(basic_ed25519.json)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1844,8 +1844,8 @@ class TestBasicEd25519:
         generate the correct signature using the public key and message.
 
         """
-        from cryptoconditions.types.ed25519 import Ed25519Sha256
-        from cryptoconditions.crypto import base64_add_padding
+        from planetmint_cryptoconditions.types.ed25519 import Ed25519Sha256
+        from planetmint_cryptoconditions.crypto import base64_add_padding
 
         fulfillment = Ed25519Sha256(public_key=urlsafe_b64decode(base64_add_padding(basic_ed25519.json["publicKey"])))
         signature = fulfillment.sign(
@@ -1869,7 +1869,7 @@ class TestNotarizedReceipt:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(notarized_receipt.condition_binary)
         assert condition.serialize_uri() == notarized_receipt.condition_uri
@@ -1882,7 +1882,7 @@ class TestNotarizedReceipt:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(notarized_receipt.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -1896,7 +1896,7 @@ class TestNotarizedReceipt:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(notarized_receipt.fulfillment)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1910,7 +1910,7 @@ class TestNotarizedReceipt:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(notarized_receipt.fulfillment)
         assert fulfillment.validate(notarized_receipt.message)
@@ -1923,7 +1923,7 @@ class TestNotarizedReceipt:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(notarized_receipt.fulfillment)
         fingerprint_contents = fulfillment.fingerprint_contents
@@ -1938,7 +1938,7 @@ class TestNotarizedReceipt:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(notarized_receipt.fulfillment)
         condition = fulfillment.condition
@@ -1953,7 +1953,7 @@ class TestNotarizedReceipt:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(notarized_receipt.json)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -1969,7 +1969,7 @@ class TestNotarizedReceiptMultipleNotaries:
         3. Should match condition_uri.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_binary(notarized_receipt_multiple_notaries.condition_binary)
         assert condition.serialize_uri() == notarized_receipt_multiple_notaries.condition_uri
@@ -1982,7 +1982,7 @@ class TestNotarizedReceiptMultipleNotaries:
         3. should match condition_binary.
 
         """
-        from cryptoconditions import Condition
+        from planetmint_cryptoconditions import Condition
 
         condition = Condition.from_uri(notarized_receipt_multiple_notaries.condition_uri)
         generated_condition_binary = condition.serialize_binary()
@@ -1996,7 +1996,7 @@ class TestNotarizedReceiptMultipleNotaries:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(notarized_receipt_multiple_notaries.fulfillment)
         fulfillment_uri = fulfillment.serialize_uri()
@@ -2010,7 +2010,7 @@ class TestNotarizedReceiptMultipleNotaries:
         3. Should return True.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(notarized_receipt_multiple_notaries.fulfillment)
         assert fulfillment.validate(notarized_receipt_multiple_notaries.message)
@@ -2023,7 +2023,7 @@ class TestNotarizedReceiptMultipleNotaries:
         3, Should match fingerprint_contents.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(notarized_receipt_multiple_notaries.fulfillment)
         assert fulfillment.fingerprint_contents == notarized_receipt_multiple_notaries.fingerprint_contents
@@ -2037,7 +2037,7 @@ class TestNotarizedReceiptMultipleNotaries:
         4. Should match conditionUri.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_uri(notarized_receipt_multiple_notaries.fulfillment)
         condition = fulfillment.condition
@@ -2051,7 +2051,7 @@ class TestNotarizedReceiptMultipleNotaries:
         3. Should match fulfillment.
 
         """
-        from cryptoconditions import Fulfillment
+        from planetmint_cryptoconditions import Fulfillment
 
         fulfillment = Fulfillment.from_json(notarized_receipt_multiple_notaries.json)
         assert fulfillment.serialize_uri() == notarized_receipt_multiple_notaries.fulfillment

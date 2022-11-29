@@ -7,11 +7,11 @@ from pyasn1.codec.native.decoder import decode as nat_decode
 from pyasn1.codec.native.encoder import encode as nat_encode
 from pyasn1.error import PyAsn1Error, SubstrateUnderrunError
 
-from cryptoconditions import TypeRegistry
-from cryptoconditions.condition import Condition
-from cryptoconditions.crypto import base64_add_padding, base64_remove_padding
-from cryptoconditions.exceptions import ASN1DecodeError, ASN1EncodeError
-from cryptoconditions.schemas.fulfillment import Fulfillment as Asn1Fulfillment
+from planetmint_cryptoconditions import TypeRegistry
+from planetmint_cryptoconditions.condition import Condition
+from planetmint_cryptoconditions.crypto import base64_add_padding, base64_remove_padding
+from planetmint_cryptoconditions.exceptions import ASN1DecodeError, ASN1EncodeError
+from planetmint_cryptoconditions.schemas.fulfillment import Fulfillment as Asn1Fulfillment
 
 
 class Fulfillment(metaclass=ABCMeta):

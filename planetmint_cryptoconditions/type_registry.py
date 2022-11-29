@@ -1,4 +1,4 @@
-from cryptoconditions.exceptions import UnsupportedTypeError
+from planetmint_cryptoconditions.exceptions import UnsupportedTypeError
 
 
 # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
