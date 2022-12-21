@@ -1,6 +1,13 @@
 Changelog
 =========
 
+1.1.0 (2022-12-15)
+------------------
+* removed automated "keyring" handling from ZenroomSha256.sign method
+* improved sample code
+* simplified dependency management
+* improved github workflows
+
 1.0.0 (2022-11-28)
 ------------------
 * support of the neweste zenroom 2.3.1

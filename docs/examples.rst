@@ -6,7 +6,7 @@ Preimage Sha 256
 
 .. code-block:: python
 
-    >>> from cryptoconditions import PreimageSha256
+    >>> from planetmint_cryptoconditions import PreimageSha256
 
     >>> secret = b'Beware! Trying to understand crypto can lead to knowledge intoxications.'
 

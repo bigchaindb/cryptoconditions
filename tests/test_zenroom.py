@@ -35,7 +35,7 @@ GENERATE_KEYPAIR = """Rule input encoding base58
 
 
 def genkey():
-    return json.loads(zencode_exec(GENERATE_KEYPAIR).output)["keyring"]
+    return json.loads(zencode_exec(GENERATE_KEYPAIR).output)
 
 
 # There is not a unique way of generating the public
@@ -56,7 +56,7 @@ SK_TO_PK = """Scenario 'ecdh': Create the keypair
 
 
 def sk2pk(name, keys):
-    return json.loads(zencode_exec(SK_TO_PK.format(name), keys=json.dumps({"keyring": keys})).output)
+    return json.loads(zencode_exec(SK_TO_PK.format(name), keys=json.dumps(keys)).output)
 
 
 # Alice assert the composition of the houses
@@ -195,6 +195,22 @@ def test_wrong_data():
         keys={},
         data={},
     )
+
+
+def test_empty_objects_in_asn1_dict():
+    from planetmint_cryptoconditions.condition import Condition
+
+    none_objs = ZenroomSha256(
+        script="Given nothing",
+        keys=None,
+        data=None,
+    )
+    serialized_uri_ = none_objs.serialize_uri()
+    asn1_dict = none_objs.condition.to_asn1_dict()
+    ff = Fulfillment.from_uri(serialized_uri_)
+    assert none_objs.script == ff.script
+    assert none_objs.data == ff.data
+    assert none_objs.keys == ff.keys
 
 
 def test_no_asset_no_metadata():
