@@ -75,7 +75,7 @@ setup(
         'base58==2.1.0',
         'PyNaCl==1.4.0',
         'pyasn1==0.4.8',
-        'cryptography==3.4.7',
+        'cryptography==39.0.1',
     ],
     setup_requires=['pytest-runner'],
     tests_require=tests_require,
