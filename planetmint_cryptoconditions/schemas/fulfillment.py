@@ -58,7 +58,6 @@ from planetmint_cryptoconditions.schemas.condition import Condition
 
 
 class Ed25519Sha512Fulfillment(Sequence):
-
     # TODO implement
     def __deepcopy__(self, memo):
         return None
@@ -81,7 +80,6 @@ Ed25519Sha512Fulfillment.componentType = NamedTypes(
 
 
 class ZenroomSha512Fulfillment(Sequence):
-
     # TODO implement
     def __deepcopy__(self, memo):
         return None
@@ -139,7 +137,6 @@ class PrefixFulfillment(Sequence):
 
 
 class Fulfillment(Choice):
-
     # TODO implement
     def __deepcopy__(self, memo):
         return None

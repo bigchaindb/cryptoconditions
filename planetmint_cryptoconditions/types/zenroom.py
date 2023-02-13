@@ -27,7 +27,6 @@ class MalformedMessageException(Exception):
 
 
 class ZenroomSha256(BaseSha256):
-
     TYPE_ID = 5
     TYPE_NAME = "zenroom-sha-256"
     TYPE_ASN1 = "zenroomSha256"
