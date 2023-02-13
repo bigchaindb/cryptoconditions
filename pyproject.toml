@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "planetmint-cryptoconditions"
-version = "1.1.1"
+version = "1.1.2"
 description = "Multi-algorithm, multi-level, multi-signature format for expressing conditions and fulfillments according to the Interledger Protocol (ILP)."
 authors = ["Cryptoconditions contributors <contact@ipdb.global>"]
 readme = "README.rst"
