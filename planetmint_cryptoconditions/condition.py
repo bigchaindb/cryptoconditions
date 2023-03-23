@@ -57,7 +57,6 @@ class Condition(metaclass=ABCMeta):
         "threshold-sha-256",
         "rsa-sha-256",
         "ed25519-sha-256",
-        "zenroom-sha-256",
     }
 
     MAX_SAFE_SUBTYPES = len(SUPPORTED_SUBTYPES)
