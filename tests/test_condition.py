@@ -69,11 +69,12 @@ def test_from_uri_parse_error_invalid_cost(uri):
 def test_from_uri_with_unsupported_type(uri):
     from planetmint_cryptoconditions.condition import Condition
     from planetmint_cryptoconditions.exceptions import UnsupportedTypeError
+    from planetmint_cryptoconditions.type_registry import UNSUPPORTED_TYPE_ERROR_MSG
 
     with raises(UnsupportedTypeError) as exc_info:
         Condition.from_uri(uri)
     condition_type = parse_qs(urlparse(uri.rstrip()).query)["fpt"][0]
-    assert exc_info.value.args == ("Type {} is not supported".format(condition_type),)
+    assert exc_info.value.args == (UNSUPPORTED_TYPE_ERROR_MSG.format(condition_type),)
 
 
 @given(from_regex(r"^ni:\/\/\/sha-265;([a-zA-Z0-9_-]{0,86})\?(.+)$"))
@@ -105,7 +106,7 @@ def test_condition_comparison(minimal_ed25519, minimal_prefix):
 
     assert Condition.from_uri(minimal_ed25519.condition_uri) == Condition.from_uri(minimal_ed25519.condition_uri)
 
-    assert not Condition.from_uri(minimal_ed25519.condition_uri) == Condition.from_uri(minimal_prefix.condition_uri)
+    assert Condition.from_uri(minimal_ed25519.condition_uri) != Condition.from_uri(minimal_prefix.condition_uri)
 
 
 def test_condition_hash():

@@ -331,7 +331,7 @@ class ThresholdSha256(BaseSha256):
         for subfulfillments in data.get("subfulfillments", ()):
             self.add_subfulfillment(Fulfillment.from_dict(subfulfillments))
         for subconditions in data.get("subconditions", ()):
-            self.add_subcondition(Condition.from_dict(subfulfillments))
+            self.add_subcondition(Condition.from_dict(subconditions))
 
     def parse_asn1_dict_payload(self, data):
         self.threshold = len(data["subfulfillments"])

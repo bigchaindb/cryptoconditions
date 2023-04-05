@@ -6,6 +6,8 @@ from collections import namedtuple
 
 import pytest
 
+LOCAL_TEST_VECTOR_JSON="tests/vectors/{}.json"
+
 
 # ED25519
 VK_HEX_ILP = b"ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"  # noqa E501
@@ -203,7 +205,7 @@ def normalize_value(value, key):
     )
 )
 def test_vector(request):
-    with open("tests/vectors/{}.json".format(request.param), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(request.param), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})
 
@@ -211,7 +213,7 @@ def test_vector(request):
 @pytest.fixture
 def minimal_preimage():
     vector_name = "0000_test-minimal-preimage"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})
 
@@ -219,7 +221,7 @@ def minimal_preimage():
 @pytest.fixture
 def minimal_prefix():
     vector_name = "0001_test-minimal-prefix"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})
 
@@ -227,7 +229,7 @@ def minimal_prefix():
 @pytest.fixture
 def minimal_threshold():
     vector_name = "0002_test-minimal-threshold"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})
 
@@ -235,7 +237,7 @@ def minimal_threshold():
 @pytest.fixture
 def minimal_rsa():
     vector_name = "0003_test-minimal-rsa"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})
 
@@ -255,7 +257,7 @@ def minimal_ed25519_private_key(minimal_ed25519_private_key_base64url):
 @pytest.fixture
 def minimal_ed25519(minimal_ed25519_private_key):
     vector_name = "0004_test-minimal-ed25519"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     vector = {snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()}
     vector["private_key"] = minimal_ed25519_private_key
@@ -265,7 +267,7 @@ def minimal_ed25519(minimal_ed25519_private_key):
 @pytest.fixture
 def basic_preimage():
     vector_name = "0005_test-basic-preimage"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})
 
@@ -273,7 +275,7 @@ def basic_preimage():
 @pytest.fixture
 def basic_prefix():
     vector_name = "0006_test-basic-prefix"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})
 
@@ -281,7 +283,7 @@ def basic_prefix():
 @pytest.fixture
 def basic_prefix_two_levels_deep():
     vector_name = "0007_test-basic-prefix-two-levels-deep"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})
 
@@ -289,7 +291,7 @@ def basic_prefix_two_levels_deep():
 @pytest.fixture
 def basic_threshold():
     vector_name = "0008_test-basic-threshold"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})
 
@@ -297,7 +299,7 @@ def basic_threshold():
 @pytest.fixture
 def basic_threshold_same_condition_twice():
     vector_name = "0009_test-basic-threshold-same-condition-twice"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})
 
@@ -305,7 +307,7 @@ def basic_threshold_same_condition_twice():
 @pytest.fixture
 def basic_threshold_same_fulfillment_twice():
     vector_name = "0010_test-basic-threshold-same-fulfillment-twice"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})
 
@@ -313,7 +315,7 @@ def basic_threshold_same_fulfillment_twice():
 @pytest.fixture
 def basic_threshold_two_levels_deep():
     vector_name = "0011_test-basic-threshold-two-levels-deep"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})
 
@@ -321,7 +323,7 @@ def basic_threshold_two_levels_deep():
 @pytest.fixture
 def basic_threshold_schroedinger():
     vector_name = "0012_test-basic-threshold-schroedinger"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})
 
@@ -329,7 +331,7 @@ def basic_threshold_schroedinger():
 @pytest.fixture
 def basic_rsa():
     vector_name = "0013_test-basic-rsa"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})
 
@@ -337,7 +339,7 @@ def basic_rsa():
 @pytest.fixture
 def basic_rsa4096():
     vector_name = "0014_test-basic-rsa4096"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})
 
@@ -357,7 +359,7 @@ def basic_ed25519_private_key(basic_ed25519_private_key_base64url):
 @pytest.fixture
 def basic_ed25519(basic_ed25519_private_key):
     vector_name = "0015_test-basic-ed25519"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     vector = {snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()}
     vector["private_key"] = basic_ed25519_private_key
@@ -367,7 +369,7 @@ def basic_ed25519(basic_ed25519_private_key):
 @pytest.fixture
 def notarized_receipt():
     vector_name = "0016_test-advanced-notarized-receipt"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})
 
@@ -375,6 +377,6 @@ def notarized_receipt():
 @pytest.fixture
 def notarized_receipt_multiple_notaries():
     vector_name = "0017_test-advanced-notarized-receipt-multiple-notaries"
-    with open("tests/vectors/{}.json".format(vector_name), "r") as f:
+    with open(LOCAL_TEST_VECTOR_JSON.format(vector_name), "r") as f:
         test_vector = json.load(f)
     return TestVector(**{snake_case(k): normalize_value(v, snake_case(k)) for k, v in test_vector.items()})

@@ -19,7 +19,7 @@ services:
     volumes:
       - .:/usr/src/app/
     command: make -C docs html
-  
+
   vdocs:
     image: nginx
     ports:

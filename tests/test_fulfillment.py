@@ -196,7 +196,7 @@ class TestThresholdSha256Fulfillment:
         # Create a threshold condition
         fulfillment = ThresholdSha256(threshold=threshold)
 
-        for i in range(threshold - 1):
+        for _ in range(threshold - 1):
             fulfillment.add_subfulfillment(ilp_fulfillment)
 
         with pytest.raises(KeyError):

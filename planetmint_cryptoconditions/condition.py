@@ -28,7 +28,7 @@ CONDITION_REGEX = r"^ni:\/\/\/sha-256;([a-zA-Z0-9_-]{0,86})\?(.+)$"
 # Specifically, we can't handle bitmasks greater than 32 bits.
 CONDITION_REGEX_STRICT = CONDITION_REGEX
 
-INTEGER_REGEX = r"^0|[1-9]\d*$"
+INTEGER_REGEX = r"^(0|[1-9]\d*)$"
 
 
 @total_ordering
@@ -341,7 +341,7 @@ class Condition(metaclass=ABCMeta):
         payload = {"fingerprint": self.hash, "cost": self.cost}
         if condition_class.TYPE_CATEGORY == "compound":
             subtype_ids = [TypeRegistry.find_by_name(subtype)["type_id"] for subtype in self.subtypes]
-            bits = ["0" for bit in range(5)]
+            bits = ["0" for _ in range(5)]
             for subtype_id in subtype_ids:
                 bits[subtype_id] = "1"
             bitstring = "".join(bits).rstrip("0")

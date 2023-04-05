@@ -33,7 +33,7 @@ def download_vectors(vectors_base_url=vectors_base_url, vector_names=vector_name
     for vector_name in vector_names:
         print("Downloading test vector: {}".format(vector_name))
         vector_data = json.loads(urlopen("{}{}.json".format(vectors_base_url, vector_name)).read().decode())
-        vector_filename = "tests/vectors/{}.json".format(vector_name)
+        vector_filename = LOCAL_TEST_VECTOR_JSON.format(vector_name)
         with open(vector_filename, "w") as json_file:
             json.dump(vector_data, json_file, indent=4)
 

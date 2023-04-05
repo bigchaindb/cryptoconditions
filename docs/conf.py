@@ -1,4 +1,3 @@
-# import sphinx_rtd_theme
 import datetime
 
 _version = {}
@@ -41,7 +40,6 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 pygments_style = "sphinx"
 todo_include_todos = True
 html_theme = "press"
-# html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_static_path = ["_static"]
 htmlhelp_basename = "cryptoconditions"
 

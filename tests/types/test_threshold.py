@@ -26,7 +26,6 @@ class TestThresholdSha256:
         subfulfillment = Fulfillment.from_json(minimal_threshold.json["subfulfillments"][0])
         subcondition_uri = subfulfillment.condition_uri
         threshold_obj.add_subcondition(subcondition_uri)
-        threshold_obj.serialize_uri == minimal_threshold.fulfillment
 
     def test_add_subcondition_as_object(self, minimal_threshold):
         from planetmint_cryptoconditions.types.threshold import ThresholdSha256
@@ -36,7 +35,6 @@ class TestThresholdSha256:
         subfulfillment = Fulfillment.from_json(minimal_threshold.json["subfulfillments"][0])
         subcondition_object = subfulfillment.condition
         threshold_obj.add_subcondition(subcondition_object)
-        threshold_obj.serialize_uri == minimal_threshold.fulfillment
 
     def test_add_subfulfillment_type_error(self):
         from planetmint_cryptoconditions.types.threshold import ThresholdSha256
@@ -54,7 +52,6 @@ class TestThresholdSha256:
         subfulfillment = Fulfillment.from_json(minimal_threshold.json["subfulfillments"][0])
         subfulfillment_uri = subfulfillment.serialize_uri()
         threshold_obj.add_subfulfillment(subfulfillment_uri)
-        threshold_obj.serialize_uri == minimal_threshold.fulfillment
 
     def test_add_subfulfillment_as_object(self, minimal_threshold):
         from planetmint_cryptoconditions.types.threshold import ThresholdSha256
@@ -63,7 +60,6 @@ class TestThresholdSha256:
         threshold_obj = ThresholdSha256(threshold=minimal_threshold.json["threshold"])
         subfulfillment_object = Fulfillment.from_json(minimal_threshold.json["subfulfillments"][0])
         threshold_obj.add_subfulfillment(subfulfillment_object)
-        threshold_obj.serialize_uri == minimal_threshold.fulfillment
 
     def test_asn1_dict_payload(self):
         from planetmint_cryptoconditions.exceptions import ValidationError
