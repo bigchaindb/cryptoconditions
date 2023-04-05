@@ -6,7 +6,8 @@ from planetmint_cryptoconditions.exceptions import UnsupportedTypeError
 # see https://interledger.org/
 MAX_SAFE_INTEGER_JS = 2**53 - 1
 
-UNSUPPORTED_TYPE_ERROR_MSG="Type {} is not supported"
+UNSUPPORTED_TYPE_ERROR_MSG = "Type {} is not supported"
+
 
 class TypeRegistry:
     """ """

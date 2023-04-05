@@ -6,7 +6,7 @@ from collections import namedtuple
 
 import pytest
 
-LOCAL_TEST_VECTOR_JSON="tests/vectors/{}.json"
+LOCAL_TEST_VECTOR_JSON = "tests/vectors/{}.json"
 
 
 # ED25519
