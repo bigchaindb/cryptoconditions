@@ -4,7 +4,6 @@ from planetmint_cryptoconditions.types.prefix import PrefixSha256
 from planetmint_cryptoconditions.types.rsa import RsaSha256
 from planetmint_cryptoconditions.types.threshold import ThresholdSha256
 from planetmint_cryptoconditions.types.ed25519 import Ed25519Sha256
-from planetmint_cryptoconditions.types.zenroom import ZenroomSha256
 from planetmint_cryptoconditions.fulfillment import Fulfillment  # noqa: W0611
 from planetmint_cryptoconditions.condition import Condition  # noqa: W0611
 from planetmint_cryptoconditions.exceptions import ValidationError
@@ -15,7 +14,6 @@ TypeRegistry.register_type(PrefixSha256)
 TypeRegistry.register_type(ThresholdSha256)
 TypeRegistry.register_type(RsaSha256)
 TypeRegistry.register_type(Ed25519Sha256)
-TypeRegistry.register_type(ZenroomSha256)
 
 
 # Modeled after:

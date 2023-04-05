@@ -1,10 +1,10 @@
 [tool.poetry]
 name = "planetmint-cryptoconditions"
-version = "1.1.2"
+version = "1.2.0"
 description = "Multi-algorithm, multi-level, multi-signature format for expressing conditions and fulfillments according to the Interledger Protocol (ILP)."
 authors = ["Cryptoconditions contributors <contact@ipdb.global>"]
 readme = "README.rst"
-keywords = ["cryptoconditions", "interledger", "merkle tree", "ed25519", "threshold signatures", "hash lock", "zenroom"]
+keywords = ["cryptoconditions", "interledger", "merkle tree", "ed25519", "threshold signatures", "hash lock"]
 repository = "https://github.com/planetmint/cryptoconditions/"
 license = "MIT"
 classifiers=[
@@ -23,7 +23,6 @@ exclude = ["tests*", "examples"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-zenroom = "^2.3.1"
 base58 = "2.1.1"
 PyNaCl = "1.4.0"
 pyasn1 = "0.4.8"

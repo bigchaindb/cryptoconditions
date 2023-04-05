@@ -12,7 +12,6 @@
           thresholdSha256  [2] ThresholdFulfillment,
           rsaSha256        [3] RsaSha256Fulfillment,
           ed25519Sha256    [4] Ed25519Sha512Fulfillment
-          zenroomSha256    [5] ZenroomSha512Fulfillment
         }
 
         PreimageFulfillment ::= SEQUENCE {
@@ -38,11 +37,6 @@
         Ed25519Sha512Fulfillment ::= SEQUENCE {
           publicKey            OCTET STRING (SIZE(32)),
           signature            OCTET STRING (SIZE(64))
-        }
-
-        ZenroomSha512Fulfillment ::= SEQUENCE {
-          script               OCTET STRING,
-          keys                 OCTET STRING,
         }
 
     END
@@ -76,33 +70,6 @@ Ed25519Sha512Fulfillment.componentType = NamedTypes(
         .subtype(subtypeSpec=ValueSizeConstraint(64, 64))
         .subtype(implicitTag=Tag(tagClassContext, tagFormatSimple, 1)),
     ),
-)
-
-
-class ZenroomSha512Fulfillment(Sequence):
-    # TODO implement
-    def __deepcopy__(self, memo):
-        return None
-
-
-ZenroomSha512Fulfillment.componentType = NamedTypes(
-    NamedType(
-        "script",
-        OctetString().subtype(implicitTag=Tag(tagClassContext, tagFormatSimple, 0)),
-    ),
-    NamedType(
-        "data",
-        OctetString().subtype(implicitTag=Tag(tagClassContext, tagFormatSimple, 1)),
-    ),
-    NamedType(
-        "keys",
-        OctetString().subtype(implicitTag=Tag(tagClassContext, tagFormatSimple, 2)),
-    ),
-    # NamedType(
-    #     'conf',
-    #     OctetString().subtype(
-    #         implicitTag=Tag(tagClassContext, tagFormatSimple, 3)),
-    # ),
 )
 
 
@@ -172,9 +139,6 @@ Fulfillment.componentType = NamedTypes(
     NamedType("rsaSha256", RsaSha256Fulfillment().subtype(implicitTag=Tag(tagClassContext, tagFormatConstructed, 3))),
     NamedType(
         "ed25519Sha256", Ed25519Sha512Fulfillment().subtype(implicitTag=Tag(tagClassContext, tagFormatConstructed, 4))
-    ),
-    NamedType(
-        "zenroomSha256", ZenroomSha512Fulfillment().subtype(implicitTag=Tag(tagClassContext, tagFormatConstructed, 5))
     ),
 )
 

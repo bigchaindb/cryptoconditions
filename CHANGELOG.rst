@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.2.0 (2023-03-23)
+------------------
+* removed zenroom signing
+
 1.1.0 (2022-12-15)
 ------------------
 * removed automated "keyring" handling from ZenroomSha256.sign method
